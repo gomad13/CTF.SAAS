@@ -1,0 +1,549 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\ctf. api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:ctf. api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\progress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\progress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\contracts\\admindtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:contracts\\admindtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\assignmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\assignmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\modulescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\modulescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\services\\auditservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:services\\auditservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\adminauditlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\adminauditlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\challenges.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\challenges.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\challengescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\challengescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\submissionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\submissionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\assignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\assignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\learningpathscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\learningpathscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\security\\tenantmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:security\\tenantmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\learningpath.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\learningpath.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\module.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\module.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\services\\progressservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:services\\progressservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\progresscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\progresscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\security\\tenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:security\\tenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\security\\claimsextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:security\\claimsextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\submission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\submission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\teamscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\teamscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\tenantscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\tenantscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\team.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\team.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\models\\tenant.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:models\\tenant.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|c:\\users\\madoumih\\source\\repos\\ctf. api\\controllers\\healthcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E24C038C-2EF3-4F6D-9A42-7090DFDAFABC}|CTF. API.csproj|solutionrelative:controllers\\healthcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CTF. API.csproj",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\CTF. API.csproj",
+              "RelativeDocumentMoniker": "CTF. API.csproj",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\CTF. API.csproj",
+              "RelativeToolTip": "CTF. API.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-01-30T10:16:44.712Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AdminDtos.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Contracts\\AdminDtos.cs",
+              "RelativeDocumentMoniker": "Contracts\\AdminDtos.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Contracts\\AdminDtos.cs",
+              "RelativeToolTip": "Contracts\\AdminDtos.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAowDkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-15T14:13:28.858Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Models\\User.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\User.cs",
+              "RelativeToolTip": "Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T17:42:31.489Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "Data\\AppDbContext.cs",
+              "ViewState": "AgIAALYAAAAAAAAAAAAkwNsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T17:46:44.474Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AssignmentsController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\AssignmentsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AssignmentsController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\AssignmentsController.cs",
+              "RelativeToolTip": "Controllers\\AssignmentsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAP8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:01:21.198Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAcwHUAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T17:47:53.334Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ModulesController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\ModulesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ModulesController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\ModulesController.cs",
+              "RelativeToolTip": "Controllers\\ModulesController.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAArwEQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T21:22:18.141Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Progress.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Progress.cs",
+              "RelativeDocumentMoniker": "Models\\Progress.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Progress.cs",
+              "RelativeToolTip": "Models\\Progress.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T22:03:20.908Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "Controllers\\AdminController.cs",
+              "ViewState": "AgIAANwBAAAAAAAAAAAkwPgBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-15T14:14:26.096Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T13:29:26.586Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AuditService.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Services\\AuditService.cs",
+              "RelativeDocumentMoniker": "Services\\AuditService.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Services\\AuditService.cs",
+              "RelativeToolTip": "Services\\AuditService.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAuwCgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-10T08:42:50.929Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "AdminAuditLog.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\AdminAuditLog.cs",
+              "RelativeDocumentMoniker": "Models\\AdminAuditLog.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\AdminAuditLog.cs",
+              "RelativeToolTip": "Models\\AdminAuditLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-10T08:37:04.082Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Challenges.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Challenges.cs",
+              "RelativeDocumentMoniker": "Models\\Challenges.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Challenges.cs",
+              "RelativeToolTip": "Models\\Challenges.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAADwvy8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T21:34:22.041Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ChallengesController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\ChallengesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ChallengesController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\ChallengesController.cs",
+              "RelativeToolTip": "Controllers\\ChallengesController.cs",
+              "ViewState": "AgIAAP4AAAAAAAAAAAAkwCABAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T21:41:50.661Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "SubmissionsController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\SubmissionsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\SubmissionsController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\SubmissionsController.cs",
+              "RelativeToolTip": "Controllers\\SubmissionsController.cs",
+              "ViewState": "AgIAAFMAAAAAAAAAAAAkwHgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T21:50:43.137Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Assignment.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Assignment.cs",
+              "RelativeDocumentMoniker": "Models\\Assignment.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Assignment.cs",
+              "RelativeToolTip": "Models\\Assignment.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwCMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-08T22:38:56.792Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "LearningPathsController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\LearningPathsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\LearningPathsController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\LearningPathsController.cs",
+              "RelativeToolTip": "Controllers\\LearningPathsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T20:18:32.089Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "TenantMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Security\\TenantMiddleware.cs",
+              "RelativeDocumentMoniker": "Security\\TenantMiddleware.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Security\\TenantMiddleware.cs",
+              "RelativeToolTip": "Security\\TenantMiddleware.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAA5wDMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T18:12:39.779Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "DbSeeder.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Data\\DbSeeder.cs",
+              "RelativeDocumentMoniker": "Data\\DbSeeder.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Data\\DbSeeder.cs",
+              "RelativeToolTip": "Data\\DbSeeder.cs",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAkwMoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-08T18:54:00.825Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "LearningPath.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\LearningPath.cs",
+              "RelativeDocumentMoniker": "Models\\LearningPath.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\LearningPath.cs",
+              "RelativeToolTip": "Models\\LearningPath.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T18:57:54.204Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Module.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Module.cs",
+              "RelativeDocumentMoniker": "Models\\Module.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Module.cs",
+              "RelativeToolTip": "Models\\Module.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T21:05:15.057Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "ProgressService.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Services\\ProgressService.cs",
+              "RelativeDocumentMoniker": "Services\\ProgressService.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Services\\ProgressService.cs",
+              "RelativeToolTip": "Services\\ProgressService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-06T09:46:53.818Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "ProgressController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\ProgressController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProgressController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\ProgressController.cs",
+              "RelativeToolTip": "Controllers\\ProgressController.cs",
+              "ViewState": "AgIAAFgAAAAAAAAAAAAkwGoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T22:04:53.711Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "TenantContext.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Security\\TenantContext.cs",
+              "RelativeDocumentMoniker": "Security\\TenantContext.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Security\\TenantContext.cs",
+              "RelativeToolTip": "Security\\TenantContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T18:11:03.164Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "ClaimsExtensions.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Security\\ClaimsExtensions.cs",
+              "RelativeDocumentMoniker": "Security\\ClaimsExtensions.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Security\\ClaimsExtensions.cs",
+              "RelativeToolTip": "Security\\ClaimsExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T22:02:53.497Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "appsettings.Development.json",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\appsettings.Development.json",
+              "RelativeToolTip": "appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-02-01T17:14:05.845Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "Submission.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Submission.cs",
+              "RelativeDocumentMoniker": "Models\\Submission.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Submission.cs",
+              "RelativeToolTip": "Models\\Submission.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T21:49:20.33Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T18:26:17.37Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "TeamsController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\TeamsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\TeamsController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\TeamsController.cs",
+              "RelativeToolTip": "Controllers\\TeamsController.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAswDgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T18:25:17.777Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "TenantsController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\TenantsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\TenantsController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\TenantsController.cs",
+              "RelativeToolTip": "Controllers\\TenantsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T17:49:33.067Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "Team.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Team.cs",
+              "RelativeDocumentMoniker": "Models\\Team.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Team.cs",
+              "RelativeToolTip": "Models\\Team.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T17:41:33.781Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "Tenant.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Tenant.cs",
+              "RelativeDocumentMoniker": "Models\\Tenant.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Models\\Tenant.cs",
+              "RelativeToolTip": "Models\\Tenant.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-01T17:39:44.176Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "HealthController.cs",
+              "DocumentMoniker": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\HealthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HealthController.cs",
+              "ToolTip": "C:\\Users\\madoumih\\source\\repos\\CTF. API\\Controllers\\HealthController.cs",
+              "RelativeToolTip": "Controllers\\HealthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-30T10:16:46.259Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
