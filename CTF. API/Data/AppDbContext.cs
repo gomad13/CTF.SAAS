@@ -1,4 +1,4 @@
-﻿using CTF.Api.Models;
+using CTF.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CTF.Api.Data;
@@ -8,212 +8,145 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
-    public DbSet<Team> Teams => Set<Team>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<Team> Teams => Set<Team>();
     public DbSet<LearningPath> Paths => Set<LearningPath>();
     public DbSet<Module> Modules => Set<Module>();
-    public DbSet<Challenges> Challenges => Set<Challenges>();
+    public DbSet<Challenge> Challenges => Set<Challenge>();
+    public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<Submission> Submissions => Set<Submission>();
     public DbSet<Progress> Progresses => Set<Progress>();
-    public DbSet<Assignment> Assignments => Set<Assignment>();
+    public DbSet<AdminAuditLog> AuditLogs => Set<AdminAuditLog>();
+    public DbSet<ChallengeCompletion> ChallengeCompletions => Set<ChallengeCompletion>();
+    public DbSet<SuperAdmin> SuperAdmins => Set<SuperAdmin>();
+    public DbSet<TenantLicense> TenantLicenses => Set<TenantLicense>();
+    public DbSet<SuperAdminAuditLog> SuperAdminAuditLogs => Set<SuperAdminAuditLog>();
+    public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<TenantEmailDomain> TenantEmailDomains => Set<TenantEmailDomain>();
+    public DbSet<MandatoryAssignment> MandatoryAssignments => Set<MandatoryAssignment>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<Campaign> Campaigns => Set<Campaign>();
+    public DbSet<CampaignPath> CampaignPaths => Set<CampaignPath>();
+    public DbSet<CampaignTarget> CampaignTargets => Set<CampaignTarget>();
+    public DbSet<CampaignParticipation> CampaignParticipations => Set<CampaignParticipation>();
+    public DbSet<TeamParcoursAssignment> TeamParcoursAssignments => Set<TeamParcoursAssignment>();
+    public DbSet<TenantParcoursAccess> TenantParcoursAccesses => Set<TenantParcoursAccess>();
+    public DbSet<TenantParcoursAssignment> TenantParcoursAssignments => Set<TenantParcoursAssignment>();
+    public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
+    public DbSet<FeedbackMessage> FeedbackMessages => Set<FeedbackMessage>();
+    public DbSet<MailLog> MailLogs => Set<MailLog>();
+    public DbSet<RiskScoreHistory> RiskScoreHistories => Set<RiskScoreHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Tenant>(e =>
+        modelBuilder.Entity<TenantEmailDomain>(b =>
         {
-            e.ToTable("tenants");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Name).IsRequired();
-            e.Property(x => x.SsoProvider).HasColumnName("sso_provider");
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            b.HasIndex(x => new { x.TenantId, x.Domain }).IsUnique();
+            b.HasIndex(x => x.Domain).IsUnique();
         });
 
-        modelBuilder.Entity<Team>(e =>
+        modelBuilder.Entity<Team>(b =>
         {
-            e.ToTable("teams");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.Name).IsRequired();
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            b.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
         });
 
-        modelBuilder.Entity<User>(e =>
+        modelBuilder.Entity<TeamParcoursAssignment>(b =>
         {
-            e.ToTable("users");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.TeamId).HasColumnName("team_id");
-
-            // ✅ Email durci (recommandé)
-            e.Property(x => x.Email)
-                .HasMaxLength(200)
-                .IsRequired();
-
-            // ⚠️ Unique par tenant (plus juste en multi-tenant)
-            e.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
-
-            // ✅ Ajout FirstName/LastName (si tu les as ajoutés dans User.cs)
-            e.Property(x => x.FirstName)
-                .HasColumnName("first_name")
-                .HasMaxLength(100)
-                .IsRequired();
-
-            e.Property(x => x.LastName)
-                .HasColumnName("last_name")
-                .HasMaxLength(100)
-                .IsRequired();
-
-            // Optionnel : garder DisplayName si tu l'utilises côté UI
-            e.Property(x => x.DisplayName)
-                .HasColumnName("display_name")
-                .HasMaxLength(200);
-
-            e.Property(x => x.Role)
-                .HasMaxLength(32)
-                .IsRequired();
-
-            e.Property(x => x.IsActive).HasColumnName("is_active");
-
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
-            e.Property(x => x.LastLoginAt).HasColumnName("last_login_at");
+            b.HasIndex(x => new { x.TeamId, x.PathId }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.TeamId });
         });
 
-        modelBuilder.Entity<LearningPath>(e =>
+        modelBuilder.Entity<TenantParcoursAccess>(b =>
         {
-            e.ToTable("paths");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.Type).IsRequired().HasColumnName("type");
-            e.Property(x => x.JobFamily).HasColumnName("job_family");
-
-            e.Property(x => x.Title).IsRequired().HasColumnName("title");
-            e.Property(x => x.Description).HasColumnName("description");
-
-            e.Property(x => x.Level).HasColumnName("level");
-            e.Property(x => x.Status).IsRequired().HasColumnName("status");
-
-            e.Property(x => x.Version).HasColumnName("version");
-
-            e.Property(x => x.CreatedBy).HasColumnName("created_by");
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
-            e.Property(x => x.PublishedAt).HasColumnName("published_at");
+            b.Ignore(x => x.IsActive);
+            b.HasIndex(x => new { x.TenantId, x.PathId }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.RevokedAt });
+            b.HasIndex(x => new { x.PathId, x.RevokedAt });
         });
 
-        modelBuilder.Entity<Module>(e =>
+        modelBuilder.Entity<TenantParcoursAssignment>(b =>
         {
-            e.ToTable("modules");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.PathId).HasColumnName("path_id");
-
-            e.Property(x => x.Title).IsRequired().HasColumnName("title");
-            e.Property(x => x.SortOrder).HasColumnName("sort_order");
-
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            b.Ignore(x => x.IsActive);
+            b.HasIndex(x => new { x.TenantId, x.PathId }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.DeactivatedAt });
         });
 
-        modelBuilder.Entity<Challenges>(e =>
+        modelBuilder.Entity<AdminActionLog>(b =>
         {
-            e.ToTable("challenges");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.ModuleId).HasColumnName("module_id");
-
-            e.Property(x => x.Type).IsRequired().HasColumnName("type");
-            e.Property(x => x.Title).IsRequired().HasColumnName("title");
-            e.Property(x => x.Instructions).IsRequired().HasColumnName("instructions");
-
-            e.Property(x => x.Difficulty).HasColumnName("difficulty");
-            e.Property(x => x.Points).HasColumnName("points");
-
-            e.Property(x => x.Status).IsRequired().HasColumnName("status");
-
-            e.Property(x => x.CreatedBy).HasColumnName("created_by");
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
-            e.Property(x => x.PublishedAt).HasColumnName("published_at");
+            b.HasIndex(x => new { x.TenantId, x.TargetUserId, x.CreatedAt });
+            b.HasIndex(x => new { x.TenantId, x.CreatedAt });
         });
 
-        modelBuilder.Entity<Submission>(e =>
+        modelBuilder.Entity<User>(b =>
         {
-            e.ToTable("submissions");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.UserId).HasColumnName("user_id");
-            e.Property(x => x.ChallengeId).HasColumnName("challenge_id");
-
-            e.Property(x => x.AttemptNo).HasColumnName("attempt_no");
-            e.Property(x => x.IsCorrect).HasColumnName("is_correct");
-            e.Property(x => x.ScoreAwarded).HasColumnName("score_awarded");
-
-            e.Property(x => x.SubmittedAt).HasColumnName("submitted_at");
-
-            e.HasIndex(x => new { x.TenantId, x.UserId, x.ChallengeId, x.AttemptNo })
-             .IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.LastName, x.FirstName });
+            b.HasIndex(x => new { x.TenantId, x.TeamId });
+            b.HasIndex(x => x.GoogleSubjectId);
+            b.HasIndex(x => x.MicrosoftSubjectId);
         });
 
-        modelBuilder.Entity<Progress>(e =>
+        modelBuilder.Entity<LearningPath>(b =>
         {
-            e.ToTable("progress");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.UserId).HasColumnName("user_id");
-            e.Property(x => x.PathId).HasColumnName("path_id");
-
-            e.Property(x => x.Status).IsRequired().HasColumnName("status");
-            e.Property(x => x.Percent).HasColumnName("percent");
-
-            e.Property(x => x.StartedAt).HasColumnName("started_at");
-            e.Property(x => x.CompletedAt).HasColumnName("completed_at");
-            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
-
-            e.HasIndex(x => new { x.TenantId, x.UserId, x.PathId })
-             .IsUnique();
+            b.HasIndex(x => new { x.IsCatalog, x.Sector });
         });
 
-        // ✅ Assignment mapping (COMPLET)
-        modelBuilder.Entity<Assignment>(e =>
+        modelBuilder.Entity<MandatoryAssignment>(b =>
         {
-            e.ToTable("assignments");
-            e.HasKey(x => x.Id);
+            b.HasIndex(x => new { x.TenantId, x.PathId });
+            b.HasIndex(x => x.Deadline);
+        });
 
-            e.Property(x => x.TenantId).HasColumnName("tenant_id");
-            e.Property(x => x.PathId).HasColumnName("path_id");
-            e.Property(x => x.UserId).HasColumnName("user_id");
+        modelBuilder.Entity<Notification>(b =>
+        {
+            b.HasIndex(x => new { x.TenantId, x.UserId, x.IsRead });
+        });
 
-            e.Property(x => x.Status)
-                .HasColumnName("status")
-                .HasMaxLength(16)
-                .IsRequired();
+        modelBuilder.Entity<Campaign>(b =>
+        {
+            b.HasIndex(x => new { x.TenantId, x.Status });
+            b.HasIndex(x => x.StartDate);
+        });
 
-            e.Property(x => x.StartedAt).HasColumnName("started_at");
-            e.Property(x => x.CompletedAt).HasColumnName("completed_at");
+        modelBuilder.Entity<CampaignPath>(b =>
+        {
+            b.HasKey(x => new { x.CampaignId, x.PathId });
+        });
 
-            e.Property(x => x.DueAt).HasColumnName("due_at");
+        modelBuilder.Entity<CampaignTarget>(b =>
+        {
+            b.HasIndex(x => x.CampaignId);
+        });
 
-            e.Property(x => x.AssignedBy).HasColumnName("assigned_by");
-            e.Property(x => x.AssignedAt).HasColumnName("assigned_at");
-            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        modelBuilder.Entity<CampaignParticipation>(b =>
+        {
+            b.HasKey(x => new { x.CampaignId, x.UserId });
+            b.HasIndex(x => new { x.TenantId, x.CampaignId });
+        });
 
-            // 1 user ne peut avoir qu’un assignment par path (par tenant)
-            e.HasIndex(x => new { x.TenantId, x.UserId, x.PathId })
-             .IsUnique();
+        // Cyber Resilience Index — historique des scores calculés.
+        // - Components stocké en jsonb pour traçabilité complète des 4 composantes
+        //   (taux de réussite, vitesse, diversité, régression).
+        // - 4 indexes pour les usages identifiés : recherche par user, par tenant,
+        //   historique trié desc, nettoyage par date.
+        // - Cascade delete sur User : si l'user est supprimé, son historique aussi.
+        modelBuilder.Entity<RiskScoreHistory>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Components).HasColumnType("jsonb").IsRequired();
+            b.Property(x => x.ComputedAt).HasColumnType("timestamp with time zone");
 
-            // ✅ Empêche status = "n'importe quoi" en DB
-            e.ToTable(t =>
-            {
-                t.HasCheckConstraint(
-                    "ck_assignments_status",
-                    $"status IN ('{Assignment.Statuses.Assigned}', '{Assignment.Statuses.Started}', '{Assignment.Statuses.Completed}')"
-                );
-            });
+            b.HasIndex(x => x.UserId);
+            b.HasIndex(x => x.TenantId);
+            b.HasIndex(x => new { x.UserId, x.ComputedAt }).IsDescending(false, true);
+            b.HasIndex(x => x.ComputedAt);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
