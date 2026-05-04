@@ -1,23 +1,21 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     useScenarioCatalogDetail,
-    useEligibleSenders,
+    useEmployeesWithConsent,
     useLaunchScenario,
 } from "@/lib/hooks/useScenarios";
-import { apiFetch } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
 import {
     ArrowLeft, ChevronRight, ChevronLeft, Check, Theater, Mail, Clock,
-    Users, Eye, Rocket,
+    Users, Eye, Rocket, CheckCircle2, XCircle, X,
 } from "lucide-react";
+import type { EmployeeWithConsent } from "@/lib/types/scenarios";
 
-type DirectoryUser = { id: string; firstName: string; lastName: string; email: string };
-
-const STEP_LABELS = ["Cible", "Expéditeur", "Personnalisation", "Confirmation"] as const;
+const STEP_LABELS = ["Cible et expéditeur", "Personnalisation", "Confirmation"] as const;
+const MAX_CHIPS_VISIBLE = 10;
 
 export default function LaunchScenarioPage() {
     const params = useParams<{ templateId: string }>();
@@ -25,53 +23,76 @@ export default function LaunchScenarioPage() {
     const templateId = params.templateId;
 
     const { data: tpl, isLoading: tplLoading } = useScenarioCatalogDetail(templateId);
-    const { data: senders, isLoading: sendersLoading } = useEligibleSenders();
-
-    // Annuaire complet (cibles possibles) : on réutilise l'endpoint /api/users.
-    const { data: allUsers, isLoading: usersLoading } = useQuery<DirectoryUser[]>({
-        queryKey: ["users", "all"],
-        queryFn: () => apiFetch<DirectoryUser[]>("/api/users"),
-        staleTime: 60_000,
-    });
+    const { data: employees, isLoading: employeesLoading } = useEmployeesWithConsent();
 
     const [stepIndex, setStepIndex] = useState(0);
-    const [targetUserId, setTargetUserId] = useState<string | null>(null);
+    const [targetUserIds, setTargetUserIds] = useState<string[]>([]);
     const [senderUserId, setSenderUserId] = useState<string | null>(null);
     const [mode, setMode] = useState<"normal" | "demo">("normal");
     const [overrides, setOverrides] = useState<Record<string, { subject?: string; bodyTemplate?: string }>>({});
     const [error, setError] = useState<string | null>(null);
+    const targetsListRef = useRef<HTMLDivElement | null>(null);
 
     const { launch, isLoading: launching } = useLaunchScenario();
 
-    const targetUser = useMemo(
-        () => allUsers?.find(u => u.id === targetUserId) ?? null,
-        [allUsers, targetUserId]);
+    const employeesById = useMemo(() => {
+        const map = new Map<string, EmployeeWithConsent>();
+        for (const u of employees ?? []) map.set(u.id, u);
+        return map;
+    }, [employees]);
+
+    const targetUsers = useMemo(
+        () => targetUserIds.map(id => employeesById.get(id)).filter((u): u is EmployeeWithConsent => !!u),
+        [targetUserIds, employeesById]);
     const senderUser = useMemo(
-        () => senders?.find(u => u.userId === senderUserId) ?? null,
-        [senders, senderUserId]);
+        () => (senderUserId ? employeesById.get(senderUserId) ?? null : null),
+        [senderUserId, employeesById]);
 
     const canNext =
-        (stepIndex === 0 && targetUserId) ||
-        (stepIndex === 1 && senderUserId && senderUserId !== targetUserId) ||
-        (stepIndex === 2) ||
-        (stepIndex === 3);
+        (stepIndex === 0 && targetUserIds.length > 0 && senderUserId &&
+            !targetUserIds.includes(senderUserId)) ||
+        (stepIndex === 1) ||
+        (stepIndex === 2);
+
+    function toggleTarget(id: string) {
+        setTargetUserIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    }
+    function removeTarget(id: string) {
+        setTargetUserIds(prev => prev.filter(x => x !== id));
+    }
+    function scrollToTargetsList() {
+        targetsListRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 
     async function onLaunch() {
-        if (!targetUserId || !senderUserId || !tpl) return;
+        if (targetUserIds.length === 0 || !senderUserId || !tpl) return;
         setError(null);
-        const r = await launch({
-            templateId: tpl.id,
-            targetUserId,
-            senderUserId,
-            mode,
-            stepOverrides: Object.entries(overrides).map(([stepId, ov]) => ({
-                stepId, subject: ov.subject, bodyTemplate: ov.bodyTemplate,
-            })),
-        });
-        if (r) {
+        // V1 multi-target : on lance une instance par destinataire en série.
+        // En cas d'échec, on s'arrête pour que l'admin puisse corriger sans
+        // découvrir une cinquantaine d'instances cassées dans la table.
+        const stepOverrides = Object.entries(overrides).map(([stepId, ov]) => ({
+            stepId, subject: ov.subject, bodyTemplate: ov.bodyTemplate,
+        }));
+        const failures: string[] = [];
+        for (const targetId of targetUserIds) {
+            const r = await launch({
+                templateId: tpl.id,
+                targetUserId: targetId,
+                senderUserId,
+                mode,
+                stepOverrides,
+            });
+            if (!r) {
+                const u = employeesById.get(targetId);
+                failures.push(u ? `${u.firstName} ${u.lastName}` : targetId);
+                break;
+            }
+        }
+        if (failures.length === 0) {
             router.push("/admin/scenarios/instances");
         } else {
-            setError("Échec du lancement. Vérifie le consentement de l'expéditeur et la disponibilité de la cible.");
+            setError(`Échec du lancement pour ${failures.join(", ")}. Vérifie le consentement de l'expéditeur et la disponibilité des cibles.`);
         }
     }
 
@@ -122,23 +143,19 @@ export default function LaunchScenarioPage() {
             {/* Content */}
             <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 24, minHeight: 320 }}>
                 {stepIndex === 0 && (
-                    <StepTarget
-                        users={allUsers ?? []}
-                        loading={usersLoading}
-                        selectedId={targetUserId}
-                        onSelect={setTargetUserId}
+                    <StepTargetAndSender
+                        employees={employees ?? []}
+                        loading={employeesLoading}
+                        targetUserIds={targetUserIds}
+                        senderUserId={senderUserId}
+                        onToggleTarget={toggleTarget}
+                        onRemoveTarget={removeTarget}
+                        onSelectSender={setSenderUserId}
+                        onScrollToTargets={scrollToTargetsList}
+                        targetsListRef={targetsListRef}
                     />
                 )}
                 {stepIndex === 1 && (
-                    <StepSender
-                        senders={senders ?? []}
-                        loading={sendersLoading}
-                        targetUserId={targetUserId}
-                        selectedId={senderUserId}
-                        onSelect={setSenderUserId}
-                    />
-                )}
-                {stepIndex === 2 && (
                     <StepCustomize
                         tpl={tpl}
                         overrides={overrides}
@@ -147,10 +164,10 @@ export default function LaunchScenarioPage() {
                         onModeChange={setMode}
                     />
                 )}
-                {stepIndex === 3 && (
+                {stepIndex === 2 && (
                     <StepReview
                         tpl={tpl}
-                        target={targetUser}
+                        targets={targetUsers}
                         sender={senderUser}
                         mode={mode}
                         overrides={overrides}
@@ -193,7 +210,7 @@ export default function LaunchScenarioPage() {
                 ) : (
                     <button
                         onClick={onLaunch}
-                        disabled={launching || !targetUserId || !senderUserId}
+                        disabled={launching || targetUserIds.length === 0 || !senderUserId}
                         style={{
                             display: "inline-flex", alignItems: "center", gap: 6,
                             padding: "10px 20px", border: "none", borderRadius: 8,
@@ -201,94 +218,260 @@ export default function LaunchScenarioPage() {
                             fontSize: 14, cursor: launching ? "wait" : "pointer",
                             transition: "all 0.2s", fontWeight: 600,
                         }}
-                    ><Rocket size={16} /> {launching ? "Lancement…" : "Lancer le scénario"}</button>
+                    ><Rocket size={16} /> {launching ? "Lancement…" : `Lancer (${targetUserIds.length})`}</button>
                 )}
             </div>
         </div>
     );
 }
 
-// ── Étape 1 : cible ─────────────────────────────────────────────────────────
+// ── Étape 1 : cible et expéditeur (multi-target + sender single-select) ────
 
-function StepTarget({ users, loading, selectedId, onSelect }: {
-    users: DirectoryUser[]; loading: boolean;
-    selectedId: string | null; onSelect: (id: string) => void;
+function StepTargetAndSender({
+    employees, loading,
+    targetUserIds, senderUserId,
+    onToggleTarget, onRemoveTarget, onSelectSender,
+    onScrollToTargets, targetsListRef,
+}: {
+    employees: EmployeeWithConsent[]; loading: boolean;
+    targetUserIds: string[]; senderUserId: string | null;
+    onToggleTarget: (id: string) => void;
+    onRemoveTarget: (id: string) => void;
+    onSelectSender: (id: string) => void;
+    onScrollToTargets: () => void;
+    targetsListRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
-    const [filter, setFilter] = useState("");
-    const filtered = users.filter(u => {
-        const q = filter.toLowerCase();
-        return !q || u.email.toLowerCase().includes(q) ||
-            `${u.firstName} ${u.lastName}`.toLowerCase().includes(q);
-    });
+    const [filterTarget, setFilterTarget] = useState("");
+    const [filterSender, setFilterSender] = useState("");
+
+    const targetCandidates = useMemo(() => {
+        const q = filterTarget.toLowerCase();
+        return employees
+            .filter(u => u.id !== senderUserId)
+            .filter(u => !q || u.email.toLowerCase().includes(q)
+                || `${u.firstName} ${u.lastName}`.toLowerCase().includes(q));
+    }, [employees, filterTarget, senderUserId]);
+
+    const senderCandidates = useMemo(() => {
+        const q = filterSender.toLowerCase();
+        return employees
+            .filter(u => !targetUserIds.includes(u.id))
+            .filter(u => !q || u.email.toLowerCase().includes(q)
+                || `${u.firstName} ${u.lastName}`.toLowerCase().includes(q));
+    }, [employees, filterSender, targetUserIds]);
+
+    const selectedTargets = useMemo(
+        () => targetUserIds.map(id => employees.find(e => e.id === id))
+            .filter((u): u is EmployeeWithConsent => !!u),
+        [targetUserIds, employees]);
+
+    const visibleChips = selectedTargets.slice(0, MAX_CHIPS_VISIBLE);
+    const overflowCount = Math.max(0, selectedTargets.length - MAX_CHIPS_VISIBLE);
 
     return (
         <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>Choix de la cible</h2>
-            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>{"L'employé qui recevra les emails du scénario."}</p>
-            <input
-                type="search" placeholder="Rechercher (nom, email)…" value={filter} onChange={e => setFilter(e.target.value)}
-                style={{ width: "100%", padding: "10px 14px", border: "1px solid #E2E8F0", borderRadius: 8, marginBottom: 12, fontSize: 14 }}
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>Cible et expéditeur</h2>
+            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>{"Choisis les destinataires du scénario et l'employé qui prêtera son identité comme expéditeur fictif."}</p>
+
+            {/* Récap des destinataires sélectionnés */}
+            <RecipientsRecap
+                selected={selectedTargets}
+                visibleChips={visibleChips}
+                overflowCount={overflowCount}
+                onRemove={onRemoveTarget}
+                onScrollToList={onScrollToTargets}
             />
-            <div style={{ maxHeight: 320, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
-                {loading && <div style={{ padding: 16, color: "#64748B" }}>Chargement…</div>}
-                {filtered.map(u => (
-                    <label key={u.id} style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: 12, borderBottom: "1px solid #F1F5F9", cursor: "pointer",
-                        background: selectedId === u.id ? "#F1F5F9" : "transparent",
-                        transition: "background 0.2s",
-                    }}>
-                        <input type="radio" checked={selectedId === u.id} onChange={() => onSelect(u.id)} />
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 14, color: "#1E293B" }}>{u.firstName} {u.lastName}</div>
-                            <div style={{ fontSize: 12, color: "#64748B" }}>{u.email}</div>
-                        </div>
-                    </label>
-                ))}
-                {!loading && filtered.length === 0 && <div style={{ padding: 16, color: "#64748B" }}>Aucun résultat.</div>}
-            </div>
-        </div>
-    );
-}
 
-// ── Étape 2 : expéditeur fictif consentant ──────────────────────────────────
-
-function StepSender({ senders, loading, targetUserId, selectedId, onSelect }: {
-    senders: { userId: string; firstName: string; lastName: string; email: string }[];
-    loading: boolean; targetUserId: string | null;
-    selectedId: string | null; onSelect: (id: string) => void;
-}) {
-    const eligible = senders.filter(s => s.userId !== targetUserId);
-    return (
-        <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>{"Choix de l'expéditeur fictif"}</h2>
-            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>{"Seuls les employés qui ont donné leur "}<strong>{"consentement explicite"}</strong>{" dans leur profil apparaissent ici. Leur prénom / nom servira d'expéditeur affiché dans l'email simulé. Aucun email réel n'est envoyé."}</p>
-            {loading && <div style={{ color: "#64748B" }}>Chargement…</div>}
-            {!loading && eligible.length === 0 && (
-                <div style={{ padding: 16, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.20)", borderRadius: 8, color: "#92400E", fontSize: 13 }}>
-                    {"Aucun employé n'a encore donné son consentement. Les employés peuvent activer cette option depuis leur page Paramètres > Consentement."}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
+                {/* Colonne destinataires (multi-select) */}
+                <div ref={targetsListRef}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <Users size={15} /> Destinataires
+                    </h3>
+                    <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 8px" }}>{"Sélectionne un ou plusieurs employés (multi-sélection). Le consentement n'est pas requis pour être destinataire."}</p>
+                    <input
+                        type="search" placeholder="Rechercher (nom, email)…" value={filterTarget} onChange={e => setFilterTarget(e.target.value)}
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #E2E8F0", borderRadius: 8, marginBottom: 8, fontSize: 14 }}
+                    />
+                    <div style={{ maxHeight: 360, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
+                        {loading && <div style={{ padding: 16, color: "#64748B" }}>Chargement…</div>}
+                        {!loading && targetCandidates.length === 0 && <div style={{ padding: 16, color: "#64748B" }}>Aucun résultat.</div>}
+                        {targetCandidates.map(u => {
+                            const checked = targetUserIds.includes(u.id);
+                            return (
+                                <label key={u.id} style={{
+                                    display: "flex", alignItems: "center", gap: 10,
+                                    padding: 10, borderBottom: "1px solid #F1F5F9", cursor: "pointer",
+                                    background: checked ? "rgba(3,121,113,0.08)" : "transparent",
+                                    transition: "background 0.2s",
+                                }}>
+                                    <input type="checkbox" checked={checked} onChange={() => onToggleTarget(u.id)} />
+                                    <ConsentBadge consents={u.consentsToBeFictionalSender} side="recipient" />
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: 13, color: "#1E293B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.firstName} {u.lastName}</div>
+                                        <div style={{ fontSize: 11, color: "#64748B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
+                                    </div>
+                                </label>
+                            );
+                        })}
+                    </div>
                 </div>
-            )}
-            <div style={{ maxHeight: 320, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
-                {eligible.map(s => (
-                    <label key={s.userId} style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: 12, borderBottom: "1px solid #F1F5F9", cursor: "pointer",
-                        background: selectedId === s.userId ? "#F1F5F9" : "transparent",
-                    }}>
-                        <input type="radio" checked={selectedId === s.userId} onChange={() => onSelect(s.userId)} />
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 14, color: "#1E293B" }}>{s.firstName} {s.lastName}</div>
-                            <div style={{ fontSize: 12, color: "#64748B" }}>{s.email}</div>
-                        </div>
-                    </label>
-                ))}
+
+                {/* Colonne expéditeur (single-select, non-consentants désactivés) */}
+                <div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <Mail size={15} /> Expéditeur fictif
+                    </h3>
+                    <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 8px" }}>{"Seuls les employés ayant donné leur consentement peuvent être sélectionnés. Les autres restent visibles mais sont désactivés."}</p>
+                    <input
+                        type="search" placeholder="Rechercher (nom, email)…" value={filterSender} onChange={e => setFilterSender(e.target.value)}
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #E2E8F0", borderRadius: 8, marginBottom: 8, fontSize: 14 }}
+                    />
+                    <div style={{ maxHeight: 360, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
+                        {loading && <div style={{ padding: 16, color: "#64748B" }}>Chargement…</div>}
+                        {!loading && senderCandidates.length === 0 && <div style={{ padding: 16, color: "#64748B" }}>Aucun résultat.</div>}
+                        {senderCandidates.map(u => {
+                            const consents = u.consentsToBeFictionalSender;
+                            const selected = senderUserId === u.id;
+                            const tooltip = consents
+                                ? undefined
+                                : "Cet employé n'a pas consenti à être expéditeur fictif. Active l'option dans sa fiche pour pouvoir le sélectionner.";
+                            return (
+                                <label key={u.id} title={tooltip} style={{
+                                    display: "flex", alignItems: "center", gap: 10,
+                                    padding: 10, borderBottom: "1px solid #F1F5F9",
+                                    cursor: consents ? "pointer" : "not-allowed",
+                                    opacity: consents ? 1 : 0.5,
+                                    background: selected ? "rgba(3,121,113,0.08)" : "transparent",
+                                    transition: "background 0.2s",
+                                }}>
+                                    <input
+                                        type="radio" name="sender"
+                                        checked={selected}
+                                        disabled={!consents}
+                                        onChange={() => consents && onSelectSender(u.id)}
+                                    />
+                                    <ConsentBadge consents={consents} side="sender" />
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: 13, color: "#1E293B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.firstName} {u.lastName}</div>
+                                        <div style={{ fontSize: 11, color: "#64748B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
+                                    </div>
+                                </label>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
 
-// ── Étape 3 : personnalisation + mode ───────────────────────────────────────
+function ConsentBadge({ consents, side }: { consents: boolean; side: "sender" | "recipient" }) {
+    const label = consents ? "Consent: Yes" : "Consent: No";
+    const recipientTooltip = !consents
+        ? "Cet employé n'a pas consenti à être expéditeur fictif (il peut quand même être destinataire d'un scénario)."
+        : undefined;
+    if (consents) {
+        return <CheckCircle2 size={16} color="#10b981" strokeWidth={1.75} aria-label={label} />;
+    }
+    return (
+        <span title={side === "recipient" ? recipientTooltip : undefined} style={{ display: "inline-flex" }}>
+            <XCircle size={16} color="#ef4444" strokeWidth={1.75} aria-label={label} />
+        </span>
+    );
+}
+
+function RecipientsRecap({
+    selected, visibleChips, overflowCount, onRemove, onScrollToList,
+}: {
+    selected: EmployeeWithConsent[];
+    visibleChips: EmployeeWithConsent[];
+    overflowCount: number;
+    onRemove: (id: string) => void;
+    onScrollToList: () => void;
+}) {
+    if (selected.length === 0) {
+        return (
+            <div style={{
+                padding: "12px 16px",
+                background: "#F1F5F9",
+                border: "1px solid #E2E8F0",
+                borderRadius: 8,
+                color: "#64748B",
+                fontSize: 13,
+            }}>
+                Aucun destinataire sélectionné
+            </div>
+        );
+    }
+    return (
+        <div style={{
+            background: "#023436",
+            borderLeft: "4px solid #03b5aa",
+            borderRadius: 8,
+            padding: 16,
+            color: "#FFFFFF",
+        }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+                Destinataires sélectionnés ({selected.length})
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {visibleChips.map(u => (
+                    <span key={u.id} style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "4px 12px",
+                        background: "#037971",
+                        color: "#FFFFFF",
+                        borderRadius: 999,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        transition: "background 0.2s",
+                    }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#03b5aa"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#037971"}
+                    >
+                        {u.firstName} {u.lastName}
+                        <button
+                            type="button"
+                            aria-label={`Retirer ${u.firstName} ${u.lastName}`}
+                            onClick={() => onRemove(u.id)}
+                            style={{
+                                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                background: "transparent", border: "none", padding: 0,
+                                color: "#FFFFFF", cursor: "pointer",
+                            }}
+                        >
+                            <X size={14} strokeWidth={2.25} />
+                        </button>
+                    </span>
+                ))}
+                {overflowCount > 0 && (
+                    <button
+                        type="button"
+                        onClick={onScrollToList}
+                        style={{
+                            padding: "4px 12px",
+                            background: "rgba(255,255,255,0.10)",
+                            color: "#FFFFFF",
+                            border: "1px solid rgba(255,255,255,0.20)",
+                            borderRadius: 999,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            transition: "background 0.2s",
+                        }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.20)"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.10)"}
+                    >
+                        +{overflowCount} autres
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ── Étape 2 : personnalisation + mode ───────────────────────────────────────
 
 function StepCustomize({ tpl, overrides, onChange, mode, onModeChange }: {
     tpl: { timeline?: { stepId: string; subject: string; bodyTemplate: string; isAttackStep: boolean; stepOrder: number }[] };
@@ -374,24 +557,30 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange }: {
     );
 }
 
-// ── Étape 4 : récapitulatif ─────────────────────────────────────────────────
+// ── Étape 3 : récapitulatif ─────────────────────────────────────────────────
 
-function StepReview({ tpl, target, sender, mode, overrides }: {
+function StepReview({ tpl, targets, sender, mode, overrides }: {
     tpl: { name: string; durationDays: number; emailCount: number };
-    target: DirectoryUser | null;
-    sender: { firstName: string; lastName: string; email: string } | null;
+    targets: EmployeeWithConsent[];
+    sender: EmployeeWithConsent | null;
     mode: string;
     overrides: Record<string, { subject?: string; bodyTemplate?: string }>;
 }) {
     const overrideCount = Object.keys(overrides).length;
+    const targetsLabel = targets.length === 0
+        ? "—"
+        : targets.length === 1
+            ? `${targets[0].firstName} ${targets[0].lastName} — ${targets[0].email}`
+            : `${targets.length} destinataires : ${targets.slice(0, 3).map(t => `${t.firstName} ${t.lastName}`).join(", ")}${targets.length > 3 ? `, +${targets.length - 3} autres` : ""}`;
+
     return (
         <div>
             <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>Récapitulatif</h2>
-            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>Vérifie avant de lancer. Le scénario démarre immédiatement après confirmation.</p>
+            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>{`Vérifie avant de lancer. ${targets.length > 1 ? `${targets.length} instances seront créées (une par destinataire).` : "Le scénario démarre immédiatement après confirmation."}`}</p>
 
             <div style={{ display: "grid", gap: 12 }}>
                 <ReviewRow label="Scénario" value={`${tpl.name} (${tpl.emailCount} emails sur ${tpl.durationDays} j)`} />
-                <ReviewRow label="Cible" value={target ? `${target.firstName} ${target.lastName} — ${target.email}` : "—"} icon={<Users size={16} />} />
+                <ReviewRow label="Destinataires" value={targetsLabel} icon={<Users size={16} />} />
                 <ReviewRow label="Expéditeur fictif" value={sender ? `${sender.firstName} ${sender.lastName} (consentement actif)` : "—"} />
                 <ReviewRow label="Mode" value={mode === "demo" ? "Démo (1 jour = 1 minute)" : "Normal"} icon={<Eye size={16} />} />
                 <ReviewRow label="Personnalisations" value={overrideCount > 0 ? `${overrideCount} étape(s) modifiée(s)` : "Aucune (template d'origine)"} />

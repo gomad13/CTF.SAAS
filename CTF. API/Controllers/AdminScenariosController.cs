@@ -230,4 +230,23 @@ public class AdminScenariosController : ControllerBase
             .ToListAsync(ct);
         return Ok(rows);
     }
+
+    // Liste complète des employés du tenant avec leur flag de consentement
+    // expéditeur fictif. Le wizard de lancement affiche TOUS les employés
+    // (badge vert/rouge selon le consentement), contrairement à
+    // /eligible-senders qui filtre déjà côté serveur. Endpoint dédié pour
+    // ne pas casser le contrat existant et garder une seule responsabilité
+    // par route.
+    [HttpGet("employees")]
+    public async Task<ActionResult<List<EmployeeWithConsentDto>>> GetEmployeesWithConsent(CancellationToken ct)
+    {
+        var tenantId = User.GetTenantId();
+        var rows = await _db.Users.AsNoTracking()
+            .Where(u => u.TenantId == tenantId && u.IsActive)
+            .OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
+            .Select(u => new EmployeeWithConsentDto(
+                u.Id, u.FirstName, u.LastName, u.Email, u.Role, u.ConsentsToBeFictionalSender))
+            .ToListAsync(ct);
+        return Ok(rows);
+    }
 }

@@ -35,6 +35,20 @@ public sealed record EligibleSenderDto(
     string LastName,
     string Email);
 
+/// <summary>
+/// Liste complète des employés du tenant avec leur statut de consentement
+/// pour servir d'expéditeur fictif. Utilisé par le wizard de lancement de
+/// scénario : tous les employés sont affichés, avec un badge ✅/❌, mais
+/// seuls les consentants peuvent être sélectionnés comme expéditeur.
+/// </summary>
+public sealed record EmployeeWithConsentDto(
+    Guid Id,
+    string FirstName,
+    string LastName,
+    string Email,
+    string Role,
+    bool ConsentsToBeFictionalSender);
+
 // ── Instances (admin) ────────────────────────────────────────────────────────
 
 public sealed record ScenarioInstanceListItemDto(

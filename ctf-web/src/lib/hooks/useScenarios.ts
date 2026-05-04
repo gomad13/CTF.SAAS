@@ -11,6 +11,7 @@ import type {
     InboxEmailListItem,
     InboxEmailDetail,
     EligibleSender,
+    EmployeeWithConsent,
     LaunchScenarioRequest,
     ReportPhishingResponse,
     ScenarioLandingDetail,
@@ -58,6 +59,17 @@ export function useEligibleSenders() {
     return useQuery<EligibleSender[]>({
         queryKey: ["scenarios", "eligible-senders"],
         queryFn: () => apiFetch<EligibleSender[]>("/api/admin/scenarios/eligible-senders"),
+        staleTime: 60_000,
+    });
+}
+
+// Liste complète des employés du tenant + flag de consentement.
+// Utilisé par le wizard de lancement pour afficher TOUS les employés avec
+// un badge ✅/❌ et désactiver les non-consentants côté expéditeur.
+export function useEmployeesWithConsent() {
+    return useQuery<EmployeeWithConsent[]>({
+        queryKey: ["scenarios", "employees-with-consent"],
+        queryFn: () => apiFetch<EmployeeWithConsent[]>("/api/admin/scenarios/employees"),
         staleTime: 60_000,
     });
 }
