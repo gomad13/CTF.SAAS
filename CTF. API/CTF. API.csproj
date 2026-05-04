@@ -1,28 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>CTF._API</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<!-- ✅ CORRECTION : RootNamespace corrigé -->
+		<RootNamespace>CTF.Api</RootNamespace>
+	  <UserSecretsId>65ff2fce-ab3b-42ec-af1f-b7415f43899e</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
-
-  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
-    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    <PrivateAssets>all</PrivateAssets>
-  </PackageReference>
-
-  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
-    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    <PrivateAssets>all</PrivateAssets>
-  </PackageReference>
-
-  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
-  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-</ItemGroup>
-
-
+	<ItemGroup>
+		<PackageReference Include="ExcelDataReader" Version="3.7.0" />
+		<PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.*" />
+		<PackageReference Include="Hangfire.PostgreSql" Version="1.20.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+		<PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+	</ItemGroup>
 </Project>

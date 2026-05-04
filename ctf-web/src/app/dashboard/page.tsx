@@ -5,6 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { Me, AssignmentMine, RecentSubmission } from "@/lib/types";
+import { useRiskScore, useRiskScoreHistory } from "@/lib/hooks/useRiskScore";
+import { RiskScoreCard } from "@/components/risk-score/RiskScoreCard";
+import { RiskScoreEvolutionChart } from "@/components/risk-score/RiskScoreEvolutionChart";
 
 const LEVEL_LABELS: Record<string, string> = {
     beginner:     "Débutant",
@@ -41,6 +44,9 @@ export default function DashboardHome() {
 
     const me = meQ.data;
 
+    const riskScoreQ = useRiskScore();
+    const riskHistoryQ = useRiskScoreHistory(6);
+
     return (
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 40px" }}>
             <DemoFallbackBanner tenantName={me?.tenantName} />
@@ -52,6 +58,25 @@ export default function DashboardHome() {
                 <p style={{ marginTop: 4, fontSize: 14, color: "#64748B" }}>
                     {me?.tenantName ?? "—"}
                 </p>
+            </div>
+
+            {/* Section 1.4 — Cyber Resilience Index (CRI) : pilier produit RSSI.
+                Jauge à gauche (≥ md) ou pleine largeur en mobile, courbe à droite. */}
+            <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="md:col-span-1">
+                    <RiskScoreCard
+                        data={riskScoreQ.data}
+                        isLoading={riskScoreQ.isLoading}
+                        isError={riskScoreQ.isError}
+                    />
+                </div>
+                <div className="md:col-span-2">
+                    <RiskScoreEvolutionChart
+                        data={riskHistoryQ.data}
+                        isLoading={riskHistoryQ.isLoading}
+                        isError={riskHistoryQ.isError}
+                    />
+                </div>
             </div>
 
             {/* Section 1.5 — Onboarding "Premiers pas" si parcours assignés mais 0 challenge complété */}

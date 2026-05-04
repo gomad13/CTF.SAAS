@@ -1,4 +1,5 @@
-﻿using CTF.Api.Data;
+﻿using CTF.Api.Contracts;
+using CTF.Api.Data;
 using CTF.Api.Models;
 using CTF.Api.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,32 @@ public class ChallengesController : ControllerBase
         _tenant = tenant;
     }
 
-    // GET /api/challenges?moduleId=...
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetOne(Guid id)
+    {
+        var tenantId = _tenant.TenantId!.Value;
+        var demoTenantId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+
+        var challenge = await _db.Challenges
+            .AsNoTracking()
+            .Where(c => (c.TenantId == tenantId || c.TenantId == demoTenantId) && c.Id == id)
+            .Select(c => new
+            {
+                c.Id,
+                c.ModuleId,
+                c.Type,
+                c.Title,
+                c.Instructions,
+                c.Difficulty,
+                c.Points,
+                c.Status
+            })
+            .SingleOrDefaultAsync();
+
+        if (challenge is null) return NotFound();
+        return Ok(challenge);
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid moduleId)
     {
@@ -31,18 +57,7 @@ public class ChallengesController : ControllerBase
             .AsNoTracking()
             .Where(c => c.TenantId == tenantId && c.ModuleId == moduleId)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new
-            {
-                c.Id,
-                c.ModuleId,
-                c.Type,
-                c.Title,
-                c.Difficulty,
-                c.Points,
-                c.Status,
-                c.CreatedAt,
-                c.PublishedAt
-            })
+            .Select(c => new ChallengeDto(c.Id, c.ModuleId, c.Type, c.Title, c.Difficulty, c.Points, c.Status, c.CreatedAt, c.PublishedAt))
             .ToListAsync();
 
         return Ok(items);
@@ -55,38 +70,57 @@ public class ChallengesController : ControllerBase
         string Instructions,
         int? Difficulty,
         int Points,
-        string Status
+        string Status,
+        string? CorrectAnswer
     );
 
-    // POST /api/challenges  ✅ ADMIN ONLY
     [Authorize(Roles = "admin")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateChallengeRequest req)
     {
         var tenantId = _tenant.TenantId!.Value;
 
-        // Vérifie que le module existe (et appartient au tenant)
+        // Garde précoce : pré-valide les chaînes obligatoires pour que le compilateur
+        // sache qu'après ce point Type/Title/Instructions/Status sont non-null
+        // (évite les warnings CS8601 sur les assignations à l'entité Challenge).
+        if (string.IsNullOrWhiteSpace(req.Type)
+            || string.IsNullOrWhiteSpace(req.Title)
+            || string.IsNullOrWhiteSpace(req.Instructions)
+            || string.IsNullOrWhiteSpace(req.Status))
+            return BadRequest(new { error = "Type, Title, Instructions and Status are required." });
+
         var moduleOk = await _db.Modules.AnyAsync(m => m.Id == req.ModuleId && m.TenantId == tenantId);
         if (!moduleOk) return BadRequest(new { error = "ModuleId not found for this tenant" });
 
-        // ✅ user connecté via JWT
+        if (req.Points <= 0)
+            return BadRequest(new { error = "Points must be greater than 0." });
+
+        if (req.Difficulty.HasValue && (req.Difficulty < 1 || req.Difficulty > 5))
+            return BadRequest(new { error = "Difficulty must be between 1 and 5." });
+
+        string[] allowedTypes = { "quiz", "flag", "scenario", "code" };
+        if (!allowedTypes.Contains(req.Type.ToLowerInvariant()))
+            return BadRequest(new { error = $"Invalid type. Allowed: {string.Join(", ", allowedTypes)}" });
+
+        string[] allowedStatuses = { "draft", "published", "archived" };
+        if (!allowedStatuses.Contains(req.Status.ToLowerInvariant()))
+            return BadRequest(new { error = "Invalid status. Allowed: draft, published, archived" });
+
         var createdBy = User.GetUserId();
 
-        var challenge = new Challenges
+        // ✅ CORRECTION : Challenge au singulier
+        var challenge = new Challenge
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             ModuleId = req.ModuleId,
-
             Type = req.Type,
             Title = req.Title,
             Instructions = req.Instructions,
-
             Difficulty = req.Difficulty,
             Points = req.Points <= 0 ? 10 : req.Points,
-
             Status = req.Status,
-
+            CorrectAnswer = req.CorrectAnswer,
             CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow
         };
