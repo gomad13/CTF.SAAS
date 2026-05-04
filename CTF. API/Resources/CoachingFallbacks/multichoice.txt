@@ -1,0 +1,11 @@
+Cet exercice n'a pas donné le bon résultat, mais c'est en se trompant qu'on construit les meilleurs réflexes.
+
+Sur une question à choix multiple en cybersécurité, certains pièges reviennent souvent. Trois angles à garder en tête pour la prochaine fois :
+
+- Une réponse "trop évidente" est souvent le piège le plus courant
+- Plusieurs réponses peuvent paraître correctes : la bonne est celle qui couvre le scénario complet, pas seulement la première étape
+- Quand tu hésites, élimine d'abord les réponses qui te paraissent absurdes ou exagérées, le bon choix se révèle plus facilement
+
+À l'avenir, prends quelques secondes pour relire chaque proposition avant de cliquer. Demande-toi quelle réponse refléterait la meilleure pratique professionnelle, pas la plus rassurante.
+
+Tu progresses à chaque tentative. Continue !
