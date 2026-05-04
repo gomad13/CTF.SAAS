@@ -1,0 +1,85 @@
+{
+    "id": "faux-it-mdp",
+    "version": "1.0.0",
+    "name": "Faux IT — Mot de passe expirant",
+    "description": "Scénario court sur 2 jours, 2 emails. L'attaquant se fait passer pour le support IT et joue sur l'angoisse du blocage du compte pour pousser à cliquer sur une fausse page de login.",
+    "category": "it_phishing",
+    "difficulty": "easy",
+    "duration_days": 2,
+    "characters": [
+        {
+            "id": "it_support",
+            "role_label": "IT",
+            "fictional_email_pattern": "it-support@{{senderDomain}}"
+        }
+    ],
+    "timeline": [
+        {
+            "step_id": "email_1_attaque",
+            "step_order": 1,
+            "type": "email",
+            "delay_days": 0,
+            "delay_hours": 9,
+            "delay_minutes": 0,
+            "from_character_id": "it_support",
+            "to_recipient": "target",
+            "subject": "Important — Ton mot de passe expire dans 24h",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Notre système d'authentification a détecté que ton mot de passe arrive à <strong>expiration dans 24 heures</strong>. Pour éviter le blocage de ton compte, merci de le renouveler dès maintenant.</p><p><a href=\"https://login-{{tenant.companyDomain}}-secure.support-it365.com/renew\">Renouveler mon mot de passe</a></p><p>L'opération prend moins d'une minute. Si tu ne fais rien, ton accès aux outils internes sera suspendu demain matin.</p><p>Cordialement,<br/>L'équipe Support IT<br/>{{tenant.companyName}}</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 23,
+                "ignore_next_step_id": "email_2_relance"
+            },
+            "hints": [
+                "Adresse expéditeur générique « it-support@... » au lieu d'une personne identifiable",
+                "L'URL contient le nom de l'entreprise mais le vrai domaine est support-it365.com",
+                "Ton anxiogène avec compte à rebours pour pousser à agir vite",
+                "Un vrai renouvellement de mot de passe se fait depuis l'OS ou le portail SSO, jamais via un lien email",
+                "Si tu as un doute, tu peux ouvrir un ticket directement depuis ton portail interne"
+            ]
+        },
+        {
+            "step_id": "email_2_relance",
+            "step_order": 2,
+            "type": "email",
+            "delay_days": 1,
+            "delay_hours": 9,
+            "delay_minutes": 0,
+            "from_character_id": "it_support",
+            "to_recipient": "target",
+            "subject": "Dernier rappel — Compte suspendu dans 6h",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Tu n'as pas renouvelé ton mot de passe. Ton compte sera <strong>suspendu dans 6 heures</strong>.</p><p>Action requise immédiatement : <a href=\"https://login-{{tenant.companyDomain}}-secure.support-it365.com/renew\">Renouveler le mot de passe</a></p><p>L'équipe Support IT<br/>{{tenant.companyName}}</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 12,
+                "ignore_next_step_id": null
+            },
+            "hints": [
+                "Escalade de la pression : 6h au lieu de 24h",
+                "Toujours le même domaine externe suspect",
+                "Une suspension de compte serait toujours notifiée par ton manager direct, pas par un mail générique"
+            ]
+        }
+    ],
+    "outcomes": {
+        "outcome_failure": {
+            "label": "Échec — identifiants saisis sur la fausse page",
+            "trigger_coaching": true,
+            "cri_impact": -10
+        },
+        "outcome_success": {
+            "label": "Succès — l'employé a signalé l'email",
+            "trigger_coaching": false,
+            "cri_impact": 5
+        },
+        "outcome_neutral": {
+            "label": "Neutre — l'employé n'a pas réagi",
+            "trigger_coaching": false,
+            "cri_impact": 0
+        }
+    }
+}

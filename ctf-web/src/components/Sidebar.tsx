@@ -11,6 +11,7 @@ import {
     LayoutDashboard, BookOpen, Trophy, Settings,
     Users, ShieldAlert, LogOut, Shield,
     BarChart3, CheckCircle2, Target, BookUser,
+    Mail, Theater,
 } from "lucide-react";
 
 function Item({ href, icon, label, badge, exact = false, danger = false }: {
@@ -101,6 +102,7 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                             <Item href="/admin/dashboard" icon={<Users size={15} strokeWidth={1.75} />} label="Administration" />
                             <Item href="/admin/catalog" icon={<BookOpen size={15} strokeWidth={1.75} />} label="Catalogue" />
                             <Item href="/admin/directory" icon={<BookUser size={15} strokeWidth={1.75} />} label="Annuaire" />
+                            <Item href="/admin/scenarios" icon={<Theater size={15} strokeWidth={1.75} />} label="Scénarios" />
                             {modes?.analytics && <Item href="/admin/analytics" icon={<BarChart3 size={15} strokeWidth={1.75} />} label="Analytics" />}
                             {modes?.compliance && <Item href="/admin/compliance" icon={<CheckCircle2 size={15} strokeWidth={1.75} />} label="Compliance" />}
                             {modes?.teams && <Item href="/admin/teams" icon={<Users size={15} strokeWidth={1.75} />} label="Équipes" />}
@@ -112,6 +114,7 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                     <div style={{ fontSize: "10px", fontWeight: "700", color: "#CBD5E1", textTransform: "uppercase", letterSpacing: "0.10em", padding: "14px 12px 5px" }}>Menu</div>
                     <Item href="/dashboard" icon={<LayoutDashboard size={15} strokeWidth={1.75} />} label="Accueil" exact />
                     <Item href="/dashboard/parcours" icon={<BookOpen size={15} strokeWidth={1.75} />} label="Mes parcours" />
+                    <Item href="/inbox" icon={<Mail size={15} strokeWidth={1.75} />} label="Inbox" />
                     {competitionEnabled && (
                         <Item href="/dashboard/competition" icon={<Trophy size={15} strokeWidth={1.75} />} label="Compétition" />
                     )}

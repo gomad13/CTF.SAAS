@@ -184,6 +184,13 @@ builder.Services.AddHttpClient<CTF.Api.Services.LLM.IOllamaLLMProvider, CTF.Api.
 });
 builder.Services.AddScoped<CTF.Api.Services.Coaching.ICoachingService, CTF.Api.Services.Coaching.CoachingService>();
 
+// ✅ Pilier 1 — Scénarios narratifs (Inbox interne, 0 € email).
+//   Renderer en singleton (pur, ré-entrant) pour éviter une allocation par request.
+//   Seeder + Engine en scoped : ils touchent le DbContext.
+builder.Services.AddSingleton<CTF.Api.Services.Scenarios.IScenarioRenderer, CTF.Api.Services.Scenarios.ScenarioRenderer>();
+builder.Services.AddScoped<CTF.Api.Services.Scenarios.IScenarioCatalogSeeder, CTF.Api.Services.Scenarios.ScenarioCatalogSeeder>();
+builder.Services.AddScoped<CTF.Api.Services.Scenarios.IScenarioEngine, CTF.Api.Services.Scenarios.ScenarioEngine>();
+
 // ✅ Hangfire — orchestration des jobs récurrents (CRI nocturne, etc.)
 //   Storage : même base PostgreSQL que l'app (table dédiée Hangfire). Pas de
 //   nouvelle connexion : on réutilise la chaîne ConnectionStrings:DefaultConnection.
@@ -242,6 +249,10 @@ if (app.Environment.IsDevelopment())
     await CTF.Api.Data.MedicalDemoSeed.SeedAsync(db);
     await CTF.Api.Data.CompanySeed.SeedAsync(db);
     await CTF.Api.Data.Seeds.Catalog.CatalogSeed.SeedAsync(db);
+
+    // Pilier 1 — Catalogue scénarios narratifs (Resources/Scenarios/*.json)
+    var scenarioSeeder = scope.ServiceProvider.GetRequiredService<CTF.Api.Services.Scenarios.IScenarioCatalogSeeder>();
+    await scenarioSeeder.SeedAsync(CancellationToken.None);
 }
 
 // ✅ Swagger DEV only
@@ -301,7 +312,8 @@ app.Use(async (context, next) =>
         var path = context.Request.Path.Value ?? "";
         if (!path.StartsWith("/api/auth/google")
             && !path.StartsWith("/api/auth/microsoft")
-            && !path.StartsWith("/hangfire"))
+            && !path.StartsWith("/hangfire")
+            && !path.StartsWith("/api/scenario-tracking"))
         {
             if (!context.Request.Headers.ContainsKey("X-Requested-With"))
             {

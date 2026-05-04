@@ -12,6 +12,7 @@
 		<PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
 		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.*" />
 		<PackageReference Include="Hangfire.PostgreSql" Version="1.20.*" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.11" />
@@ -24,6 +25,8 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+		<PackageReference Include="Scriban" Version="7.1.0" />
+		<PackageReference Include="Stateless" Version="5.20.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -32,6 +35,13 @@
 		<!-- Templates fallback coaching : copiés à côté de l'exe pour que le service
 			 les lise depuis AppContext.BaseDirectory. -->
 		<Content Include="Resources\CoachingFallbacks\*.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<!-- Catalogue Pilier 1 : scénarios narratifs (VSF JSON) chargés au démarrage
+			 par IScenarioCatalogSeeder depuis AppContext.BaseDirectory.
+			 Les .json sont déjà inclus implicitement par le SDK Web ; on Update
+			 plutôt qu'Include pour activer CopyToOutputDirectory sans doublon. -->
+		<Content Update="Resources\Scenarios\*.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>

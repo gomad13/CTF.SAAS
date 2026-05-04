@@ -19,10 +19,15 @@ public class TenantMiddleware
         // - /api/auth/* : login/register/forgot-password/reset-password/oauth (incl. SSO callbacks Google/Microsoft)
         // - /api/test/* : outils dev (en mode Development uniquement, contrôlé ailleurs)
         // - /api/feedback (POST anonyme accepté ; SuperAdmin GET/PATCH passe par le middleware classique avec son JWT)
+        // - /api/scenario-tracking/* : pixels d'ouverture + redirections de clic
+        //   (l'utilisateur n'est pas authentifié quand il ouvre l'email dans son
+        //   client de mail simulé Inbox — le tracking_token GUID v4 fait office
+        //   d'identifiant unique non-énumérable, c'est le pattern standard).
         var path = context.Request.Path;
         if (path.StartsWithSegments("/api/health") ||
             path.StartsWithSegments("/api/auth") ||
             path.StartsWithSegments("/api/test") ||
+            path.StartsWithSegments("/api/scenario-tracking") ||
             (path.Equals("/api/feedback", StringComparison.OrdinalIgnoreCase) &&
              HttpMethods.IsPost(context.Request.Method)))
         {

@@ -1,4 +1,5 @@
 using CTF.Api.Models;
+using CTF.Api.Models.Scenarios;
 using Microsoft.EntityFrameworkCore;
 
 namespace CTF.Api.Data;
@@ -38,6 +39,13 @@ public class AppDbContext : DbContext
     public DbSet<MailLog> MailLogs => Set<MailLog>();
     public DbSet<RiskScoreHistory> RiskScoreHistories => Set<RiskScoreHistory>();
     public DbSet<CoachingFeedback> CoachingFeedbacks => Set<CoachingFeedback>();
+
+    // ── Pilier 1 — Scénarios narratifs ──────────────────────────────────────
+    public DbSet<ScenarioTemplate> ScenarioTemplates => Set<ScenarioTemplate>();
+    public DbSet<ScenarioInstance> ScenarioInstances => Set<ScenarioInstance>();
+    public DbSet<ScenarioInstanceStep> ScenarioInstanceSteps => Set<ScenarioInstanceStep>();
+    public DbSet<ScenarioEmail> ScenarioEmails => Set<ScenarioEmail>();
+    public DbSet<ScenarioEmailEvent> ScenarioEmailEvents => Set<ScenarioEmailEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -168,6 +176,109 @@ public class AppDbContext : DbContext
             b.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Pilier 1 — Scénarios narratifs ──────────────────────────────────
+        // RawJson et CustomizedJson stockés en jsonb (introspectable côté DB,
+        // utile pour debug / audit / requêtes ad-hoc sur le contenu source).
+        // FK Restrict sur User -> Instance (Target/Sender) pour éviter qu'une
+        // suppression d'employé efface l'historique d'un scénario en cours.
+        // Cascade Instance -> Step -> Email -> Event : un scénario supprimé
+        // emporte tout son arbre de tracking.
+        modelBuilder.Entity<ScenarioTemplate>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.RawJson).HasColumnType("jsonb").IsRequired();
+            b.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
+            b.HasIndex(x => new { x.ExternalId, x.Version }).IsUnique();
+            b.HasIndex(x => x.Category);
+        });
+
+        modelBuilder.Entity<ScenarioInstance>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.CustomizedJson).HasColumnType("jsonb").IsRequired();
+            b.Property(x => x.StateData).HasColumnType("jsonb").IsRequired();
+            b.Property(x => x.ScheduledStartAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.StartedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.CompletedAt).HasColumnType("timestamp with time zone");
+
+            b.HasIndex(x => new { x.TenantId, x.Status });
+            b.HasIndex(x => new { x.TenantId, x.TargetUserId });
+            b.HasIndex(x => x.ScheduledStartAt);
+
+            b.HasOne<ScenarioTemplate>()
+                .WithMany()
+                .HasForeignKey(x => x.TemplateId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.TargetUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.SenderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.LaunchedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ScenarioInstanceStep>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.ScheduledAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.SentAt).HasColumnType("timestamp with time zone");
+
+            b.HasIndex(x => new { x.InstanceId, x.StepOrder });
+            b.HasIndex(x => x.Status);
+
+            b.HasOne<ScenarioInstance>()
+                .WithMany()
+                .HasForeignKey(x => x.InstanceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ScenarioEmail>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.SentAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.FirstReadAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.FirstClickAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.ReportedAt).HasColumnType("timestamp with time zone");
+
+            b.HasIndex(x => x.TrackingToken).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.RecipientUserId, x.SentAt }).IsDescending(false, false, true);
+            b.HasIndex(x => x.InstanceStepId);
+
+            b.HasOne<ScenarioInstanceStep>()
+                .WithMany()
+                .HasForeignKey(x => x.InstanceStepId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.RecipientUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ScenarioEmailEvent>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.OccurredAt).HasColumnType("timestamp with time zone");
+
+            b.HasIndex(x => new { x.EmailId, x.EventType });
+            b.HasIndex(x => new { x.TenantId, x.OccurredAt }).IsDescending(false, true);
+
+            b.HasOne<ScenarioEmail>()
+                .WithMany()
+                .HasForeignKey(x => x.EmailId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
