@@ -1,4 +1,6 @@
-﻿namespace CTF.Api.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace CTF.Api.Models;
 
 public class User
 {
@@ -12,10 +14,37 @@ public class User
     public string Role { get; set; } = default!;
     public bool IsActive { get; set; } = true;
 
+    [JsonIgnore]
+    public string? PasswordHash { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+
+    /// <summary>Dernière activité (soumission challenge, connexion, etc.). Mis à jour périodiquement.</summary>
+    public DateTime? LastActivityAt { get; set; }
+
+    /// <summary>Dernière modification admin (role, team, status) — pour audit annuaire.</summary>
+    public DateTime? UpdatedAt { get; set; }
 
     // ✅ Ajout pour import CSV / admin panel
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
+
+    // ── SSO providers ────────────────────────────────────────────────────────
+    /// <summary>Google OAuth stable subject (claim `sub`).</summary>
+    public string? GoogleSubjectId { get; set; }
+    /// <summary>Microsoft OAuth stable subject.</summary>
+    public string? MicrosoftSubjectId { get; set; }
+    /// <summary>URL de l'avatar issu du provider SSO.</summary>
+    public string? AvatarUrl { get; set; }
+    /// <summary>"password" | "google" | "microsoft" | "multi".</summary>
+    public string? AuthProvider { get; set; }
+
+    /// <summary>
+    /// Consentement explicite de l'employé pour servir d'expéditeur fictif dans
+    /// les scénarios de phishing simulé (Pilier 1). Activable / désactivable
+    /// par l'employé lui-même depuis son profil. Aucune donnée réelle n'est
+    /// jamais envoyée — seul le From rendu utilise prénom + nom de l'employé.
+    /// </summary>
+    public bool ConsentsToBeFictionalSender { get; set; } = false;
 }

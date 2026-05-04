@@ -1,0 +1,85 @@
+{
+    "id": "faux-chronopost",
+    "version": "1.0.0",
+    "name": "Faux Chronopost — Frais de douane à régler",
+    "description": "Scénario court sur 2 jours, 2 emails. Un faux livreur Chronopost prétend qu'un colis est bloqué à la douane et demande un règlement de 1,99 € via une fausse page. Le montant ridicule sert à faire baisser la garde — la vraie cible est la carte bancaire.",
+    "category": "delivery_phishing",
+    "difficulty": "easy",
+    "duration_days": 2,
+    "characters": [
+        {
+            "id": "chronopost",
+            "role_label": "Livreur",
+            "fictional_email_pattern": "service-livraison@chronopost-suivi-fr.com"
+        }
+    ],
+    "timeline": [
+        {
+            "step_id": "email_1_attaque",
+            "step_order": 1,
+            "type": "email",
+            "delay_days": 0,
+            "delay_hours": 8,
+            "delay_minutes": 0,
+            "from_character_id": "chronopost",
+            "to_recipient": "target",
+            "subject": "Votre colis est en attente — frais de douane à régler",
+            "body_template": "<p>Bonjour,</p><p>Votre colis Chronopost <strong>n° CH9482-FR-9817</strong> est actuellement en attente de livraison. Des frais de douane d'un montant de <strong>1,99 €</strong> doivent être réglés pour que la livraison reprenne.</p><p>Réglez vos frais ici en moins d'une minute : <a href=\"https://chronopost-suivi-fr.com/paiement/CH9482\">Régler mes frais</a></p><p>Sans paiement de votre part dans les 48 heures, votre colis sera retourné à l'expéditeur.</p><p>Cordialement,<br/>Service Livraison Chronopost</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 23,
+                "ignore_next_step_id": "email_2_relance"
+            },
+            "hints": [
+                "Adresse expéditeur sur chronopost-suivi-fr.com — ce n'est PAS le vrai domaine de Chronopost (chronopost.fr)",
+                "Montant ridicule de 1,99 € pour faire baisser ta garde : la vraie cible est ta carte bancaire",
+                "Tu n'as probablement aucun colis Chronopost en attente",
+                "Aucun vrai service de livraison ne demande un paiement de frais de douane sur un email générique",
+                "Le suivi officiel passe par le site chronopost.fr ou par l'application, jamais par un lien externe"
+            ]
+        },
+        {
+            "step_id": "email_2_relance",
+            "step_order": 2,
+            "type": "email",
+            "delay_days": 1,
+            "delay_hours": 8,
+            "delay_minutes": 0,
+            "from_character_id": "chronopost",
+            "to_recipient": "target",
+            "subject": "Dernier avis avant retour expéditeur",
+            "body_template": "<p>Bonjour,</p><p>Votre colis n° CH9482-FR-9817 sera <strong>retourné à l'expéditeur sous 24h</strong> faute de règlement des frais de douane (1,99 €).</p><p>Évitez le retour : <a href=\"https://chronopost-suivi-fr.com/paiement/CH9482\">Régler maintenant</a></p><p>Service Livraison Chronopost</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 24,
+                "ignore_next_step_id": null
+            },
+            "hints": [
+                "Même domaine suspect, même piège",
+                "Si tu attends vraiment un colis, vérifie sur chronopost.fr avec ton numéro de suivi officiel",
+                "Le bon réflexe : ignorer et signaler"
+            ]
+        }
+    ],
+    "outcomes": {
+        "outcome_failure": {
+            "label": "Échec — coordonnées bancaires saisies",
+            "trigger_coaching": true,
+            "cri_impact": -10
+        },
+        "outcome_success": {
+            "label": "Succès — l'employé a signalé l'email",
+            "trigger_coaching": false,
+            "cri_impact": 5
+        },
+        "outcome_neutral": {
+            "label": "Neutre — l'employé n'a pas réagi",
+            "trigger_coaching": false,
+            "cri_impact": 0
+        }
+    }
+}

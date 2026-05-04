@@ -1,0 +1,100 @@
+{
+    "id": "fournisseur-rib",
+    "version": "1.0.0",
+    "name": "Fournisseur compromis — Changement de RIB",
+    "description": "Scénario sur 4 jours, 3 emails. Un faux fournisseur (ou un vrai compte fournisseur compromis) annonce un changement de coordonnées bancaires, puis envoie un nouveau RIB en pièce jointe pour rediriger les futurs paiements.",
+    "category": "supplier_fraud",
+    "difficulty": "medium",
+    "duration_days": 4,
+    "characters": [
+        {
+            "id": "fournisseur",
+            "role_label": "Fournisseur",
+            "fictional_email_pattern": "{{firstName | string.downcase}}.{{lastName | string.downcase}}@office-supplies-pro.fr"
+        }
+    ],
+    "timeline": [
+        {
+            "step_id": "email_1_intro",
+            "step_order": 1,
+            "type": "email",
+            "delay_days": 0,
+            "delay_hours": 11,
+            "delay_minutes": 0,
+            "from_character_id": "fournisseur",
+            "to_recipient": "target",
+            "subject": "Petit changement à venir sur notre dossier",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>J'espère que tu vas bien. Je voulais te prévenir : nous changeons de banque dans les jours qui viennent suite à un regroupement de nos comptes professionnels.</p><p>Je t'enverrai notre nouveau RIB d'ici demain ou après-demain pour que tu puisses mettre à jour notre fiche fournisseur. Rien d'urgent, c'est juste pour anticiper.</p><p>Bonne journée,<br/>{{sender.firstName}} {{sender.lastName}}<br/>Office Supplies Pro</p>",
+            "is_attack_step": false,
+            "decision_branches": null,
+            "hints": []
+        },
+        {
+            "step_id": "email_2_attaque",
+            "step_order": 2,
+            "type": "email",
+            "delay_days": 1,
+            "delay_hours": 14,
+            "delay_minutes": 0,
+            "from_character_id": "fournisseur",
+            "to_recipient": "target",
+            "subject": "Notre nouveau RIB — à mettre à jour pour les prochains paiements",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Comme convenu, voici notre <strong>nouveau RIB</strong> à utiliser pour les prochaines factures. Il est valable à partir du 1er du mois prochain.</p><p>Tu peux télécharger le RIB officiel ici : <a href=\"https://office-supplies-pro.fr/docs/rib-2026.pdf\">RIB Office Supplies Pro 2026.pdf</a></p><p>Merci de bien valider l'ancien RIB en archive et de basculer sur le nouveau pour la prochaine facture (la 2026-04-118 d'environ 12 400 €). Si tu as un doute, tu peux me joindre directement sur ce mail.</p><p>Bonne journée,<br/>{{sender.firstName}} {{sender.lastName}}<br/>Office Supplies Pro</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 44,
+                "ignore_next_step_id": "email_3_relance"
+            },
+            "hints": [
+                "Tout changement de RIB fournisseur doit être validé par téléphone via le numéro déjà connu, jamais celui de l'email",
+                "Le mail vient de office-supplies-pro.fr alors que ton vrai fournisseur s'appelait peut-être Office-Supplies SARL : différence subtile dans le nom",
+                "La pièce jointe est un PDF mais le vrai canal pour un RIB serait le portail fournisseur sécurisé",
+                "Demande de basculer sans aucune procédure interne (avenant contractuel, signature)",
+                "Le montant cité (12 400 €) crée un sentiment d'engagement"
+            ]
+        },
+        {
+            "step_id": "email_3_relance",
+            "step_order": 3,
+            "type": "email",
+            "delay_days": 3,
+            "delay_hours": 10,
+            "delay_minutes": 0,
+            "from_character_id": "fournisseur",
+            "to_recipient": "target",
+            "subject": "Re: Notre nouveau RIB — confirmation avant facture",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Petit rappel : peux-tu me confirmer que le nouveau RIB est bien à jour dans votre système ? Notre service comptable va éditer la <strong>prochaine facture la semaine prochaine</strong> et on aimerait éviter tout retard de paiement.</p><p>Le <a href=\"https://office-supplies-pro.fr/docs/rib-2026.pdf\">RIB est ici</a> si besoin.</p><p>Merci !<br/>{{sender.firstName}} {{sender.lastName}}<br/>Office Supplies Pro</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 24,
+                "ignore_next_step_id": null
+            },
+            "hints": [
+                "Une vraie demande de mise à jour bancaire ne se fait jamais en une chaîne d'emails sans procédure formelle",
+                "Le ton « éviter tout retard de paiement » est une tactique classique pour culpabiliser",
+                "Le bon réflexe : appeler le fournisseur sur son numéro habituel (pas un nouveau)"
+            ]
+        }
+    ],
+    "outcomes": {
+        "outcome_failure": {
+            "label": "Échec — RIB modifié dans le système",
+            "trigger_coaching": true,
+            "cri_impact": -10
+        },
+        "outcome_success": {
+            "label": "Succès — l'employé a signalé le mail",
+            "trigger_coaching": false,
+            "cri_impact": 5
+        },
+        "outcome_neutral": {
+            "label": "Neutre — l'employé n'a pas réagi",
+            "trigger_coaching": false,
+            "cri_impact": 0
+        }
+    }
+}

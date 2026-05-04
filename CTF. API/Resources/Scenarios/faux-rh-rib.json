@@ -1,0 +1,85 @@
+{
+    "id": "faux-rh-rib",
+    "version": "1.0.0",
+    "name": "Faux RH — Mise à jour du RIB de paie",
+    "description": "Scénario court sur 3 jours, 2 emails. Un attaquant se fait passer pour les ressources humaines internes et demande un nouveau RIB pour la paie via un lien externe. Si l'employé ignore, une relance angoissante suspend la paie.",
+    "category": "hr_phishing",
+    "difficulty": "medium",
+    "duration_days": 3,
+    "characters": [
+        {
+            "id": "rh",
+            "role_label": "RH",
+            "fictional_email_pattern": "rh-paie@{{senderDomain}}"
+        }
+    ],
+    "timeline": [
+        {
+            "step_id": "email_1_attaque",
+            "step_order": 1,
+            "type": "email",
+            "delay_days": 0,
+            "delay_hours": 10,
+            "delay_minutes": 0,
+            "from_character_id": "rh",
+            "to_recipient": "target",
+            "subject": "Action requise — Mise à jour SIRH paie de fin de mois",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Suite à la migration de notre SIRH vers une nouvelle plateforme, l'ensemble des collaborateurs doit mettre à jour ses coordonnées bancaires <strong>avant le 28 du mois</strong> sous peine de retard de paie.</p><p>Merci de renseigner ton RIB à jour via ce formulaire sécurisé : <a href=\"https://sirh-paie-{{tenant.companyDomain}}.fr/maj-rib\">Mettre à jour mon RIB</a></p><p>Cette opération ne prend qu'une minute. Pour toute question, réponds à ce mail.</p><p>Bien à toi,<br/>{{sender.firstName}} {{sender.lastName}}<br/>Service Paie & RH<br/>{{tenant.companyName}}</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 47,
+                "ignore_next_step_id": "email_2_relance"
+            },
+            "hints": [
+                "Aucune procédure RH sérieuse ne demande un RIB par email avec un lien externe",
+                "Le domaine sirh-paie-...fr ressemble au tien mais n'est pas un sous-domaine de l'entreprise",
+                "Urgence artificielle « avant le 28 sous peine de retard de paie »",
+                "Le service RH t'aurait normalement contacté via le portail interne",
+                "Aucun moyen de vérifier l'identité de l'expéditeur sans contacter directement la RH"
+            ]
+        },
+        {
+            "step_id": "email_2_relance",
+            "step_order": 2,
+            "type": "email",
+            "delay_days": 2,
+            "delay_hours": 9,
+            "delay_minutes": 0,
+            "from_character_id": "rh",
+            "to_recipient": "target",
+            "subject": "Rappel — Ta paie de fin de mois est suspendue",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Nous n'avons pas reçu ta mise à jour de RIB. Ta paie de fin de mois est actuellement <strong>en attente de validation bancaire</strong> et ne sera versée qu'après réception du nouveau RIB.</p><p>Merci de compléter dès aujourd'hui le formulaire sécurisé : <a href=\"https://sirh-paie-{{tenant.companyDomain}}.fr/maj-rib\">Mettre à jour mon RIB maintenant</a></p><p>Cordialement,<br/>{{sender.firstName}} {{sender.lastName}}<br/>Service Paie & RH<br/>{{tenant.companyName}}</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 24,
+                "ignore_next_step_id": null
+            },
+            "hints": [
+                "Pression émotionnelle : « ta paie est suspendue »",
+                "Le lien et le domaine sont identiques au mail précédent — toujours aussi suspect",
+                "Ton vrai service paie ne menace jamais de bloquer la paie par email"
+            ]
+        }
+    ],
+    "outcomes": {
+        "outcome_failure": {
+            "label": "Échec — RIB envoyé sur le faux portail",
+            "trigger_coaching": true,
+            "cri_impact": -10
+        },
+        "outcome_success": {
+            "label": "Succès — l'employé a signalé l'email",
+            "trigger_coaching": false,
+            "cri_impact": 5
+        },
+        "outcome_neutral": {
+            "label": "Neutre — l'employé n'a pas réagi",
+            "trigger_coaching": false,
+            "cri_impact": 0
+        }
+    }
+}

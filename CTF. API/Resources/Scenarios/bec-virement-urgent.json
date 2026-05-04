@@ -1,0 +1,115 @@
+{
+    "id": "bec-virement-urgent",
+    "version": "1.0.0",
+    "name": "BEC — Virement urgent du DG",
+    "description": "Scénario en 4 actes sur 5 jours. Un attaquant se fait passer pour le PDG, prépare le terrain en deux mails anodins, puis demande un virement urgent de 47 800 € avec un lien vers une fausse page bancaire. Si l'employé ignore, un dernier mail culpabilisant tente de provoquer la décision sous stress.",
+    "category": "ceo_fraud",
+    "difficulty": "hard",
+    "duration_days": 5,
+    "characters": [
+        {
+            "id": "ceo",
+            "role_label": "DG",
+            "fictional_email_pattern": "{{firstName | string.downcase}}.{{lastName | string.downcase}}@{{senderDomain}}"
+        }
+    ],
+    "timeline": [
+        {
+            "step_id": "email_1_intro",
+            "step_order": 1,
+            "type": "email",
+            "delay_days": 0,
+            "delay_hours": 9,
+            "delay_minutes": 0,
+            "from_character_id": "ceo",
+            "to_recipient": "target",
+            "subject": "Mise à jour rapide de l'annuaire interne",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Je suis en train de mettre à jour l'annuaire interne avant la réunion stratégique de la semaine prochaine. Pourrais-tu me confirmer ton numéro de mobile professionnel par retour ?</p><p>Merci d'avance, c'est juste pour une vérification rapide.</p><p>Bien cordialement,<br/>{{sender.firstName}} {{sender.lastName}}<br/>Direction générale<br/>{{tenant.companyName}}</p>",
+            "is_attack_step": false,
+            "decision_branches": null,
+            "hints": []
+        },
+        {
+            "step_id": "email_2_amorce",
+            "step_order": 2,
+            "type": "email",
+            "delay_days": 2,
+            "delay_hours": 14,
+            "delay_minutes": 0,
+            "from_character_id": "ceo",
+            "to_recipient": "target",
+            "subject": "Sujet confidentiel — entre toi et moi",
+            "body_template": "<p>Bonjour {{recipient.firstName}},</p><p>Je vais bientôt te demander de m'aider sur un sujet sensible. Je tiens à ce que cela reste strictement entre nous pour le moment, le temps de finaliser un dossier qui ne doit pas s'ébruiter en interne.</p><p>Je te recontacte demain ou après-demain avec les détails. Merci de ta discrétion.</p><p>Cordialement,<br/>{{sender.firstName}} {{sender.lastName}}<br/>Direction générale<br/>{{tenant.companyName}}</p>",
+            "is_attack_step": false,
+            "decision_branches": null,
+            "hints": []
+        },
+        {
+            "step_id": "email_3_attaque",
+            "step_order": 3,
+            "type": "email",
+            "delay_days": 3,
+            "delay_hours": 16,
+            "delay_minutes": 45,
+            "from_character_id": "ceo",
+            "to_recipient": "target",
+            "subject": "URGENT — Virement à finaliser avant 17h",
+            "body_template": "<p>{{recipient.firstName}},</p><p>Je suis en réunion avec un partenaire stratégique. Nous devons absolument finaliser un virement de <strong>47 800 €</strong> vers Schneider Electric <strong>avant 17h aujourd'hui</strong>, sinon le deal tombe.</p><p>Tu peux initier le virement directement via notre portail bancaire en passant par ce lien sécurisé que m'a transmis la trésorerie : <a href=\"https://portail-bancaire-securise.{{tenant.companyDomain}}.banque-pro.io/v/47800\">Portail virement express</a></p><p>Surtout pas un mot à l'équipe, c'est confidentiel comme je te l'ai dit. Je te revaudrai ça.</p><p>Merci de ta réactivité.<br/>{{sender.firstName}}<br/>(envoyé depuis mon mobile)</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 42,
+                "ignore_next_step_id": "email_4_relance"
+            },
+            "hints": [
+                "Le DG ne demande jamais un virement par email sans validation comptable",
+                "Urgence artificielle « avant 17h » pour court-circuiter ta réflexion",
+                "Lien vers un domaine externe qui imite la banque mais n'est pas le portail officiel",
+                "Demande explicite de secret pour t'isoler et t'empêcher de vérifier en interne",
+                "Signature « envoyé depuis mon mobile » qui justifie un ton inhabituel"
+            ]
+        },
+        {
+            "step_id": "email_4_relance",
+            "step_order": 4,
+            "type": "email",
+            "delay_days": 5,
+            "delay_hours": 10,
+            "delay_minutes": 0,
+            "from_character_id": "ceo",
+            "to_recipient": "target",
+            "subject": "Re: URGENT — Virement à finaliser avant 17h",
+            "body_template": "<p>{{recipient.firstName}},</p><p>Je viens de voir que tu n'as pas traité ma demande hier soir. Le partenaire a annulé. C'est embêtant pour nous, j'aurais préféré ne pas avoir à en arriver là.</p><p>Si tu peux quand même finaliser via le <a href=\"https://portail-bancaire-securise.{{tenant.companyDomain}}.banque-pro.io/v/47800\">lien que je t'ai envoyé</a>, on peut peut-être encore rattraper la situation.</p><p>{{sender.firstName}}</p>",
+            "is_attack_step": true,
+            "decision_branches": {
+                "click": "outcome_failure",
+                "report": "outcome_success",
+                "ignore_after_hours": 24,
+                "ignore_next_step_id": null
+            },
+            "hints": [
+                "Manipulation par culpabilisation : « tu m'as fait perdre le deal »",
+                "Le lien suspect réapparaît à l'identique : c'est le même piège",
+                "Un vrai dirigeant ne reproche jamais une vérification de sécurité"
+            ]
+        }
+    ],
+    "outcomes": {
+        "outcome_failure": {
+            "label": "Échec — clic sur le lien piégé",
+            "trigger_coaching": true,
+            "cri_impact": -10
+        },
+        "outcome_success": {
+            "label": "Succès — l'employé a signalé l'email",
+            "trigger_coaching": false,
+            "cri_impact": 5
+        },
+        "outcome_neutral": {
+            "label": "Neutre — l'employé n'a pas réagi",
+            "trigger_coaching": false,
+            "cri_impact": 0
+        }
+    }
+}
