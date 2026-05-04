@@ -57,6 +57,15 @@ export type EligibleSender = {
     email: string;
 };
 
+export type EmployeeWithConsent = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    consentsToBeFictionalSender: boolean;
+};
+
 export type StepCustomization = {
     stepId: string;
     subject?: string;
