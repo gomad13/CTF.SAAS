@@ -172,6 +172,18 @@ builder.Services.AddScoped<CTF.Api.Services.SsoFlowService>();
 // ✅ Cyber Resilience Index (CRI)
 builder.Services.AddScoped<IRiskScoringService, RiskScoringService>();
 
+// ✅ Coaching post-incident (Pilier 4) — LLM 100% local via Ollama.
+//    HttpClient typé : Ollama tourne sur localhost:11434, pas de proxy.
+//    Le timeout HTTP est aligné sur Coaching:Ollama:TimeoutSeconds + 30s de marge,
+//    pour ne jamais court-circuiter le timeout métier (qui pilote le fallback).
+builder.Services.AddHttpClient<CTF.Api.Services.LLM.IOllamaLLMProvider, CTF.Api.Services.LLM.OllamaLLMProvider>((sp, c) =>
+{
+    var cfg = sp.GetRequiredService<IConfiguration>();
+    var businessTimeout = cfg.GetValue<int>("Coaching:Ollama:TimeoutSeconds", 60);
+    c.Timeout = TimeSpan.FromSeconds(businessTimeout + 30);
+});
+builder.Services.AddScoped<CTF.Api.Services.Coaching.ICoachingService, CTF.Api.Services.Coaching.CoachingService>();
+
 // ✅ Hangfire — orchestration des jobs récurrents (CRI nocturne, etc.)
 //   Storage : même base PostgreSQL que l'app (table dédiée Hangfire). Pas de
 //   nouvelle connexion : on réutilise la chaîne ConnectionStrings:DefaultConnection.

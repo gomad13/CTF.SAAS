@@ -28,4 +28,11 @@
 		<PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 	</ItemGroup>
+	<ItemGroup>
+		<!-- Templates fallback coaching : copiés à côté de l'exe pour que le service
+			 les lise depuis AppContext.BaseDirectory. -->
+		<Content Include="Resources\CoachingFallbacks\*.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 </Project>

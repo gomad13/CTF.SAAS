@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/api";
 import Sidebar from "@/components/Sidebar";
 import ChatWidget from "@/components/ChatWidget";
 import Footer from "@/components/Footer";
+import { CoachingHost } from "@/components/coaching/CoachingHost";
 import type { Me } from "@/lib/types";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -106,6 +107,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </main>
             </div>
             <ChatWidget />
+            {/* Host global du coaching post-incident : écoute l'event window
+                "viper:coaching:trigger" et monte la modal en lazy load. */}
+            <CoachingHost />
         </div>
     );
 }

@@ -1,0 +1,11 @@
+Pas de réussite cette fois, mais ces exercices de tri sont précisément faits pour s'entraîner sans risque.
+
+Une boîte mail est rarement attaquée par un email visiblement bizarre. Les attaquants soignent la mise en forme, copient un logo officiel, et glissent un seul détail piégeux. Trois indices qui auraient pu t'alerter :
+
+- Un nom d'expéditeur familier mais une adresse derrière le @ qui ne correspond pas exactement au domaine officiel
+- Un objet qui crée une émotion forte (urgence, gain, peur) pour court-circuiter ta réflexion
+- Un lien dont l'URL au survol diffère du texte affiché ou pointe vers un domaine que tu ne reconnais pas
+
+À l'avenir, ralentis sur les emails qui demandent une action immédiate. Survole les liens sans cliquer, regarde le vrai expéditeur, et si un doute subsiste, signale plutôt que d'agir.
+
+Bravo d'être venu jusqu'ici, c'est ce qui te fera progresser.

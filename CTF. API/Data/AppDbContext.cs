@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
     public DbSet<FeedbackMessage> FeedbackMessages => Set<FeedbackMessage>();
     public DbSet<MailLog> MailLogs => Set<MailLog>();
     public DbSet<RiskScoreHistory> RiskScoreHistories => Set<RiskScoreHistory>();
+    public DbSet<CoachingFeedback> CoachingFeedbacks => Set<CoachingFeedback>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -124,6 +125,27 @@ public class AppDbContext : DbContext
         {
             b.HasKey(x => new { x.CampaignId, x.UserId });
             b.HasIndex(x => new { x.TenantId, x.CampaignId });
+        });
+
+        // Coaching post-incident — feedback IA généré (Ollama local) après échec.
+        // Index pour les 3 usages identifiés : historique user, listings tenant
+        // (futurs benchmarks SuperAdmin), accès rapide par attemptId, diagnostic
+        // par statut.
+        modelBuilder.Entity<CoachingFeedback>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Content).HasColumnType("text").IsRequired();
+            b.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+
+            b.HasIndex(x => new { x.UserId, x.CreatedAt }).IsDescending(false, true);
+            b.HasIndex(x => new { x.TenantId, x.CreatedAt }).IsDescending(false, true);
+            b.HasIndex(x => x.ChallengeAttemptId);
+            b.HasIndex(x => x.Status);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Cyber Resilience Index — historique des scores calculés.

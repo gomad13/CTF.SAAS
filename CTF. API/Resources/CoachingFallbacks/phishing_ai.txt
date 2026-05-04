@@ -1,0 +1,11 @@
+Tu n'as pas réussi cet exercice cette fois, mais c'est une excellente occasion de prendre du recul sur ce que les IA d'aujourd'hui permettent à un attaquant.
+
+Les emails de phishing sont devenus très convaincants : grammaire impeccable, ton personnalisé, mise en forme professionnelle. Trois indices qui restent décisifs même quand la forme est parfaite :
+
+- Une adresse expéditeur qui imite une marque connue avec une légère différence dans le domaine
+- Un sentiment d'urgence artificielle ("agir avant 17h", "compte sera suspendu")
+- Un lien dont le texte affiché ne correspond pas à la vraie URL au survol
+
+À l'avenir, accorde-toi 30 secondes avant tout clic : vérifie le vrai expéditeur, survole les liens sans les ouvrir, et en cas de doute, contacte directement la personne ou le service concerné par un autre canal que celui de l'email.
+
+Tu progresses, continue !
