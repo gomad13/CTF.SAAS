@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { Me } from "@/lib/types";
 import { useSenderConsent, useUpdateSenderConsent } from "@/lib/hooks/useScenarios";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 type TabKey = "profil" | "notifications" | "apparence" | "securite";
 type ToastType = "success" | "error" | "warning";
@@ -34,7 +35,7 @@ export default function ParametresPage() {
     ];
 
     return (
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 40px 80px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px var(--page-x) 80px" }}>
             <h1 style={{ fontSize: 24, fontWeight: 700, color: "#F1F5F9", marginBottom: 24 }}>
                 Paramètres
             </h1>
@@ -171,16 +172,31 @@ function ProfilTab({ me, showToast }: { me: Me | undefined; showToast: (m: strin
             {/* Mot de passe */}
             <Card title="Changer le mot de passe">
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                    <Field label="Mot de passe actuel" type="password" value={currentPwd} onChange={setCurrentPwd} />
+                    <PasswordInput
+                        label="Mot de passe actuel"
+                        value={currentPwd}
+                        onChange={e => setCurrentPwd(e.target.value)}
+                        autoComplete="current-password"
+                    />
                     <div>
-                        <Field label="Nouveau mot de passe" type="password" value={newPwd} onChange={setNewPwd} />
+                        <PasswordInput
+                            label="Nouveau mot de passe"
+                            value={newPwd}
+                            onChange={e => setNewPwd(e.target.value)}
+                            autoComplete="new-password"
+                        />
                         {pwdStrength && (
                             <div style={{ marginTop: 6, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: pwdStrength.color, letterSpacing: "0.08em" }}>
                                 FORCE : {pwdStrength.label}
                             </div>
                         )}
                     </div>
-                    <Field label="Confirmer le nouveau mot de passe" type="password" value={confirmPwd} onChange={setConfirmPwd} />
+                    <PasswordInput
+                        label="Confirmer le nouveau mot de passe"
+                        value={confirmPwd}
+                        onChange={e => setConfirmPwd(e.target.value)}
+                        autoComplete="new-password"
+                    />
                     {pwdError && (
                         <div style={{ fontSize: 12, color: "#f87171" }}>⚠ {pwdError}</div>
                     )}
@@ -491,6 +507,9 @@ function SecuriteTab({ me, showToast }: { me: Me | undefined; showToast: (m: str
                 </button>
             </Card>
 
+            {/* M3 — Double authentification par email */}
+            <TwoFactorCard showToast={showToast} />
+
             {/* 2FA — masqué pour la bêta privée tant que la fonctionnalité n'est pas livrée */}
             {/* TODO V1 publique : implémenter le flow TOTP (générer secret, QR code, vérification 6 chiffres). */}
 
@@ -588,6 +607,103 @@ function SecuriteTab({ me, showToast }: { me: Me | undefined; showToast: (m: str
 }
 
 // ── COMPONENTS UTILS ────────────────────────────────────────────────────────
+function TwoFactorCard({ showToast }: { showToast: (m: string, t?: ToastType) => void }) {
+    const [enabled, setEnabled] = useState<boolean | null>(null);
+    const [step, setStep] = useState<"idle" | "confirming">("idle");
+    const [code, setCode] = useState("");
+    const [busy, setBusy] = useState(false);
+
+    useEffect(() => {
+        apiFetch<{ enabled: boolean }>("/api/auth/2fa/status")
+            .then(d => setEnabled(d.enabled))
+            .catch(() => setEnabled(false));
+    }, []);
+
+    async function startEnable() {
+        setBusy(true);
+        try {
+            await apiFetch("/api/auth/2fa/enable", { method: "POST" });
+            setStep("confirming");
+            showToast("Code de confirmation envoyé par email");
+        } catch (e) {
+            showToast(e instanceof Error ? e.message : "Erreur", "error");
+        } finally { setBusy(false); }
+    }
+
+    async function confirmEnable() {
+        if (!/^\d{6}$/.test(code)) { showToast("Entrez le code à 6 chiffres", "warning"); return; }
+        setBusy(true);
+        try {
+            await apiFetch("/api/auth/2fa/confirm", { method: "POST", body: JSON.stringify({ code }) });
+            setEnabled(true); setStep("idle"); setCode("");
+            showToast("Double authentification activée");
+        } catch (e) {
+            showToast(e instanceof Error ? e.message : "Code invalide", "error");
+        } finally { setBusy(false); }
+    }
+
+    async function disable() {
+        if (!confirm("Désactiver la double authentification par email ?")) return;
+        setBusy(true);
+        try {
+            await apiFetch("/api/auth/2fa/disable", { method: "POST" });
+            setEnabled(false); setStep("idle");
+            showToast("Double authentification désactivée");
+        } catch (e) {
+            showToast(e instanceof Error ? e.message : "Erreur", "error");
+        } finally { setBusy(false); }
+    }
+
+    return (
+        <Card title="Double authentification (2FA) par email">
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, marginTop: 0 }}>
+                {"Renforcez la sécurité de votre compte : à chaque connexion par mot de passe, un code à 6 chiffres vous sera envoyé par email."}
+            </p>
+
+            {enabled === null && <div style={{ fontSize: 12, color: "var(--text-muted)" }}>…</div>}
+
+            {enabled === false && step === "idle" && (
+                <button style={ghostBtnStyle()} onClick={startEnable} disabled={busy}>
+                    Activer la 2FA par email
+                </button>
+            )}
+
+            {enabled === false && step === "confirming" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 280 }}>
+                    <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                        Entrez le code reçu par email pour confirmer :
+                    </div>
+                    <input
+                        inputMode="numeric" maxLength={6} value={code}
+                        onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        placeholder="••••••"
+                        style={{
+                            background: "var(--bg-input)", border: "1px solid var(--border)", borderRadius: 8,
+                            padding: "10px 14px", color: "var(--text-primary)", fontSize: 18,
+                            letterSpacing: "0.3em", textAlign: "center", fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                    />
+                    <div style={{ display: "flex", gap: 8 }}>
+                        <button style={ghostBtnStyle()} onClick={confirmEnable} disabled={busy}>Confirmer</button>
+                        <button style={ghostBtnStyle()} onClick={() => { setStep("idle"); setCode(""); }} disabled={busy}>Annuler</button>
+                    </div>
+                </div>
+            )}
+
+            {enabled === true && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                    <span style={{
+                        display: "inline-block", fontSize: 10, padding: "2px 8px", borderRadius: 4,
+                        background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.35)",
+                        color: "#4ade80", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
+                    }}>Activée</span>
+                    <button style={ghostBtnStyle()} onClick={disable} disabled={busy}>Désactiver</button>
+                </div>
+            )}
+        </Card>
+    );
+}
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <div style={{
@@ -617,12 +733,13 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
     );
 }
 
-function Field({ label, value, onChange, type = "text", disabled = false }: {
+function Field({ label, value, onChange, type = "text", disabled = false, autoComplete }: {
     label: string;
     value: string;
     onChange?: (v: string) => void;
     type?: string;
     disabled?: boolean;
+    autoComplete?: string;
 }) {
     return (
         <div>
@@ -632,20 +749,29 @@ function Field({ label, value, onChange, type = "text", disabled = false }: {
                 value={value}
                 onChange={e => onChange?.(e.target.value)}
                 disabled={disabled}
+                autoComplete={autoComplete}
                 style={{
                     width: "100%",
                     background: "var(--bg-input)",
                     border: "1px solid var(--border)",
                     borderRadius: 8,
                     padding: "10px 14px",
-                    color: disabled ? "#6b7280" : "#ffffff",
+                    color: disabled ? "var(--text-muted)" : "var(--text-primary)",
                     fontSize: 14,
                     outline: "none",
                     boxSizing: "border-box",
-                    transition: "border-color 0.2s",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
                 }}
-                onFocus={e => { if (!disabled) e.currentTarget.style.borderColor = "rgba(255,255,255,0.30)"; }}
-                onBlur={e => { e.currentTarget.style.borderColor = "var(--border)"; }}
+                onFocus={e => {
+                    if (!disabled) {
+                        e.currentTarget.style.borderColor = "var(--border-focus)";
+                        e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.1)";
+                    }
+                }}
+                onBlur={e => {
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.boxShadow = "none";
+                }}
             />
         </div>
     );
@@ -712,7 +838,8 @@ function Toast({ message, type, onClose }: { message: string; type: ToastType; o
             display: "flex",
             alignItems: "center",
             gap: 12,
-            minWidth: 280,
+            minWidth: "min(280px, calc(100vw - 24px))",
+            maxWidth: "calc(100vw - 24px)",
             boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
             animation: "slideUp 300ms ease",
         }}>

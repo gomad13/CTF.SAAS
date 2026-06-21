@@ -1,4 +1,5 @@
 using CTF.Api.Models;
+using CTF.Api.Models.Legal;
 using CTF.Api.Models.Scenarios;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Team> Teams => Set<Team>();
+    public DbSet<TeamMembership> TeamMemberships => Set<TeamMembership>();
     public DbSet<LearningPath> Paths => Set<LearningPath>();
     public DbSet<Module> Modules => Set<Module>();
     public DbSet<Challenge> Challenges => Set<Challenge>();
@@ -31,14 +33,23 @@ public class AppDbContext : DbContext
     public DbSet<CampaignPath> CampaignPaths => Set<CampaignPath>();
     public DbSet<CampaignTarget> CampaignTargets => Set<CampaignTarget>();
     public DbSet<CampaignParticipation> CampaignParticipations => Set<CampaignParticipation>();
+    public DbSet<CampaignContent> CampaignContents => Set<CampaignContent>();
+    public DbSet<CampaignAssignment> CampaignAssignments => Set<CampaignAssignment>();
+    public DbSet<CampaignProgress> CampaignProgresses => Set<CampaignProgress>();
     public DbSet<TeamParcoursAssignment> TeamParcoursAssignments => Set<TeamParcoursAssignment>();
     public DbSet<TenantParcoursAccess> TenantParcoursAccesses => Set<TenantParcoursAccess>();
     public DbSet<TenantParcoursAssignment> TenantParcoursAssignments => Set<TenantParcoursAssignment>();
     public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
     public DbSet<FeedbackMessage> FeedbackMessages => Set<FeedbackMessage>();
     public DbSet<MailLog> MailLogs => Set<MailLog>();
+    public DbSet<TenantInvite> TenantInvites => Set<TenantInvite>();
+    public DbSet<TwoFactorCode> TwoFactorCodes => Set<TwoFactorCode>();
     public DbSet<RiskScoreHistory> RiskScoreHistories => Set<RiskScoreHistory>();
     public DbSet<CoachingFeedback> CoachingFeedbacks => Set<CoachingFeedback>();
+
+    // ── Documents légaux + consentements RGPD ───────────────────────────────
+    public DbSet<LegalDocument> LegalDocuments => Set<LegalDocument>();
+    public DbSet<UserConsent> UserConsents => Set<UserConsent>();
 
     // ── Pilier 1 — Scénarios narratifs ──────────────────────────────────────
     public DbSet<ScenarioTemplate> ScenarioTemplates => Set<ScenarioTemplate>();
@@ -60,6 +71,37 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Team>(b =>
         {
             b.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
+        });
+
+        modelBuilder.Entity<TenantInvite>(b =>
+        {
+            // Lookup au redeem : par empreinte du token (unique).
+            b.HasIndex(x => x.TokenHash).IsUnique();
+            // Listing admin : invitations d'un tenant.
+            b.HasIndex(x => new { x.TenantId, x.IsRevoked });
+            b.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.ExpiresAt).HasColumnType("timestamp with time zone");
+        });
+
+        modelBuilder.Entity<TwoFactorCode>(b =>
+        {
+            b.HasIndex(x => x.UserId);
+            b.HasIndex(x => x.PendingTokenHash);     // lookup au verify (cookie pending)
+            b.HasIndex(x => x.ExpiresAt);            // purge / filtrage des codes expirés
+            b.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.ExpiresAt).HasColumnType("timestamp with time zone");
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TeamMembership>(b =>
+        {
+            // Many-to-many : un user ↔ plusieurs équipes. Unicité (équipe, user).
+            b.HasIndex(x => new { x.TeamId, x.UserId }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.UserId });
+            b.HasIndex(x => new { x.TenantId, x.TeamId });
         });
 
         modelBuilder.Entity<TeamParcoursAssignment>(b =>
@@ -102,6 +144,15 @@ public class AppDbContext : DbContext
             b.HasIndex(x => new { x.IsCatalog, x.Sector });
         });
 
+        modelBuilder.Entity<Challenge>(b =>
+        {
+            // Consignes pédagogiques : longueurs bornées sur les champs courts,
+            // texte libre pour le corps. Tous nullable (cf. Challenge.cs).
+            b.Property(x => x.InstructionTitle).HasMaxLength(200);
+            b.Property(x => x.InstructionShortReminder).HasMaxLength(300);
+            b.Property(x => x.InstructionBody).HasColumnType("text");
+        });
+
         modelBuilder.Entity<MandatoryAssignment>(b =>
         {
             b.HasIndex(x => new { x.TenantId, x.PathId });
@@ -117,6 +168,12 @@ public class AppDbContext : DbContext
         {
             b.HasIndex(x => new { x.TenantId, x.Status });
             b.HasIndex(x => x.StartDate);
+            b.HasIndex(x => new { x.TenantId, x.IsArchived });
+            b.HasIndex(x => new { x.TenantId, x.StartDate }).IsDescending(false, true);
+            b.Property(x => x.StartDate).HasColumnType("timestamp with time zone");
+            b.Property(x => x.EndDate).HasColumnType("timestamp with time zone");
+            b.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
         });
 
         modelBuilder.Entity<CampaignPath>(b =>
@@ -133,6 +190,52 @@ public class AppDbContext : DbContext
         {
             b.HasKey(x => new { x.CampaignId, x.UserId });
             b.HasIndex(x => new { x.TenantId, x.CampaignId });
+        });
+
+        modelBuilder.Entity<CampaignContent>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.HasIndex(x => x.CampaignId);
+            b.HasIndex(x => new { x.TenantId, x.ContentType });
+
+            b.HasOne<Campaign>()
+                .WithMany()
+                .HasForeignKey(x => x.CampaignId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CampaignAssignment>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.HasIndex(x => new { x.CampaignId, x.UserId }).IsUnique();
+            b.HasIndex(x => new { x.UserId, x.TenantId });
+            b.Property(x => x.AssignedAt).HasColumnType("timestamp with time zone");
+
+            b.HasOne<Campaign>()
+                .WithMany()
+                .HasForeignKey(x => x.CampaignId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CampaignProgress>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.HasIndex(x => new { x.CampaignId, x.UserId });
+            b.HasIndex(x => new { x.UserId, x.Status });
+            b.HasIndex(x => new { x.CampaignId, x.CampaignContentId, x.UserId }).IsUnique();
+            b.Property(x => x.StartedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.CompletedAt).HasColumnType("timestamp with time zone");
+            b.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
+
+            b.HasOne<Campaign>()
+                .WithMany()
+                .HasForeignKey(x => x.CampaignId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Coaching post-incident — feedback IA généré (Ollama local) après échec.
@@ -177,6 +280,49 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Documents légaux + consentements RGPD ───────────────────────────
+        // LegalDocument : (Slug, Version) unique, plus un index pour récupérer
+        // rapidement la version active la plus récente pour un slug donné.
+        // UserConsent : index par (User, Slug, AcceptedAt) pour reconstituer
+        // l'historique d'un user, plus un index par LegalDocumentId pour les
+        // statistiques d'audit (combien d'acceptations sur la v1.0.0, etc.).
+        modelBuilder.Entity<LegalDocument>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Slug).IsRequired();
+            b.Property(x => x.Title).IsRequired();
+            b.Property(x => x.Version).IsRequired();
+            b.Property(x => x.ContentHtml).HasColumnType("text").IsRequired();
+            b.Property(x => x.ContentMarkdown).HasColumnType("text");
+            b.Property(x => x.ChangeLog).HasColumnType("text");
+            b.Property(x => x.PublishedAt).HasColumnType("timestamp with time zone");
+            b.HasIndex(x => new { x.Slug, x.Version }).IsUnique();
+            b.HasIndex(x => new { x.Slug, x.IsActive, x.PublishedAt });
+        });
+
+        modelBuilder.Entity<UserConsent>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.Property(x => x.DocumentSlug).IsRequired();
+            b.Property(x => x.DocumentVersion).IsRequired();
+            b.Property(x => x.Source).IsRequired();
+            b.Property(x => x.AcceptedAt).HasColumnType("timestamp with time zone");
+
+            b.HasIndex(x => new { x.UserId, x.DocumentSlug, x.AcceptedAt });
+            b.HasIndex(x => x.LegalDocumentId);
+            b.HasIndex(x => x.TenantId);
+
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne<LegalDocument>()
+                .WithMany()
+                .HasForeignKey(x => x.LegalDocumentId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ── Pilier 1 — Scénarios narratifs ──────────────────────────────────

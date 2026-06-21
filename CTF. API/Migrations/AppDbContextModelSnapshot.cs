@@ -176,6 +176,9 @@ namespace CTF.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("AssignedToWholeTenant")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -188,6 +191,9 @@ namespace CTF.Api.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -205,13 +211,81 @@ namespace CTF.Api.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StartDate");
 
+                    b.HasIndex("TenantId", "IsArchived");
+
+                    b.HasIndex("TenantId", "StartDate")
+                        .IsDescending(false, true);
+
                     b.HasIndex("TenantId", "Status");
 
                     b.ToTable("Campaigns");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.CampaignAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId", "UserId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "TenantId");
+
+                    b.ToTable("CampaignAssignments");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.CampaignContent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ContentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("TenantId", "ContentType");
+
+                    b.ToTable("CampaignContents");
                 });
 
             modelBuilder.Entity("CTF.Api.Models.CampaignParticipation", b =>
@@ -252,6 +326,56 @@ namespace CTF.Api.Migrations
                     b.HasKey("CampaignId", "PathId");
 
                     b.ToTable("CampaignPaths");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.CampaignProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CampaignContentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("CompletionPercentage")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool?>("IsSuccess")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId", "UserId");
+
+                    b.HasIndex("UserId", "Status");
+
+                    b.HasIndex("CampaignId", "CampaignContentId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("CampaignProgresses");
                 });
 
             modelBuilder.Entity("CTF.Api.Models.CampaignTarget", b =>
@@ -305,6 +429,17 @@ namespace CTF.Api.Migrations
                     b.Property<int?>("Difficulty")
                         .HasColumnType("integer");
 
+                    b.Property<string>("InstructionBody")
+                        .HasColumnType("text");
+
+                    b.Property<string>("InstructionShortReminder")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("InstructionTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("Instructions")
                         .IsRequired()
                         .HasColumnType("text");
@@ -336,6 +471,9 @@ namespace CTF.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("VariantsJson")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Challenges");
@@ -356,6 +494,9 @@ namespace CTF.Api.Migrations
 
                     b.Property<DateTime>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDemo")
                         .HasColumnType("boolean");
@@ -551,6 +692,104 @@ namespace CTF.Api.Migrations
                     b.HasIndex("IsCatalog", "Sector");
 
                     b.ToTable("Paths");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.Legal.LegalDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChangeLog")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ContentHtml")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ContentMarkdown")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug", "Version")
+                        .IsUnique();
+
+                    b.HasIndex("Slug", "IsActive", "PublishedAt");
+
+                    b.ToTable("LegalDocuments");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.Legal.UserConsent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Accepted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DocumentSlug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DocumentVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("LegalDocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LegalDocumentId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("UserId", "DocumentSlug", "AcceptedAt");
+
+                    b.ToTable("UserConsents");
                 });
 
             modelBuilder.Entity("CTF.Api.Models.MailLog", b =>
@@ -1182,8 +1421,14 @@ namespace CTF.Api.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("character varying(60)");
 
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("ManagerId")
                         .HasColumnType("uuid");
+
+                    b.Property<int?>("MaxMembers")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1202,6 +1447,36 @@ namespace CTF.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.TeamMembership", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId", "UserId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "TeamId");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("TeamMemberships");
                 });
 
             modelBuilder.Entity("CTF.Api.Models.TeamParcoursAssignment", b =>
@@ -1274,6 +1549,15 @@ namespace CTF.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("DefaultTeamsOpen")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("GoogleSsoEnabled")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -1292,8 +1576,14 @@ namespace CTF.Api.Migrations
                     b.Property<bool>("IsTeamsEnabled")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("MicrosoftSsoEnabled")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sector")
                         .HasColumnType("text");
 
                     b.Property<string>("SsoProvider")
@@ -1342,6 +1632,48 @@ namespace CTF.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("TenantEmailDomains");
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.TenantInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxUses")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("UsedCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "IsRevoked");
+
+                    b.ToTable("TenantInvites");
                 });
 
             modelBuilder.Entity("CTF.Api.Models.TenantLicense", b =>
@@ -1455,6 +1787,50 @@ namespace CTF.Api.Migrations
                     b.ToTable("TenantParcoursAssignments");
                 });
 
+            modelBuilder.Entity("CTF.Api.Models.TwoFactorCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PendingTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("PendingTokenHash");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TwoFactorCodes");
+                });
+
             modelBuilder.Entity("CTF.Api.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1516,6 +1892,9 @@ namespace CTF.Api.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1532,6 +1911,39 @@ namespace CTF.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("CTF.Api.Models.CampaignAssignment", b =>
+                {
+                    b.HasOne("CTF.Api.Models.Campaign", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CTF.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.CampaignContent", b =>
+                {
+                    b.HasOne("CTF.Api.Models.Campaign", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.CampaignProgress", b =>
+                {
+                    b.HasOne("CTF.Api.Models.Campaign", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CTF.Api.Models.ChallengeCompletion", b =>
                 {
                     b.HasOne("CTF.Api.Models.User", "User")
@@ -1545,6 +1957,21 @@ namespace CTF.Api.Migrations
 
             modelBuilder.Entity("CTF.Api.Models.CoachingFeedback", b =>
                 {
+                    b.HasOne("CTF.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.Legal.UserConsent", b =>
+                {
+                    b.HasOne("CTF.Api.Models.Legal.LegalDocument", null)
+                        .WithMany()
+                        .HasForeignKey("LegalDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CTF.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -1616,6 +2043,15 @@ namespace CTF.Api.Migrations
                     b.HasOne("CTF.Api.Models.Scenarios.ScenarioInstance", null)
                         .WithMany()
                         .HasForeignKey("InstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CTF.Api.Models.TwoFactorCode", b =>
+                {
+                    b.HasOne("CTF.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
