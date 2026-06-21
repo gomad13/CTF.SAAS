@@ -47,4 +47,11 @@ public class User
     /// jamais envoyée — seul le From rendu utilise prénom + nom de l'employé.
     /// </summary>
     public bool ConsentsToBeFictionalSender { get; set; } = false;
+
+    /// <summary>
+    /// M3 — Double authentification par email activée pour ce compte (optionnelle, par utilisateur).
+    /// Si true, le login email+mot de passe exige la saisie d'un code reçu par email avant de délivrer
+    /// la session. Le login SSO délègue le MFA au provider.
+    /// </summary>
+    public bool TwoFactorEnabled { get; set; } = false;
 }

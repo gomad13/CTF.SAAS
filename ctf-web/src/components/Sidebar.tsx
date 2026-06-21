@@ -11,7 +11,7 @@ import {
     LayoutDashboard, BookOpen, Trophy, Settings,
     Users, ShieldAlert, LogOut, Shield,
     BarChart3, CheckCircle2, Target, BookUser,
-    Mail, Theater,
+    Mail, Theater, QrCode,
 } from "lucide-react";
 
 function Item({ href, icon, label, badge, exact = false, danger = false }: {
@@ -88,7 +88,7 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                         <Shield size={16} color="white" strokeWidth={2} />
                     </div>
                     <div>
-                        <div style={{ fontSize: "15px", fontWeight: "800", color: "#FFFFFF", lineHeight: "1.1", letterSpacing: "-0.02em" }}>Viper</div>
+                        <div style={{ fontSize: "15px", fontWeight: "800", color: "#FFFFFF", lineHeight: "1.1", letterSpacing: "-0.02em" }}>Sentys</div>
                         <div style={{ fontSize: "10px", color: "#94A3B8", lineHeight: "1.2" }}>CTF Platform</div>
                     </div>
                     {onClose && <button onClick={onClose} className="md:hidden" style={{ marginLeft: "auto", background: "none", border: "none", color: "#94A3B8", cursor: "pointer", padding: 4 }}>✕</button>}
@@ -102,6 +102,8 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                             <Item href="/admin/dashboard" icon={<Users size={15} strokeWidth={1.75} />} label="Administration" />
                             <Item href="/admin/catalog" icon={<BookOpen size={15} strokeWidth={1.75} />} label="Catalogue" />
                             <Item href="/admin/directory" icon={<BookUser size={15} strokeWidth={1.75} />} label="Annuaire" />
+                            <Item href="/admin/entreprise" icon={<Settings size={15} strokeWidth={1.75} />} label="Paramètres entreprise" />
+                            <Item href="/admin/invites" icon={<QrCode size={15} strokeWidth={1.75} />} label="Invitations" />
                             <Item href="/admin/scenarios" icon={<Theater size={15} strokeWidth={1.75} />} label="Scénarios" />
                             {modes?.analytics && <Item href="/admin/analytics" icon={<BarChart3 size={15} strokeWidth={1.75} />} label="Analytics" />}
                             {modes?.compliance && <Item href="/admin/compliance" icon={<CheckCircle2 size={15} strokeWidth={1.75} />} label="Compliance" />}
@@ -114,6 +116,7 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                     <div style={{ fontSize: "10px", fontWeight: "700", color: "#CBD5E1", textTransform: "uppercase", letterSpacing: "0.10em", padding: "14px 12px 5px" }}>Menu</div>
                     <Item href="/dashboard" icon={<LayoutDashboard size={15} strokeWidth={1.75} />} label="Accueil" exact />
                     <Item href="/dashboard/parcours" icon={<BookOpen size={15} strokeWidth={1.75} />} label="Mes parcours" />
+                    {modes?.teams && <Item href="/dashboard/equipes" icon={<Users size={15} strokeWidth={1.75} />} label="Mes équipes" />}
                     <Item href="/inbox" icon={<Mail size={15} strokeWidth={1.75} />} label="Inbox" />
                     {competitionEnabled && (
                         <Item href="/dashboard/competition" icon={<Trophy size={15} strokeWidth={1.75} />} label="Compétition" />

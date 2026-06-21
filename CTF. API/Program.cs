@@ -184,6 +184,14 @@ builder.Services.AddHttpClient<CTF.Api.Services.LLM.IOllamaLLMProvider, CTF.Api.
 });
 builder.Services.AddScoped<CTF.Api.Services.Coaching.ICoachingService, CTF.Api.Services.Coaching.CoachingService>();
 
+// ✅ Documents légaux + consentements RGPD (article 7).
+//   LegalDocumentService : cache mémoire 5 min des documents actifs (cache global).
+//   ConsentService       : validation + insertion + status (pas de cache propre).
+//   LegalDocumentSeeder  : créé au démarrage si la table est vide.
+builder.Services.AddScoped<CTF.Api.Services.Legal.ILegalDocumentService, CTF.Api.Services.Legal.LegalDocumentService>();
+builder.Services.AddScoped<CTF.Api.Services.Legal.IConsentService, CTF.Api.Services.Legal.ConsentService>();
+builder.Services.AddScoped<CTF.Api.Services.Legal.ILegalDocumentSeeder, CTF.Api.Services.Legal.LegalDocumentSeeder>();
+
 // ✅ Pilier 1 — Scénarios narratifs (Inbox interne, 0 € email).
 //   Renderer en singleton (pur, ré-entrant) pour éviter une allocation par request.
 //   Seeder + Engine en scoped : ils touchent le DbContext.
@@ -224,12 +232,15 @@ if (!isTestingEnv)
     var brevoKey = builder.Configuration["Mail:BrevoApiKey"];
     if (string.Equals(mailProvider, "Brevo", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(brevoKey))
     {
-        // TODO Phase 3 finale : implémenter BrevoMailService et l'enregistrer ici.
-        // Pour l'instant, fallback log-only même si la clé est présente — évite de spammer en bêta.
-        builder.Services.AddScoped<CTF.Api.Services.IMailService, CTF.Api.Services.LogOnlyMailService>();
+        // V3 : envoi réel via l'API HTTP Brevo (clé jamais loguée). HttpClient typé.
+        builder.Services.AddHttpClient<CTF.Api.Services.IMailService, CTF.Api.Services.BrevoMailService>(c =>
+        {
+            c.Timeout = TimeSpan.FromSeconds(15);
+        });
     }
     else
     {
+        // Pas de clé / provider non "Brevo" → mode log seulement (aucun email réel).
         builder.Services.AddScoped<CTF.Api.Services.IMailService, CTF.Api.Services.LogOnlyMailService>();
     }
 }
@@ -248,11 +259,20 @@ if (app.Environment.IsDevelopment())
     await CTF.Api.Data.DemoSeed.SeedAsync(db);
     await CTF.Api.Data.MedicalDemoSeed.SeedAsync(db);
     await CTF.Api.Data.CompanySeed.SeedAsync(db);
+    await CTF.Api.Data.CyberSanteDemoSeeder.SeedAsync(db);
     await CTF.Api.Data.Seeds.Catalog.CatalogSeed.SeedAsync(db);
+
+    // Consignes pédagogiques : peuple les 3 champs Instruction* des challenges
+    // existants qui n'en ont pas. Idempotent, rejouable, n'écrase pas les éditions.
+    await CTF.Api.Services.Challenges.ChallengeInstructionsSeeder.SeedAsync(db);
 
     // Pilier 1 — Catalogue scénarios narratifs (Resources/Scenarios/*.json)
     var scenarioSeeder = scope.ServiceProvider.GetRequiredService<CTF.Api.Services.Scenarios.IScenarioCatalogSeeder>();
     await scenarioSeeder.SeedAsync(CancellationToken.None);
+
+    // Documents légaux : seedés à chaque démarrage si table vide (Resources/Legal/*.html)
+    var legalSeeder = scope.ServiceProvider.GetRequiredService<CTF.Api.Services.Legal.ILegalDocumentSeeder>();
+    await legalSeeder.SeedAsync(CancellationToken.None);
 }
 
 // ✅ Swagger DEV only
@@ -300,6 +320,11 @@ app.UseMiddleware<TenantMiddleware>();
 app.UseMiddleware<CTF.Api.Middleware.SuperAdminGuardMiddleware>();
 app.UseAuthorization();
 
+// ✅ Consentement à jour — bloque (409) toute requête métier d'un user dont
+//    les documents requis ont été mis à jour depuis sa dernière acceptation.
+//    Doit s'exécuter APRÈS Authentication (sinon ctx.User n'est pas peuplé).
+app.UseMiddleware<CTF.Api.Middleware.RequireUpToDateConsentMiddleware>();
+
 // ✅ CSRF — vérifie X-Requested-With sur les requêtes mutantes (SPA protection)
 app.Use(async (context, next) =>
 {
@@ -334,7 +359,7 @@ if (!app.Environment.IsEnvironment("Testing"))
     app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
         Authorization = new[] { new SuperAdminDashboardAuthorizationFilter() },
-        DashboardTitle = "Viper — Hangfire (SuperAdmin)",
+        DashboardTitle = "Sentys — Hangfire (SuperAdmin)",
     });
 }
 
