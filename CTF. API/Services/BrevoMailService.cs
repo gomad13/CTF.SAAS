@@ -57,6 +57,11 @@ public class BrevoMailService : IMailService
             "Nous avons bien reçu votre message",
             Layout("Merci pour votre retour. Notre équipe l'a bien reçu et reviendra vers vous si nécessaire."), ct);
 
+    public Task SendTwoFactorCodeAsync(string toEmail, string code, CancellationToken ct = default)
+        => SendAsync(toEmail, "two-factor-code",
+            "Votre code de vérification Sentys",
+            TwoFactorCodeTemplate(code), ct);
+
     private async Task SendAsync(string toEmail, string type, string subject, string htmlBody, CancellationToken ct)
     {
         var status = "sent";
@@ -124,6 +129,12 @@ public class BrevoMailService : IMailService
             "Vous avez demandé la réinitialisation de votre mot de passe.<br/><br/>" +
             $@"<a href=""{resetLink}"" style=""display:inline-block;background:#3B82F6;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600"">Réinitialiser mon mot de passe</a>" +
             "<br/><br/>Ce lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.");
+
+    private static string TwoFactorCodeTemplate(string code) =>
+        Layout(
+            "Voici votre code de vérification en deux étapes :" +
+            $@"<div style=""background:#F1F5F9;padding:16px;border-radius:8px;font-size:22px;font-weight:700;letter-spacing:0.15em;text-align:center;color:#1E293B;margin:16px 0"">{code}</div>" +
+            "Ce code expire dans 10 minutes et ne sert qu'une fois. Ne le partagez jamais — l'équipe Sentys ne vous le demandera jamais.");
 
     private static string InvitationTemplate(string firstName, string tempPassword, string organizationName) =>
         Layout(

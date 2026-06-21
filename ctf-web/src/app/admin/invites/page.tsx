@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import {
-    QrCode, Plus, Trash2, Copy, Check, Clock, Users, AlertCircle, X,
+    QrCode, Plus, Trash2, Copy, Check, Clock, Users, AlertCircle, X, Download,
 } from "lucide-react";
 import { useInvites, useCreateInvite, useRevokeInvite } from "@/lib/hooks/useInvites";
 import type { InviteDto, CreatedInviteDto } from "@/lib/types/invites";
@@ -39,6 +39,7 @@ export default function InvitesPage() {
     const [maxUses, setMaxUses] = useState("5");
     const [created, setCreated] = useState<CreatedInviteDto | null>(null);
     const [copied, setCopied] = useState(false);
+    const qrRef = useRef<HTMLDivElement>(null);
 
     async function handleCreate() {
         const uses = Number(maxUses);
@@ -56,6 +57,31 @@ export default function InvitesPage() {
         } catch {
             /* clipboard indisponible — l'URL reste affichée et sélectionnable */
         }
+    }
+
+    // Sérialise le SVG du QR, le dessine sur un canvas HD et télécharge un PNG.
+    function downloadQrPng() {
+        const svg = qrRef.current?.querySelector("svg");
+        if (!svg) return;
+        const size = 512;
+        const xml = new XMLSerializer().serializeToString(svg);
+        const svgUrl = "data:image/svg+xml;base64," + window.btoa(unescape(encodeURIComponent(xml)));
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, size, size);
+            ctx.drawImage(img, 0, 0, size, size);
+            const a = document.createElement("a");
+            a.href = canvas.toDataURL("image/png");
+            a.download = "invitation-sentys-qr.png";
+            a.click();
+        };
+        img.src = svgUrl;
     }
 
     return (
@@ -110,9 +136,15 @@ export default function InvitesPage() {
                 {created && (
                     <div className="mt-6 grid grid-cols-1 gap-6 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-6 sm:grid-cols-[auto_1fr]">
                         <div className="flex flex-col items-center gap-2">
-                            <div className="rounded-lg bg-white p-3 shadow-sm">
+                            <div ref={qrRef} className="rounded-lg bg-white p-3 shadow-sm">
                                 <QRCode value={created.joinUrl} size={160} />
                             </div>
+                            <button
+                                type="button" onClick={downloadQrPng}
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary transition-colors duration-200 hover:text-primary-hover"
+                            >
+                                <Download size={13} /> Télécharger le QR
+                            </button>
                             <span className="text-xs text-[#64748B]">Scannez pour rejoindre</span>
                         </div>
                         <div className="flex flex-col gap-3">
