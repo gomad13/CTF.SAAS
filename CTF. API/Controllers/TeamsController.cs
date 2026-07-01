@@ -1,6 +1,7 @@
 ﻿using CTF.Api.Data;
 using CTF.Api.Models;
 using CTF.Api.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace CTF.Api.Controllers;
 
 [ApiController]
 [Route("api/teams")]
+[Authorize]
 public class TeamsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -36,6 +38,7 @@ public class TeamsController : ControllerBase
     public sealed record CreateTeamRequest(string Name);
 
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateTeamRequest req)
     {
         var tenantId = _tenant.TenantId!.Value;

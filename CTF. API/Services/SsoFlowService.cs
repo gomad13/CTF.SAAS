@@ -89,6 +89,22 @@ public class SsoFlowService
             if (!user.IsActive)
                 return new RedirectResult($"{FrontendUrl()}/login?error=account_disabled");
 
+            // [PENTEST] pas de liaison auto SSO sur compte mot-de-passe preexistant
+            // Si le compte existant possede un mot de passe (cree par mot de passe) et n'a PAS
+            // encore le subjectId de CE provider, on refuse la liaison silencieuse (anti account-takeover).
+            // - Deja lie (subjectId du provider present)  -> on continue (login normal).
+            // - Compte cree via SSO (PasswordHash vide/null) -> on continue (login normal).
+            var hasPassword = !string.IsNullOrEmpty(user.PasswordHash);
+            var alreadyLinkedToThisProvider =
+                (providerKey == "google" && !string.IsNullOrEmpty(user.GoogleSubjectId))
+                || (providerKey == "microsoft" && !string.IsNullOrEmpty(user.MicrosoftSubjectId));
+            if (hasPassword && !alreadyLinkedToThisProvider)
+            {
+                _logger.LogWarning("[SSO] Liaison auto refusee: compte mot-de-passe preexistant {Email} provider={Provider}",
+                    MaskEmail(email), provider);
+                return new RedirectResult($"{FrontendUrl()}/login?error=account_exists_use_password");
+            }
+
             user.LastLoginAt = DateTime.UtcNow;
             user.LastActivityAt = DateTime.UtcNow;
             if (string.IsNullOrEmpty(user.FirstName) && !string.IsNullOrEmpty(firstName)) user.FirstName = firstName;

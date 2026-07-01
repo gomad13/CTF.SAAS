@@ -48,7 +48,7 @@ export default function DashboardHome() {
     const riskHistoryQ = useRiskScoreHistory(6);
 
     return (
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 40px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px var(--page-x)" }}>
             <DemoFallbackBanner tenantName={me?.tenantName} />
             {/* Section 1 — Bienvenue */}
             <div style={{ marginBottom: 32 }}>
@@ -392,7 +392,7 @@ function FirstStepsBanner({ assignments }: { assignments?: AssignmentMine[] }) {
     const [dismissed, setDismissed] = useState(false);
     useEffect(() => {
         try {
-            setDismissed(localStorage.getItem("viper.firstSteps.dismissed") === "1");
+            setDismissed(localStorage.getItem("sentys.firstSteps.dismissed") === "1");
         } catch { /* noop */ }
     }, []);
 
@@ -405,7 +405,7 @@ function FirstStepsBanner({ assignments }: { assignments?: AssignmentMine[] }) {
 
     const first = assignments[0];
     const close = () => {
-        try { localStorage.setItem("viper.firstSteps.dismissed", "1"); } catch { /* noop */ }
+        try { localStorage.setItem("sentys.firstSteps.dismissed", "1"); } catch { /* noop */ }
         setDismissed(true);
     };
 
@@ -512,9 +512,9 @@ function DemoFallbackBanner({ tenantName }: { tenantName?: string | null }) {
         }}>
             <span style={{ fontSize: 22 }}>✨</span>
             <div style={{ flex: 1, fontSize: 13, color: "#E2E8F0", lineHeight: 1.5 }}>
-                <strong style={{ color: "#60A5FA" }}>Bienvenue sur Viper en mode Démo.</strong>
+                <strong style={{ color: "#60A5FA" }}>Bienvenue sur Sentys en mode Démo.</strong>
                 {" "}Votre organisation {tenantName ? `(${tenantName})` : ""} n'est pas encore cliente —{" "}
-                <a href="mailto:commercial@viper.local?subject=Accès%20Viper%20entreprise"
+                <a href="mailto:commercial@sentys.local?subject=Accès%20Sentys%20entreprise"
                     style={{ color: "#60A5FA", textDecoration: "underline" }}>
                     contacter notre équipe commerciale
                 </a>

@@ -47,6 +47,9 @@ public class AppDbContext : DbContext
     public DbSet<RiskScoreHistory> RiskScoreHistories => Set<RiskScoreHistory>();
     public DbSet<CoachingFeedback> CoachingFeedbacks => Set<CoachingFeedback>();
 
+    // ── [MULTI-SOCIETES] Appartenance user ↔ société ────────────────────────
+    public DbSet<UserTenant> UserTenants => Set<UserTenant>();
+
     // ── Documents légaux + consentements RGPD ───────────────────────────────
     public DbSet<LegalDocument> LegalDocuments => Set<LegalDocument>();
     public DbSet<UserConsent> UserConsents => Set<UserConsent>();
@@ -68,6 +71,14 @@ public class AppDbContext : DbContext
             b.HasIndex(x => x.Domain).IsUnique();
         });
 
+        // [MULTI-SOCIETES] Appartenance unique (UserId, TenantId) + lookup par user.
+        modelBuilder.Entity<UserTenant>(b =>
+        {
+            b.HasIndex(x => new { x.UserId, x.TenantId }).IsUnique();
+            b.HasIndex(x => x.UserId);
+            b.Property(x => x.JoinedAt).HasColumnType("timestamp with time zone");
+        });
+
         modelBuilder.Entity<Team>(b =>
         {
             b.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
@@ -79,6 +90,9 @@ public class AppDbContext : DbContext
             b.HasIndex(x => x.TokenHash).IsUnique();
             // Listing admin : invitations d'un tenant.
             b.HasIndex(x => new { x.TenantId, x.IsRevoked });
+            // Type d invitation (app / enterprise_signup / enterprise_join) ; défaut pour
+            // les lignes existantes lors de la migration.
+            b.Property(x => x.InviteType).HasMaxLength(32).HasDefaultValue("enterprise_join");
             b.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
             b.Property(x => x.ExpiresAt).HasColumnType("timestamp with time zone");
         });

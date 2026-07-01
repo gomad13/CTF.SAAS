@@ -194,7 +194,7 @@ public sealed class ScenarioEngine : IScenarioEngine
         }
 
         var character = vsf.Characters.FirstOrDefault(c => c.Id == vsfStep.FromCharacterId)
-            ?? new VsfCharacter("system", "System", "system@viper.local");
+            ?? new VsfCharacter("system", "System", "system@sentys.local");
         var target = await _db.Users.AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == instance.TargetUserId, ct)
             ?? throw new InvalidOperationException("Target user vanished mid-scenario.");
@@ -452,7 +452,7 @@ public sealed class ScenarioEngine : IScenarioEngine
         await InsertSystemEmailAsync(
             instance,
             "Exercice de sensibilisation interrompu",
-            "<p>Bonjour,</p><p>L'exercice de sensibilisation phishing dont tu étais la cible a été <strong>interrompu par ton administrateur</strong>.</p><p>Aucune action n'est attendue de ta part. Tu peux ignorer les éventuels emails reçus dans le cadre de cet exercice.</p><p>L'équipe Viper</p>",
+            "<p>Bonjour,</p><p>L'exercice de sensibilisation phishing dont tu étais la cible a été <strong>interrompu par ton administrateur</strong>.</p><p>Aucune action n'est attendue de ta part. Tu peux ignorer les éventuels emails reçus dans le cadre de cet exercice.</p><p>L'équipe Sentys</p>",
             ct);
 
         await _db.SaveChangesAsync(ct);
@@ -528,8 +528,8 @@ public sealed class ScenarioEngine : IScenarioEngine
             // Email récap final pour la cible (intégration coaching P4 :
             // si trigger_coaching, on dépose un lien vers la landing).
             var recapBody = outcome.TriggerCoaching
-                ? $"<p>Bonjour,</p><p>Tu viens de tomber dans une simulation de phishing — pas grave, c'est exactement à ça que sert l'entraînement. Un coaching personnalisé t'attend ici : <a href=\"/scenarios/landing/{instance.Id}\">Voir mon coaching</a>.</p><p>Score CRI : {outcome.CriImpact:+#;-#;0}.</p><p>L'équipe Viper</p>"
-                : $"<p>Bonjour,</p><p>Excellente vigilance ! Tu as identifié une simulation de phishing. Score CRI : {outcome.CriImpact:+#;-#;0}.</p><p>L'équipe Viper</p>";
+                ? $"<p>Bonjour,</p><p>Tu viens de tomber dans une simulation de phishing — pas grave, c'est exactement à ça que sert l'entraînement. Un coaching personnalisé t'attend ici : <a href=\"/scenarios/landing/{instance.Id}\">Voir mon coaching</a>.</p><p>Score CRI : {outcome.CriImpact:+#;-#;0}.</p><p>L'équipe Sentys</p>"
+                : $"<p>Bonjour,</p><p>Excellente vigilance ! Tu as identifié une simulation de phishing. Score CRI : {outcome.CriImpact:+#;-#;0}.</p><p>L'équipe Sentys</p>";
 
             await InsertSystemEmailAsync(instance,
                 outcome.TriggerCoaching ? "Exercice terminé — un coaching personnalisé t'attend" : "Exercice terminé — bien joué",
@@ -549,8 +549,8 @@ public sealed class ScenarioEngine : IScenarioEngine
             InstanceStepId = null,
             TenantId = instance.TenantId,
             RecipientUserId = instance.TargetUserId,
-            FromName = "Viper",
-            FromEmail = "noreply@viper.local",
+            FromName = "Sentys",
+            FromEmail = "noreply@sentys.local",
             Subject = subject,
             BodyHtml = bodyHtml,
             TrackingToken = token,

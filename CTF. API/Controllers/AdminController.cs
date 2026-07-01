@@ -68,6 +68,11 @@ public class AdminController : ControllerBase
             return BadRequest(new { error = "Format invalide. Seuls les fichiers .csv sont acceptés" });
         if (file.Length > 10 * 1024 * 1024) return BadRequest(new { error = "Fichier trop volumineux (max 10MB)" });
 
+        // [PENTEST] validation MIME
+        var allowedMimeTypes = new[] { "text/csv", "application/csv", "application/vnd.ms-excel", "text/plain", "application/octet-stream" };
+        if (!allowedMimeTypes.Contains(file.ContentType?.ToLowerInvariant()))
+            return BadRequest(new { error = "type de fichier non autorise" });
+
         var tenantId = GetEffectiveTenantId();
 
         // Vérifier la limite de licence
@@ -93,7 +98,9 @@ public class AdminController : ControllerBase
             createdEmails = result.CreatedEmails,
             updatedEmails = result.UpdatedEmails,
             summary = $"{result.Created} créés, {result.Updated} mis à jour, {result.Skipped} ignorés, {result.Errors} erreurs",
-            defaultPassword = result.Created > 0 ? "Bienvenue@2026!" : null,
+            // [PENTEST] mot de passe aleatoire unique par utilisateur importe :
+            // identifiants temporaires des comptes créés (format "email:password").
+            credentials = result.Credentials,
         });
     }
 
@@ -114,6 +121,11 @@ public class AdminController : ControllerBase
         if (ext != ".xlsx" && ext != ".xls")
             return BadRequest(new { error = "Format invalide. Seuls les fichiers .xlsx sont acceptés." });
 
+        // [PENTEST] validation MIME
+        var allowedMimeTypes = new[] { "text/csv", "application/csv", "application/vnd.ms-excel", "text/plain", "application/octet-stream", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
+        if (!allowedMimeTypes.Contains(file.ContentType?.ToLowerInvariant()))
+            return BadRequest(new { error = "type de fichier non autorise" });
+
         var tenantId = GetEffectiveTenantId();
         using var stream = file.OpenReadStream();
         var result = await csv.ImportFromExcelAsync(stream, tenantId, updateExisting);
@@ -127,7 +139,9 @@ public class AdminController : ControllerBase
             errors = result.Errors,
             errorMessages = result.ErrorMessages,
             summary = $"{result.Created} créés, {result.Updated} mis à jour, {result.Skipped} ignorés, {result.Errors} erreurs",
-            defaultPassword = result.Created > 0 ? "Bienvenue@2026!" : null,
+            // [PENTEST] mot de passe aleatoire unique par utilisateur importe :
+            // identifiants temporaires des comptes créés (format "email:password").
+            credentials = result.Credentials,
         });
     }
 

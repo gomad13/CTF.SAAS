@@ -27,7 +27,7 @@ export default function AdminScenariosPage() {
     const runningCount = instances?.filter(i => i.status === "running" || i.status === "scheduled").length ?? 0;
 
     return (
-        <div style={{ padding: "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: "var(--page-x)", background: "#F8FAFC", minHeight: "100%" }}>
             {/* Header */}
             <div style={{ marginBottom: 24, display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div>
@@ -65,7 +65,7 @@ export default function AdminScenariosPage() {
 
             <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
                 gap: 16,
             }}>
                 {catalog?.map(item => <CatalogCard key={item.id} item={item} />)}

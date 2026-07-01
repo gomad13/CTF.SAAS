@@ -29,7 +29,7 @@ export default function InstancesPage() {
     }
 
     return (
-        <div style={{ padding: "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: "var(--page-x)", background: "#F8FAFC", minHeight: "100%" }}>
             <Link href="/admin/scenarios" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 12 }}>
                 <ArrowLeft size={14} /> Retour catalogue
             </Link>
@@ -40,8 +40,8 @@ export default function InstancesPage() {
                 </div>
             </div>
 
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, overflow: "hidden" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div className="resp-scroll-x" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
                     <thead>
                         <tr style={{ background: "#F1F5F9", textTransform: "uppercase", fontSize: 11, color: "#64748B", letterSpacing: "0.05em" }}>
                             <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Scénario</th>
@@ -63,7 +63,7 @@ export default function InstancesPage() {
             {stoppingId && (
                 <div style={{
                     position: "fixed", inset: 0, zIndex: 50,
-                    background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
                 }} onClick={() => setStoppingId(null)}>
                     <div style={{
                         background: "#FFFFFF", borderRadius: 12, padding: 24, maxWidth: 480, width: "100%",

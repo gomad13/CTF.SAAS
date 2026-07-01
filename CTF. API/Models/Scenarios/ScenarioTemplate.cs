@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace CTF.Api.Models.Scenarios;
 
 /// <summary>
-/// Définition canonique d'un scénario narratif (VSF — Viper Scenario Format).
+/// Définition canonique d'un scénario narratif (VSF — Sentys Scenario Format).
 /// Une ligne = une version d'un scénario. Le contenu source (timeline, hints,
 /// outcomes, characters) est stocké en JSONB pour rester fidèle au fichier
 /// JSON livré et permettre d'évoluer le format sans migration cassante.

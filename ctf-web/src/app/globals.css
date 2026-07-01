@@ -1,26 +1,328 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --canvas:#F8FAFC; --card:#FFFFFF;
+  --sid-bg:#0F172A; --sid-text:#94A3B8; --sid-hover:#1E293B;
+  --sid-act:rgba(59,130,246,0.15); --sid-ab:#3B82F6;
+
+  --pr:#3B82F6; --pr-h:#2563EB; --pr-d:#2563EB; --pr-bg:rgba(59,130,246,0.10);
+  --ok:#10B981; --ok-bg:rgba(16,185,129,0.10); --ok-t:#065F46;
+  --er:#EF4444; --er-bg:rgba(239,68,68,0.10); --er-t:#991B1B;
+  --wa:#F59E0B; --wa-bg:rgba(245,158,11,0.10); --wa-t:#92400E;
+
+  --border:#E2E8F0; --h1:#1E293B; --sub:#64748B; --muted:#5B6573;
+
+  /* Contraste fond/texte — règle universelle (WCAG AA) */
+  --text-on-light:#0F172A;          /* texte principal sur fond clair */
+  --text-on-light-muted:#475569;    /* texte secondaire sur fond clair */
+  --text-on-light-faint:#64748B;    /* texte tertiaire sur fond clair */
+  --text-on-dark:#FFFFFF;           /* texte principal sur fond sombre */
+  --text-on-dark-muted:#CBD5E1;     /* texte secondaire sur fond sombre */
+  --text-on-dark-faint:#94A3B8;     /* texte tertiaire sur fond sombre */
+
+  /* === Tokens responsifs (mobile-first) ===
+     --page-x : marge horizontale de page, ajustée par media queries plus bas. */
+  --page-x:16px;            /* mobile par défaut */
+  --card-pad:16px;          /* padding interne carte mobile */
+  --tap-target-min:44px;    /* cible tactile minimale */
+  --fs-h1:24px;             /* titre principal, élargi en tablette/desktop */
+
+  --sh-card:0 4px 6px -1px rgba(0,0,0,0.10),0 2px 4px -2px rgba(0,0,0,0.10);
+  --sh-sm:0 1px 3px rgba(0,0,0,0.08);
+  --sh-lg:0 10px 25px rgba(0,0,0,0.15);
+  --r-sm:6px; --r-md:10px; --r-lg:12px; --r-xl:16px; --r-pill:9999px;
+
+  /* Compat aliases */
+  --bg-base:var(--canvas); --bg-surface:var(--card); --bg-card:var(--card);
+  --bg-card-hover:#F8FAFC; --bg-elevated:#E2E8F0; --bg-input:#FFFFFF; --bg-muted:#F1F5F9;
+  --text-primary:var(--h1); --text-secondary:var(--sub); --text-muted:var(--sub); --text-dim:var(--muted);
+  --primary:var(--pr); --primary-dark:var(--pr-h); --primary-light:#60A5FA; --primary-soft:#60A5FA;
+  --primary-bg:var(--pr-bg); --primary-border:rgba(59,130,246,0.25);
+  --border-hover:#CBD5E1; --border-focus:var(--pr);
+  --success:var(--ok); --error:var(--er); --warning:var(--wa);
+  --bg-page:var(--canvas); --bg-0:var(--canvas); --bg-1:var(--card); --bg-2:var(--card);
+  --tx-1:var(--h1); --tx-2:var(--sub); --tx-3:var(--sub); --tx-4:var(--muted);
+  --b1:var(--border); --b2:#CBD5E1; --b3:var(--muted); --bf:var(--pr);
+  --c-primary:var(--pr); --c-primary-h:var(--pr-h); --c-primary-l:#60A5FA;
+  --c-primary-bg:var(--pr-bg); --c-primary-b:rgba(59,130,246,0.25);
+  --c-bg-0:var(--canvas); --c-bg-1:var(--card); --c-bg-2:var(--card);
+  --c-bg-3:#F1F5F9; --c-bg-4:var(--border);
+  --c-tx-1:var(--h1); --c-tx-2:var(--sub); --c-tx-3:var(--sub); --c-tx-4:var(--muted);
+  --c-border:var(--border); --c-border-h:#CBD5E1; --c-border-f:var(--pr);
+  --c-success:var(--ok); --c-success-t:#4ade80; --c-success-bg:var(--ok-bg); --c-success-b:rgba(16,185,129,0.25);
+  --c-error:var(--er); --c-error-t:#f87171; --c-error-bg:var(--er-bg); --c-error-b:rgba(239,68,68,0.25);
+  --c-warning:var(--wa); --c-warning-t:#fbbf24; --c-warning-bg:var(--wa-bg); --c-warning-b:rgba(245,158,11,0.25);
+  --ok-l:#34d399; --er-l:#f87171; --wa-l:#fbbf24;
+  --pr-b:rgba(59,130,246,0.25); --pr-t:#1E40AF; --pr-l:#60A5FA;
+  --ok-b:rgba(16,185,129,0.25); --er-b:rgba(239,68,68,0.25); --wa-b:rgba(245,158,11,0.25);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Breakpoints standardisés Sentys (mobile-first, min-width).
+     md/lg conservés (768/1024) car déjà utilisés partout dans le code.
+     sm passe à 480 (mobile large) et xl à 1440 (desktop large). */
+  --breakpoint-sm:480px;
+  --breakpoint-md:768px;
+  --breakpoint-lg:1024px;
+  --breakpoint-xl:1440px;
+  --breakpoint-2xl:1600px;
+
+  --color-background:var(--canvas); --color-foreground:var(--h1);
+  --font-sans:var(--font-inter), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono:var(--font-geist-mono);
+  --color-canvas:#F8FAFC;
+  --color-surface:#FFFFFF;
+  --color-sidebar:#0F172A;
+  --color-sidebar-fg:#94A3B8;
+  --color-primary:#3B82F6;
+  --color-primary-hover:#2563EB;
+  --color-primary-dark:#2563EB;
+  --color-background-dark:#0F172A;
+  --color-accent:#10B981;
+  --color-success:#10B981;
+  --color-danger:#EF4444;
+  --color-error:#EF4444;
+  --color-warning:#F59E0B;
+  --color-border:#E2E8F0;
+  --color-table-head:#F1F5F9;
+  --color-fg-heading:#1E293B;
+  --color-fg-body:#334155;
+  --color-fg-muted:#64748B;
+  --color-bg-base:#F8FAFC; --color-bg-surface:#FFFFFF;
+  --color-bg-card:#FFFFFF; --color-bg-elevated:#E2E8F0;
+  --color-bg-input:#FFFFFF; --color-text-cyber:#1E293B;
+  --color-text-muted:#64748B;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@layer base {
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  /* Anti-débordement horizontal global : aucune page ne doit créer de scroll X
+     involontaire. overflow-x:hidden côté html+body ; overflow-y reste naturel. */
+  html,body{overflow-x:hidden;max-width:100%}
+  /* Médias fluides : jamais plus larges que leur conteneur. */
+  img,video{max-width:100%;height:auto}
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font-inter),'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:#0F172A;color:#F1F5F9;line-height:1.5;min-height:100svh}
+
+/* === Tokens responsifs : élargissement progressif marges/padding/titres === */
+/* Tres petits ecrans (iPhone SE ~320px) : on reduit les marges pour gagner de la place. */
+@media (max-width:360px){
+  :root{--page-x:12px;--card-pad:14px}
+}
+@media (min-width:768px){
+  :root{--page-x:24px;--card-pad:24px;--fs-h1:28px}
+}
+@media (min-width:1024px){
+  :root{--page-x:40px;--fs-h1:32px}
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Bandeau beta : compact sur mobile (padding/police reduits sous 768px). */
+.beta-banner{ padding:8px 40px; font-size:13px; line-height:1.4; }
+@media (max-width:767px){
+  .beta-banner{ padding:6px 32px; font-size:12px; line-height:1.3; }
+}
+
+/* === iOS : empêcher le zoom auto au focus sur un champ (<16px déclenche le zoom).
+   Scopé mobile uniquement pour préserver la densité du design sur desktop. === */
+@media (max-width:767px){
+  input,textarea,select{font-size:16px}
+  .input,.input-sm,.input-md,.input-lg,.input-xl{font-size:16px}
+  /* Cibles tactiles : boutons et liens d'action confortables au pouce. */
+  .btn-sm,.btn-md{min-height:var(--tap-target-min)}
+}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:#CBD5E1}
+
+::selection{background:rgba(59,130,246,0.15);color:#1E293B}
+
+/* === Règle de contraste automatique fond clair → texte foncé ===
+   Couvre les inline styles courants utilisés dans le projet. Tout élément
+   avec inline `color:` explicite reprend la main (priorité inline). */
+[style*="background:#fff"],[style*="background: #fff"],
+[style*="background:#FFF"],[style*="background: #FFF"],
+[style*="background:#ffffff"],[style*="background: #ffffff"],
+[style*="background:#FFFFFF"],[style*="background: #FFFFFF"],
+[style*="background:#F8FAFC"],[style*="background: #F8FAFC"],
+[style*="background:#F1F5F9"],[style*="background: #F1F5F9"],
+[style*="background:#FAFAFA"],[style*="background: #FAFAFA"],
+[style*="background:var(--bg-card)"],[style*="background: var(--bg-card)"],
+[style*="background:var(--bg-surface)"],[style*="background: var(--bg-surface)"],
+[style*="background:var(--bg-base)"],[style*="background: var(--bg-base)"],
+[style*="background:var(--bg-card-hover)"],[style*="background: var(--bg-card-hover)"],
+[style*="background:var(--bg-input)"],[style*="background: var(--bg-input)"],
+[style*="background:var(--bg-muted)"],[style*="background: var(--bg-muted)"],
+[style*="background:var(--card)"],[style*="background: var(--card)"],
+[style*="background:var(--canvas)"],[style*="background: var(--canvas)"],
+[style*="background-color:#fff"],[style*="background-color: #fff"],
+[style*="background-color:#FFFFFF"],[style*="background-color: #FFFFFF"]{
+  color:var(--text-on-light);
+}
+
+/* === Règle de contraste automatique fond sombre → texte clair === */
+[style*="background:#0F172A"],[style*="background: #0F172A"],
+[style*="background:#1E293B"],[style*="background: #1E293B"],
+[style*="background:#0f172a"],[style*="background: #0f172a"],
+[style*="background:#1e293b"],[style*="background: #1e293b"],
+[style*="background:var(--sid-bg)"],[style*="background: var(--sid-bg)"]{
+  color:var(--text-on-dark);
+}
+
+/* === Tailwind bg classes — défaut texte foncé (spécificité 0 via :where) ===
+   N'importe quelle classe `text-*` explicite écrase cette règle. */
+:where(.bg-white,.bg-canvas,.bg-surface,.bg-table-head,
+       .bg-slate-50,.bg-slate-100,.bg-gray-50,.bg-gray-100,
+       .bg-neutral-50,.bg-neutral-100,.bg-zinc-50,.bg-zinc-100,
+       .bg-stone-50,.bg-stone-100){
+  color:var(--text-on-light);
+}
+/* === Tailwind bg classes sombres — défaut texte clair === */
+:where(.bg-sidebar,.bg-background-dark,
+       .bg-slate-900,.bg-slate-800,.bg-gray-900,.bg-gray-800,
+       .bg-neutral-900,.bg-neutral-800,.bg-zinc-900,.bg-zinc-800){
+  color:var(--text-on-dark);
+}
+*:focus-visible{outline:2px solid #3B82F6;outline-offset:2px;border-radius:4px}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+.anim-up{animation:slideUp 0.25s ease both}
+.anim-in{animation:fadeIn 0.2s ease both}
+.spin{animation:spin 1s linear infinite}
+.animate-fade-up{animation:fadeUp 0.3s ease both}
+.animate-spin{animation:spin 1s linear infinite}
+.delay-1{animation-delay:0.05s}.delay-2{animation-delay:0.10s}.delay-3{animation-delay:0.15s}
+
+.skel{background:linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1E293B;color:white;border-radius:10px;box-shadow:var(--sh-lg);font-size:13.5px;min-width:260px;pointer-events:all;animation:slideUp 0.22s ease}
+.toast-ok{border-left:3px solid #10B981}.toast-er{border-left:3px solid #EF4444}.toast-wa{border-left:3px solid #F59E0B}.toast-info{border-left:3px solid #3B82F6}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.50);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease}
+.modal-box{background:#FFFFFF;color:var(--text-on-light);border:1px solid #E2E8F0;border-radius:16px;padding:28px;width:100%;max-width:480px;box-shadow:var(--sh-lg);animation:slideUp 0.22s ease}
+
+/* Compat classes */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;font-family:inherit;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all 0.15s;border-radius:8px}
+.btn-xs{height:26px;padding:0 10px;font-size:11px}.btn-sm{height:30px;padding:0 12px;font-size:12px}
+.btn-md{height:36px;padding:0 16px;font-size:13.5px}.btn-lg{height:42px;padding:0 20px;font-size:14px}
+.btn-xl{height:48px;padding:0 28px;font-size:15px}.btn-full{width:100%}
+.btn-primary{background:#3B82F6;color:#fff;box-shadow:0 1px 3px rgba(59,130,246,0.35)}
+.btn-primary:hover:not(:disabled){background:#2563EB;transform:translateY(-1px)}
+.btn-secondary{background:#fff;color:#1E293B;border:1px solid #E2E8F0;box-shadow:var(--sh-sm)}
+.btn-secondary:hover:not(:disabled){background:#F1F5F9}
+.btn-ghost{background:transparent;color:#64748B}.btn-ghost:hover:not(:disabled){background:#F1F5F9;color:#1E293B}
+.btn-danger{background:rgba(239,68,68,0.10);color:#991B1B;border:1px solid rgba(239,68,68,0.25)}
+.btn-success{background:rgba(16,185,129,0.10);color:#065F46;border:1px solid rgba(16,185,129,0.25)}
+.btn-light{background:rgba(59,130,246,0.08);color:#1E40AF;border:1px solid rgba(59,130,246,0.20)}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none !important}
+
+.input{width:100%;background:#fff;color:var(--text-on-light);border:1px solid #E2E8F0;border-radius:8px;font-family:inherit;font-size:13.5px;outline:none;transition:border-color 0.15s,box-shadow 0.15s}
+.input::placeholder{color:#64748B}
+.input:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,0.10)}
+.input-sm{height:30px;padding:0 10px;font-size:12px}.input-md{height:36px;padding:0 12px}
+.input-lg{height:42px;padding:0 14px;font-size:14px}.input-xl{height:48px;padding:0 16px;font-size:15px;border-radius:12px}
+textarea.input{height:auto;padding:10px 12px;resize:vertical}
+.label{display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px}
+.field{margin-bottom:16px}
+.input-error{border-color:#EF4444;box-shadow:0 0 0 3px rgba(239,68,68,0.10)}
+.input-hint{font-size:11.5px;color:#475569;margin-top:5px}.input-hint.err{color:#991B1B}
+select.input{cursor:pointer;padding-right:32px}
+
+.card{background:#fff;color:var(--text-on-light);border:1px solid #E2E8F0;border-radius:12px;box-shadow:var(--sh-card)}
+.card-p{padding:24px}.card-p-sm{padding:16px}.card-p-lg{padding:32px}
+.card-hover{transition:box-shadow 0.2s,transform 0.2s}.card-hover:hover{box-shadow:var(--sh-lg);transform:translateY(-2px)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.badge-primary{background:rgba(59,130,246,0.10);color:#1E40AF}
+.badge-success{background:rgba(16,185,129,0.10);color:#065F46}
+.badge-warning{background:rgba(245,158,11,0.10);color:#92400E}
+.badge-error{background:rgba(239,68,68,0.10);color:#991B1B}
+.badge-danger{background:rgba(239,68,68,0.10);color:#991B1B}
+.badge-neutral{background:#F1F5F9;color:#64748B}
+.badge-info{background:rgba(59,130,246,0.10);color:#1E40AF}
+
+.table-wrap{border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff;color:var(--text-on-light);box-shadow:var(--sh-sm)}
+.table{width:100%;border-collapse:collapse}
+.table thead{background:#F1F5F9}
+.table th{padding:11px 16px;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;text-align:left;border-bottom:1px solid #E2E8F0}
+.table td{padding:13px 16px;font-size:13.5px;color:#1E293B;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+.table tbody tr:last-child td{border-bottom:none}
+.table tbody tr{transition:background 0.1s}.table tbody tr:hover{background:#FAFAFA}
+
+.progress{height:6px;background:#F1F5F9;border-radius:99px;overflow:hidden}
+.progress-sm{height:4px}.progress-lg{height:8px}
+.progress-fill{height:100%;border-radius:99px;background:#3B82F6;transition:width 0.7s cubic-bezier(0.4,0,0.2,1)}
+.progress-fill.ok{background:#10B981}.progress-fill.wa{background:#F59E0B}.progress-fill.er{background:#EF4444}
+.progress-fill.grad{background:linear-gradient(90deg,#10B981,#3B82F6)}
+
+.divider{height:1px;background:#E2E8F0}
+.tabs{display:inline-flex;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:8px;padding:3px;gap:2px}
+.tab{height:30px;padding:0 16px;font-size:12.5px;font-weight:500;border:none;border-radius:6px;cursor:pointer;background:transparent;color:#334155;font-family:inherit;transition:all 0.15s}
+.tab:hover:not(.tab-active){color:#1E293B}
+.tab-active{background:#fff;color:#3B82F6;font-weight:600;box-shadow:var(--sh-sm)}
+
+.topbar{height:60px;display:flex;align-items:center;padding:0 28px;gap:16px;background:#fff;color:var(--text-on-light);border-bottom:1px solid #E2E8F0;position:sticky;top:0;z-index:10}
+.topbar-title{font-size:14px;font-weight:600;color:#1E293B}.topbar-sub{font-size:12px;color:#64748B}
+
+.stat{background:#fff;color:var(--text-on-light);border:1px solid #E2E8F0;border-radius:12px;padding:24px;box-shadow:var(--sh-card);transition:box-shadow 0.2s,transform 0.2s}
+.stat:hover{box-shadow:0 8px 16px rgba(0,0,0,0.12);transform:translateY(-1px)}
+
+.avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:99px;font-weight:700;flex-shrink:0;background:rgba(59,130,246,0.10);color:#1E40AF}
+.av-xs{width:24px;height:24px;font-size:9px}.av-sm{width:32px;height:32px;font-size:11px}
+.av-md{width:40px;height:40px;font-size:14px}.av-lg{width:52px;height:52px;font-size:18px}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:14px;opacity:0.5}
+.empty-title{font-size:16px;font-weight:600;color:#1E293B;margin-bottom:6px}
+.empty-text{font-size:13px;color:#64748B}
+
+.alert{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:8px;font-size:13px;border:1px solid transparent}
+.alert-ok{background:rgba(16,185,129,0.10);color:#065F46;border-color:rgba(16,185,129,0.25)}
+.alert-er{background:rgba(239,68,68,0.10);color:#991B1B;border-color:rgba(239,68,68,0.25)}
+.alert-wa{background:rgba(245,158,11,0.10);color:#92400E;border-color:rgba(245,158,11,0.25)}
+.alert-pr{background:rgba(59,130,246,0.10);color:#1E40AF;border-color:rgba(59,130,246,0.25)}
+
+.section-h{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-title{font-size:15px;font-weight:700;color:#1E293B}
+
+.footer-nav-link{color:#64748B;font-size:13px;text-decoration:none;transition:color 0.15s}
+.footer-nav-link:hover{color:#3B82F6}
+
+.sa-theme{--sid-bg:#0F172A;--canvas:#FFF5F5;--pr:#DC2626;--pr-h:#B91C1C;--pr-bg:rgba(239,68,68,0.10);--pr-t:#991B1B}
+
+/* ============================================================
+   Utilitaires responsifs réutilisables (mobile-first)
+   ============================================================ */
+@layer components {
+  /* Conteneur de page : largeur max + marges horizontales responsives. */
+  .sentys-page{width:100%;max-width:1200px;margin-inline:auto;padding-inline:var(--page-x)}
+  .sentys-page-narrow{width:100%;max-width:480px;margin-inline:auto;padding-inline:var(--page-x)}
+  .sentys-page-md{width:100%;max-width:760px;margin-inline:auto;padding-inline:var(--page-x)}
+
+  /* Scroll horizontal CONTRAINT au bloc (tableaux/grilles denses) — jamais à la page.
+     -webkit-overflow-scrolling pour un scroll fluide iOS. */
+  .resp-scroll-x{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .resp-scroll-x>*{min-width:max-content}
+}
+
+/* Modale full-screen sur mobile, centrée sur desktop. Surcharge .modal-overlay/.modal-box. */
+@media (max-width:639px){
+  .modal-overlay{padding:0;align-items:stretch}
+  .modal-box,.modal-box.resp-modal{max-width:100%;width:100%;height:100%;max-height:100%;border-radius:0;border:none;overflow-y:auto}
+}
+
+/* Empêche les grilles inline « tableau » (gridTemplateColumns multi-fr) de déborder
+   quand on les marque .stack-mobile : repli en pile verticale sous 640px. */
+@media (max-width:639px){
+  .stack-mobile{display:flex !important;flex-direction:column !important;gap:12px}
 }

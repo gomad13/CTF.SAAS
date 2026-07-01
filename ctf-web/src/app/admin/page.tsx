@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PieChart, Pie, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 
-// Palette des charts admin — alignée sur le design system Viper.
+// Palette des charts admin — alignée sur le design system Sentys.
 // Mapping intentionnel des 4 statuts user (grey/yellow/green/red) sur les tokens.
 const chartColors = {
     grey: "#6B7280",      // muted / pas commencé
@@ -108,7 +108,7 @@ export default function AdminDashboardPage() {
 
     return (
         <RequireAuth>
-            <div className="space-y-6">
+            <div className="space-y-6 p-4 sm:p-6">
                 <div className="rounded-2xl border border-neutral-800 bg-background-dark p-4">
                     <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                         <div>
@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
                                         setSearch("");
                                         setStatus("");
                                     }}
-                                    className="w-[360px] rounded-xl border border-neutral-800 bg-background-dark px-3 py-2 text-sm"
+                                    className="w-full rounded-xl border border-neutral-800 bg-background-dark px-3 py-2 text-sm md:w-[360px]"
                                 >
                                     <option value="" disabled>
                                         {pathsQuery.isLoading ? "Chargement..." : "Choisir une formation"}

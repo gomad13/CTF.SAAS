@@ -108,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <ChatWidget />
             {/* Host global du coaching post-incident : écoute l'event window
-                "viper:coaching:trigger" et monte la modal en lazy load. */}
+                "sentys:coaching:trigger" et monte la modal en lazy load. */}
             <CoachingHost />
         </div>
     );

@@ -28,6 +28,7 @@ public class TenantMiddleware
             path.StartsWithSegments("/api/auth") ||
             path.StartsWithSegments("/api/test") ||
             path.StartsWithSegments("/api/scenario-tracking") ||
+            path.StartsWithSegments("/api/legal") ||
             (path.Equals("/api/feedback", StringComparison.OrdinalIgnoreCase) &&
              HttpMethods.IsPost(context.Request.Method)))
         {

@@ -141,7 +141,7 @@ public sealed class ScenarioRenderer : IScenarioRenderer
 
     private static string SlugifyForDomain(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) return "viper.local";
+        if (string.IsNullOrWhiteSpace(name)) return "sentys.local";
         var sb = new StringBuilder(name.Length);
         foreach (var c in name.ToLowerInvariant())
         {
@@ -149,7 +149,7 @@ public sealed class ScenarioRenderer : IScenarioRenderer
             else if (c == ' ' || c == '-' || c == '_') sb.Append('-');
         }
         var slug = sb.ToString().Trim('-');
-        return string.IsNullOrEmpty(slug) ? "viper.local" : $"{slug}.local";
+        return string.IsNullOrEmpty(slug) ? "sentys.local" : $"{slug}.local";
     }
 
     private static string RewriteLinks(string html, string apiBaseUrl, string token)

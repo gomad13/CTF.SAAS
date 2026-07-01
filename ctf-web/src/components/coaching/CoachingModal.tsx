@@ -50,7 +50,7 @@ function CoachingModalImpl({ attemptId, onClose }: Props) {
             style={{ background: "rgba(0, 0, 0, 0.8)" }}
         >
             <div
-                className="relative w-full max-w-[640px] rounded-2xl p-8 shadow-2xl"
+                className="relative max-h-[90vh] w-full max-w-[640px] overflow-y-auto rounded-2xl p-5 shadow-2xl sm:p-8"
                 style={{
                     background: C_BG,
                     border: `1px solid ${C_PRIMARY_DARK}`,
@@ -86,10 +86,10 @@ function CoachingModalImpl({ attemptId, onClose }: Props) {
                     {!isLoading && data && <CoachingContent content={data.content} status={data.status} />}
                 </div>
 
-                <footer className="mt-6 flex items-center justify-between gap-4">
+                <footer className="mt-6 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <Link
                         href="/coaching/history"
-                        className="text-sm underline-offset-4 transition-colors duration-200 hover:underline"
+                        className="text-center text-sm underline-offset-4 transition-colors duration-200 hover:underline sm:text-left"
                         style={{ color: C_ACCENT }}
                     >
                         Voir l&apos;historique de mes coachings

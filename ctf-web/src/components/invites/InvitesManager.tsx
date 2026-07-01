@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import QRCode from "react-qr-code";
 import {
-    QrCode, Plus, Trash2, Copy, Check, Clock, Users, AlertCircle, X, Download,
+    QrCode, Plus, Trash2, Copy, Check, Clock, Users, AlertCircle, X, Download, Building2, AppWindow, UserPlus,
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import { useInvites, useCreateInvite, useRevokeInvite } from "@/lib/hooks/useInvites";
-import type { InviteDto, CreatedInviteDto } from "@/lib/types/invites";
+import type { InviteDto, CreatedInviteDto, InviteType } from "@/lib/types/invites";
 
 const DURATIONS: { label: string; hours: number }[] = [
     { label: "1 heure", hours: 1 },
@@ -14,6 +16,34 @@ const DURATIONS: { label: string; hours: number }[] = [
     { label: "7 jours", hours: 168 },
     { label: "30 jours", hours: 720 },
 ];
+
+// Métadonnées des 3 types de QR (libellés clairs pour l'admin).
+const TYPE_META: Record<InviteType, { short: string; label: string; help: string; cls: string }> = {
+    app: {
+        short: "Application",
+        label: "Application — inscription générale",
+        help: "Invite à créer un compte Sentys, SANS rattachement à une entreprise. Mène à la page d'inscription générale.",
+        cls: "bg-[#EEF2FF] text-[#4338CA]",
+    },
+    enterprise_signup: {
+        short: "Inscription",
+        label: "Entreprise — inscription (nouveau compte)",
+        help: "Une personne SANS compte s'inscrit avec l'entreprise pré-remplie et verrouillée, puis est rattachée automatiquement (rôle Membre).",
+        cls: "bg-[#ECFDF5] text-[#047857]",
+    },
+    enterprise_join: {
+        short: "Rejoindre",
+        label: "Entreprise — rejoindre (compte existant)",
+        help: "Une personne qui a DÉJÀ un compte scanne le QR et rejoint l'entreprise (rôle Membre). Ses autres sociétés sont conservées.",
+        cls: "bg-[#EFF6FF] text-[#1D4ED8]",
+    },
+};
+
+const TYPE_ICON: Record<InviteType, typeof Building2> = {
+    app: AppWindow,
+    enterprise_signup: UserPlus,
+    enterprise_join: Building2,
+};
 
 type Status = { label: string; cls: string };
 
@@ -31,15 +61,25 @@ function fmt(iso: string): string {
 }
 
 /**
- * Gestion des invitations QR (génération + QR + téléchargement PNG + URL copiable + liste + révocation).
- * Composant réutilisable : utilisé par la page /admin/invites ET la section « Invitations » des
- * Paramètres entreprise. Toute la logique passe par les hooks useInvites (zéro duplication d'appels API).
+ * Gestion des invitations QR en 3 types (voir QR_3_TYPES) :
+ *  - Application (SuperAdmin) : inscription générale, sans entreprise.
+ *  - Entreprise-Inscription (Type 2) et Entreprise-Rejoindre (Type 3) : scellées au tenant.
+ * Génération + QR + téléchargement PNG + URL copiable + liste typée + révocation.
+ * Réutilisé par les Paramètres entreprise (/admin/entreprise). Zéro duplication d'appels API.
  */
 export default function InvitesManager() {
     const listQ = useInvites();
     const createM = useCreateInvite();
     const revokeM = useRevokeInvite();
+    const meQ = useQuery({ queryKey: ["me"], queryFn: () => apiFetch<{ role: string }>("/api/auth/me"), staleTime: 60_000 });
+    const isSuperAdmin = meQ.data?.role === "SuperAdmin";
 
+    // Types générables selon le rôle : App réservé au SuperAdmin.
+    const availableTypes: InviteType[] = isSuperAdmin
+        ? ["app", "enterprise_signup", "enterprise_join"]
+        : ["enterprise_signup", "enterprise_join"];
+
+    const [type, setType] = useState<InviteType>("enterprise_signup");
     const [hours, setHours] = useState(24);
     const [maxUses, setMaxUses] = useState("5");
     const [created, setCreated] = useState<CreatedInviteDto | null>(null);
@@ -49,7 +89,7 @@ export default function InvitesManager() {
     async function handleCreate() {
         const uses = Number(maxUses);
         if (!Number.isFinite(uses) || uses < 1) return;
-        const res = await createM.mutateAsync({ expiresInHours: hours, maxUses: uses });
+        const res = await createM.mutateAsync({ expiresInHours: hours, maxUses: uses, type });
         setCreated(res);
         setCopied(false);
     }
@@ -83,19 +123,42 @@ export default function InvitesManager() {
             ctx.drawImage(img, 0, 0, size, size);
             const a = document.createElement("a");
             a.href = canvas.toDataURL("image/png");
-            a.download = "invitation-sentys-qr.png";
+            a.download = `invitation-sentys-${created?.type ?? "qr"}.png`;
             a.click();
         };
         img.src = svgUrl;
     }
+
+    const isEnterprise = type !== "app";
 
     return (
         <div className="flex flex-col gap-6">
             {/* Générateur */}
             <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
                 <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-[#475569]">
-                    <Plus size={14} /> Générer une invitation
+                    <Plus size={14} /> Générer une invitation QR
                 </h2>
+
+                {/* Sélecteur de type (cartes cliquables) */}
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {availableTypes.map(t => {
+                        const meta = TYPE_META[t];
+                        const Icon = TYPE_ICON[t];
+                        const active = type === t;
+                        return (
+                            <button
+                                key={t} type="button" onClick={() => setType(t)}
+                                className={`flex flex-col gap-1.5 rounded-lg border p-4 text-left transition-colors duration-200 ${active ? "border-primary bg-[#EFF6FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"}`}
+                            >
+                                <span className="flex items-center gap-2 text-sm font-semibold text-[#1E293B]">
+                                    <Icon size={15} className={active ? "text-primary" : "text-[#64748B]"} /> {meta.short}
+                                </span>
+                                <span className="text-xs leading-snug text-[#64748B]">{meta.help}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
                 <div className="mt-4 flex flex-wrap items-end gap-4">
                     <label className="flex flex-col gap-1 text-sm text-[#334155]">
                         <span className="flex items-center gap-1"><Clock size={13} /> Durée de validité</span>
@@ -124,6 +187,9 @@ export default function InvitesManager() {
                         <QrCode size={14} /> {createM.isPending ? "Génération…" : "Générer le QR"}
                     </button>
                 </div>
+                <p className="mt-2 text-xs text-[#64748B]">{isEnterprise
+                    ? "Ce QR est scellé à votre société active : il ne fait rejoindre que celle-ci."
+                    : "Ce QR mène à l'inscription générale Sentys, sans rattachement à une entreprise."}</p>
                 {createM.isError && (
                     <div className="mt-3 flex items-center gap-2 text-xs text-danger">
                         <AlertCircle size={13} /> {createM.error.message}
@@ -142,11 +208,13 @@ export default function InvitesManager() {
                             >
                                 <Download size={13} /> Télécharger le QR
                             </button>
-                            <span className="text-xs text-[#64748B]">Scannez pour rejoindre</span>
+                            <span className="text-xs text-[#64748B]">{created.type === "app" ? "Scannez pour vous inscrire" : "Scannez pour rejoindre"}</span>
                         </div>
                         <div className="flex flex-col gap-3">
                             <div className="flex items-start justify-between gap-2">
-                                <p className="text-sm font-medium text-[#1E293B]">Invitation prête</p>
+                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${TYPE_META[created.type].cls}`}>
+                                    {TYPE_META[created.type].label}
+                                </span>
                                 <button type="button" onClick={() => setCreated(null)} title="Fermer"
                                     className="text-[#94A3B8] transition-colors duration-200 hover:text-[#475569]">
                                     <X size={16} />
@@ -176,9 +244,11 @@ export default function InvitesManager() {
 
             {/* Liste */}
             <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-[#F1F5F9] text-xs uppercase tracking-wider text-[#475569]">
                         <tr>
+                            <th className="px-6 py-3 text-left font-semibold">Type</th>
                             <th className="px-6 py-3 text-left font-semibold">Statut</th>
                             <th className="px-6 py-3 text-left font-semibold">Usages</th>
                             <th className="px-6 py-3 text-left font-semibold">Expiration</th>
@@ -189,9 +259,16 @@ export default function InvitesManager() {
                     <tbody className="divide-y divide-[#E2E8F0]">
                         {(listQ.data ?? []).map(i => {
                             const st = inviteStatus(i);
+                            const tm = TYPE_META[i.type];
                             const canRevoke = !i.isRevoked && !i.isExpired;
                             return (
                                 <tr key={i.id} className="hover:bg-[#F8FAFC]">
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${tm.cls}`}>
+                                            {tm.short}
+                                        </span>
+                                        {i.tenantName && <span className="ml-2 text-xs text-[#94A3B8]">{i.tenantName}</span>}
+                                    </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${st.cls}`}>
                                             {st.label}
@@ -216,16 +293,17 @@ export default function InvitesManager() {
                         })}
                         {listQ.isSuccess && (listQ.data ?? []).length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-sm text-[#64748B]">
+                                <td colSpan={6} className="px-6 py-12 text-center text-sm text-[#64748B]">
                                     Aucune invitation. Générez-en une ci-dessus.
                                 </td>
                             </tr>
                         )}
                         {listQ.isLoading && (
-                            <tr><td colSpan={5} className="px-6 py-12 text-center text-sm text-[#64748B]">Chargement…</td></tr>
+                            <tr><td colSpan={6} className="px-6 py-12 text-center text-sm text-[#64748B]">Chargement…</td></tr>
                         )}
                     </tbody>
                 </table>
+                </div>
             </section>
         </div>
     );

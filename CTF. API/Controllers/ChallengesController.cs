@@ -40,7 +40,10 @@ public class ChallengesController : ControllerBase
                 c.Instructions,
                 c.Difficulty,
                 c.Points,
-                c.Status
+                c.Status,
+                c.InstructionTitle,
+                c.InstructionBody,
+                c.InstructionShortReminder
             })
             .SingleOrDefaultAsync();
 
@@ -57,7 +60,7 @@ public class ChallengesController : ControllerBase
             .AsNoTracking()
             .Where(c => c.TenantId == tenantId && c.ModuleId == moduleId)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new ChallengeDto(c.Id, c.ModuleId, c.Type, c.Title, c.Difficulty, c.Points, c.Status, c.CreatedAt, c.PublishedAt))
+            .Select(c => new ChallengeDto(c.Id, c.ModuleId, c.Type, c.Title, c.Difficulty, c.Points, c.Status, c.CreatedAt, c.PublishedAt, c.InstructionTitle, c.InstructionBody, c.InstructionShortReminder))
             .ToListAsync();
 
         return Ok(items);

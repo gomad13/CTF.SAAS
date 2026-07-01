@@ -1,6 +1,7 @@
 ﻿using CTF.Api.Data;
 using CTF.Api.Models;
 using CTF.Api.Security;
+using CTF.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ public class ProgressController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly TenantContext _tenant;
+    private readonly ProgressCalculationService _progressCalc;
 
-    public ProgressController(AppDbContext db, TenantContext tenant)
+    public ProgressController(AppDbContext db, TenantContext tenant, ProgressCalculationService progressCalc)
     {
         _db = db;
         _tenant = tenant;
+        _progressCalc = progressCalc;
     }
 
     // GET /api/progress?pathId=...
@@ -47,49 +50,28 @@ public class ProgressController : ControllerBase
         return item is null ? NotFound() : Ok(item);
     }
 
-    // ✅ On ne prend plus UserId depuis le client
-    public sealed record UpsertProgressRequest(Guid PathId, string Status, int Percent);
+    // Note : Status/Percent du client ne sont plus utilisés ; la progression est calculée serveur.
+    public sealed record UpsertProgressRequest(Guid PathId, string? Status = null, int Percent = 0);
 
-    // POST /api/progress (upsert simple)
+    // POST /api/progress (upsert : progression recalculée côté serveur)
     [HttpPost]
     public async Task<IActionResult> Upsert([FromBody] UpsertProgressRequest req)
     {
         var tenantId = _tenant.TenantId!.Value;
         var userId = User.GetUserId();
 
-        var now = DateTime.UtcNow;
+        // [PENTEST] progression calculee serveur, valeurs client ignorees
+        // On ne fait jamais confiance à req.Percent / req.Status : la progression est
+        // (re)calculée et persistée à partir des challenges réellement complétés par ce user.
+        await _progressCalc.RecalculateAndPersistAsync(userId, req.PathId, tenantId);
 
         var entity = await _db.Progresses
+            .AsNoTracking()
             .Where(p => p.TenantId == tenantId && p.UserId == userId && p.PathId == req.PathId)
             .SingleOrDefaultAsync();
 
         if (entity is null)
-        {
-            entity = new Progress
-            {
-                Id = Guid.NewGuid(),
-                TenantId = tenantId,
-                UserId = userId,
-                PathId = req.PathId,
-                Status = req.Status,
-                Percent = Math.Clamp(req.Percent, 0, 100),
-                StartedAt = req.Status == "not_started" ? null : now,
-                CompletedAt = req.Status == "completed" ? now : null,
-                UpdatedAt = now
-            };
-
-            _db.Progresses.Add(entity);
-        }
-        else
-        {
-            entity.Status = req.Status;
-            entity.Percent = Math.Clamp(req.Percent, 0, 100);
-            entity.StartedAt ??= (req.Status == "not_started" ? null : now);
-            entity.CompletedAt = req.Status == "completed" ? (entity.CompletedAt ?? now) : null;
-            entity.UpdatedAt = now;
-        }
-
-        await _db.SaveChangesAsync();
+            return NotFound();
 
         return Ok(new
         {

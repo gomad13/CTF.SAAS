@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CTF.Api.Controllers;
 
 /// <summary>
-/// Inbox interne Viper — boîte de réception simulée pour les scénarios narratifs.
+/// Inbox interne Sentys — boîte de réception simulée pour les scénarios narratifs.
 /// Chaque employé authentifié voit uniquement ses propres emails (filtre user + tenant).
 /// </summary>
 [ApiController]

@@ -10,7 +10,7 @@ const CoachingModal = dynamic(
     { ssr: false }
 );
 
-const EVENT_NAME = "viper:coaching:trigger";
+const EVENT_NAME = "sentys:coaching:trigger";
 
 type TriggerDetail = { attemptId: string };
 
@@ -19,7 +19,7 @@ type TriggerDetail = { attemptId: string };
  * Les composants challenge dispatchent un CustomEvent quand ils détectent
  * un échec :
  *
- *   window.dispatchEvent(new CustomEvent("viper:coaching:trigger", {
+ *   window.dispatchEvent(new CustomEvent("sentys:coaching:trigger", {
  *     detail: { attemptId: "<challengeCompletionId>" }
  *   }));
  *

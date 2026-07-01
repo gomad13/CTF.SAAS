@@ -42,7 +42,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
         queryFn: () => apiFetch<PathDto>(`/api/paths/${pathId}`),
     });
 
-    // 2) Charger l'état assignment + progress (mine)
+    // 2) Charger l'Ã©tat assignment + progress (mine)
     const mineQ = useQuery({
         queryKey: ["assignments", "mine"],
         queryFn: () => apiFetch<MyAssignment[]>("/api/assignments/mine"),
@@ -99,13 +99,13 @@ export default function PathPage({ params }: { params: { id: string } }) {
                 body: JSON.stringify(payload),
             }),
         onSuccess: async () => {
-            // Progress recalculé côté backend => on refresh "mine"
+            // Progress recalculÃ© cÃ´tÃ© backend => on refresh "mine"
             await qc.invalidateQueries({ queryKey: ["assignments", "mine"] });
         },
     });
 
     // --- UI states
-    if (pathQ.isLoading) return <PageShell>Chargement du parcours…</PageShell>;
+    if (pathQ.isLoading) return <PageShell>Chargement du parcoursâ€¦</PageShell>;
     if (pathQ.isError)
         return (
             <PageShell>
@@ -143,9 +143,9 @@ export default function PathPage({ params }: { params: { id: string } }) {
                                 className="rounded-xl border border-neutral-800 bg-neutral-950/40 px-3 py-2 text-sm hover:bg-neutral-800/40 disabled:opacity-60"
                                 onClick={() => startM.mutate()}
                                 disabled={startM.isPending || my?.status === "started" || my?.status === "completed"}
-                                title="Démarre l'assignment (status = started)"
+                                title="DÃ©marre l'assignment (status = started)"
                             >
-                                {startM.isPending ? "Start…" : my?.status === "started" ? "Démarré" : "Start"}
+                                {startM.isPending ? "Startâ€¦" : my?.status === "started" ? "DÃ©marrÃ©" : "Start"}
                             </button>
 
                             <button
@@ -154,7 +154,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
                                 disabled={completeM.isPending || progressPct < 100 || my?.status === "completed"}
                                 title="Termine si progress = 100%"
                             >
-                                {completeM.isPending ? "Complete…" : my?.status === "completed" ? "Complété" : "Complete"}
+                                {completeM.isPending ? "Completeâ€¦" : my?.status === "completed" ? "ComplÃ©tÃ©" : "Complete"}
                             </button>
                         </div>
                     </div>
@@ -188,7 +188,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
                                                         >
                                                             <div className="font-medium">{c.title}</div>
                                                             <div className="mt-1 text-xs text-neutral-400">
-                                                                {c.type} • {c.points} pts
+                                                                {c.type} â€¢ {c.points} pts
                                                             </div>
                                                         </button>
                                                     );
@@ -212,7 +212,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
                                             <div className="text-xs text-neutral-400">Challenge</div>
                                             <h2 className="text-xl font-semibold">{active.title}</h2>
                                             <div className="mt-1 text-sm text-neutral-400">
-                                                {active.type} • {active.points} pts
+                                                {active.type} â€¢ {active.points} pts
                                             </div>
                                         </div>
                                     </div>
@@ -226,18 +226,18 @@ export default function PathPage({ params }: { params: { id: string } }) {
                                             className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-neutral-950 hover:opacity-90 disabled:opacity-60"
                                             disabled={submitM.isPending}
                                             onClick={() => submitM.mutate({ challengeId: active.id, isCorrect: true })}
-                                            title="Démo: envoie une réponse correcte"
+                                            title="DÃ©mo: envoie une rÃ©ponse correcte"
                                         >
-                                            {submitM.isPending ? "Envoi…" : "Réponse correcte ?"}
+                                            {submitM.isPending ? "Envoiâ€¦" : "RÃ©ponse correcte ?"}
                                         </button>
 
                                         <button
                                             className="rounded-xl border border-neutral-800 bg-neutral-950/40 px-4 py-2 text-sm hover:bg-neutral-800/40 disabled:opacity-60"
                                             disabled={submitM.isPending}
                                             onClick={() => submitM.mutate({ challengeId: active.id, isCorrect: false })}
-                                            title="Démo: envoie une réponse fausse"
+                                            title="DÃ©mo: envoie une rÃ©ponse fausse"
                                         >
-                                            Réponse fausse ?
+                                            RÃ©ponse fausse ?
                                         </button>
                                     </div>
 
@@ -248,7 +248,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
                                     )}
 
                                     <div className="mt-6 border-t border-neutral-800 pt-4 text-xs text-neutral-500">
-                                        Astuce: le progress se met à jour automatiquement après une submission correcte.
+                                        Astuce: le progress se met Ã  jour automatiquement aprÃ¨s une submission correcte.
                                     </div>
                                 </>
                             )}

@@ -51,6 +51,7 @@ public class AuthController : ControllerBase
     // ── Dev token (DEV only) ────────────────────────────────────────────────
     public record DevTokenRequest(Guid TenantId, Guid UserId, string Role);
 
+#if DEBUG
     [HttpPost("dev-token")]
     public IActionResult DevToken([FromBody] DevTokenRequest req)
     {
@@ -61,6 +62,7 @@ public class AuthController : ControllerBase
         SetAuthCookie(tokenString);
         return Ok(new { message = "Token émis." });
     }
+#endif
 
     // ── Login ───────────────────────────────────────────────────────────────
     public record LoginRequest(string Email, string Password);
@@ -140,13 +142,15 @@ public class AuthController : ControllerBase
     {
         var isSuperAdmin = await db.SuperAdmins
             .AnyAsync(sa => sa.IsActive && sa.Email.ToLower() == user.Email.ToLower());
-        var effectiveRole = isSuperAdmin ? "SuperAdmin" : user.Role;
 
-        SetAuthCookie(BuildJwt(user.TenantId, user.Id, effectiveRole));
+        // [MULTI-SOCIETES] Société active par défaut + rôle dans cette société.
+        var (activeTenantId, effectiveRole) = await ResolveActiveAsync(db, user, isSuperAdmin, requestedTenantId: null);
+
+        SetAuthCookie(BuildJwt(activeTenantId, user.Id, effectiveRole));
         SetRoleCookie(effectiveRole);
 
         var ipAddr = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var refresh = await IssueRefreshTokenAsync(db, user.Id, ipAddr);
+        var refresh = await IssueRefreshTokenAsync(db, user.Id, ipAddr, activeTenantId);
         SetRefreshCookie(refresh.Token);
 
         var redirectTo = effectiveRole switch
@@ -205,7 +209,9 @@ public class AuthController : ControllerBase
         if (consentError is not null)
             return BadRequest(new { error = consentError });
 
-        var tenantId = req.TenantId ?? DemoTenantId;
+        // [PENTEST] tenant non issu du body — inscription publique self-service :
+        // on ignore req.TenantId pour éviter qu'un client se rattache à un tenant arbitraire.
+        var tenantId = DemoTenantId;
 
         var tenantExists = await db.Tenants.AnyAsync(t => t.Id == tenantId, ct);
         if (!tenantExists)
@@ -232,10 +238,21 @@ public class AuthController : ControllerBase
             Role        = "user",
             IsActive    = true,
             CreatedAt   = DateTime.UtcNow,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password, workFactor: 12)
         };
 
         db.Users.Add(user);
+        await db.SaveChangesAsync(ct);
+
+        // [MULTI-SOCIETES] Appartenance par défaut du nouvel utilisateur à sa société.
+        db.UserTenants.Add(new UserTenant
+        {
+            UserId    = user.Id,
+            TenantId  = tenantId,
+            Role      = user.Role,
+            IsDefault = true,
+            JoinedAt  = DateTime.UtcNow,
+        });
         await db.SaveChangesAsync(ct);
 
         await consentService.RecordConsentsAsync(
@@ -314,9 +331,12 @@ public class AuthController : ControllerBase
                 absoluteExpiration: new DateTimeOffset(expiresAt)
             );
 
-            // En DEV : lien dans les logs — remplacer par SMTP en production
+            // [PENTEST] Ne JAMAIS logguer le token/lien en clair hors Development.
             var resetLink = $"{Request.Scheme}://{Request.Host}/reset-password?token={token}";
-            Console.WriteLine($"[DEV] Lien de réinitialisation pour {normalizedEmail} : {resetLink}");
+            if (_env.IsDevelopment())
+            {
+                Console.WriteLine($"[DEV] Lien de réinitialisation pour {normalizedEmail} : {resetLink}");
+            }
         }
 
         return Ok(new { message = safeMsg });
@@ -353,7 +373,7 @@ public class AuthController : ControllerBase
         if (user is null)
             return BadRequest(new { error = "Utilisateur introuvable." });
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword);
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword, workFactor: 12);
         await db.SaveChangesAsync();
 
         _cache.Remove(ResetPrefix + req.Token);
@@ -425,7 +445,7 @@ public class AuthController : ControllerBase
         if (!IsPasswordStrong(req.NewPassword))
             return BadRequest(new { error = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial." });
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword);
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword, workFactor: 12);
         await db.SaveChangesAsync();
         return Ok(new { success = true });
     }
@@ -453,24 +473,64 @@ public class AuthController : ControllerBase
         // Recalculer le rôle effectif (SuperAdmin)
         var isSuperAdmin = await db.SuperAdmins
             .AnyAsync(sa => sa.IsActive && sa.Email.ToLower() == user.Email.ToLower());
-        var effectiveRole = isSuperAdmin ? "SuperAdmin" : user.Role;
+
+        // [MULTI-SOCIETES] Restaurer la société active mémorisée dans le refresh token
+        // (re-vérifie l'appartenance ; retombe sur la société par défaut si plus membre).
+        var (activeTenantId, effectiveRole) = await ResolveActiveAsync(db, user, isSuperAdmin, rt.ActiveTenantId);
 
         // Nouveaux tokens (rotation)
-        var newJwt = BuildJwt(user.TenantId, user.Id, effectiveRole);
+        var newJwt = BuildJwt(activeTenantId, user.Id, effectiveRole);
         SetAuthCookie(newJwt);
         SetRoleCookie(effectiveRole);
 
-        var newRefresh = await IssueRefreshTokenAsync(db, user.Id, ip);
+        var newRefresh = await IssueRefreshTokenAsync(db, user.Id, ip, activeTenantId);
         SetRefreshCookie(newRefresh.Token);
 
         return Ok(new { success = true });
     }
 
-    // ── Logout all (placeholder) ────────────────────────────────────────────
+    // ── Logout all ───────────────────────────────────────────────────────────
     [HttpPost("logout-all")]
     [Microsoft.AspNetCore.Authorization.Authorize]
-    public IActionResult LogoutAll()
+    public async Task<IActionResult> LogoutAll([FromServices] AppDbContext db, CancellationToken ct)
     {
+        var userId = User.GetUserId();
+
+        // Révoquer TOUS les refresh tokens actifs de l'utilisateur courant
+        var tokens = await db.RefreshTokens
+            .Where(t => t.UserId == userId && !t.IsRevoked)
+            .ToListAsync(ct);
+        foreach (var t in tokens)
+        {
+            t.IsRevoked = true;
+            t.RevokedAt = DateTime.UtcNow;
+            t.RevokedByIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        }
+        await db.SaveChangesAsync(ct);
+
+        // Supprimer les cookies de session comme dans Logout
+        Response.Cookies.Delete("jwt", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure   = !_env.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+            Path     = "/",
+        });
+        Response.Cookies.Delete("refresh_token", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure   = !_env.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+            Path     = "/",
+        });
+        Response.Cookies.Delete("user_role", new CookieOptions
+        {
+            HttpOnly = false,
+            Secure   = !_env.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+            Path     = "/",
+        });
+
         return Ok(new { success = true });
     }
 
@@ -704,6 +764,130 @@ public class AuthController : ControllerBase
         && System.Text.RegularExpressions.Regex.IsMatch(password, @"[0-9]")
         && System.Text.RegularExpressions.Regex.IsMatch(password, @"[^A-Za-z0-9]");
 
+    // ── [MULTI-SOCIETES] Résolution de la société active + endpoints /api/me ──
+
+    /// <summary>
+    /// Détermine la société active et le rôle effectif d'un utilisateur.
+    /// requestedTenantId : société demandée (switch/refresh) ; null = société par défaut.
+    /// SÉCURITÉ : un non-SuperAdmin ne peut activer qu'une société dont il est MEMBRE (UserTenant).
+    /// Le claim tenant_id émis pilote directement l'isolation (TenantContext + filtres .Where).
+    /// </summary>
+    private async Task<(Guid tenantId, string effectiveRole)> ResolveActiveAsync(
+        AppDbContext db, User user, bool isSuperAdmin, Guid? requestedTenantId)
+    {
+        var memberships = await db.UserTenants
+            .Where(ut => ut.UserId == user.Id)
+            .ToListAsync();
+
+        UserTenant? chosen = null;
+        if (requestedTenantId.HasValue)
+            chosen = memberships.FirstOrDefault(m => m.TenantId == requestedTenantId.Value);
+
+        Guid tenantId;
+        string roleInTenant;
+        if (chosen != null)
+        {
+            tenantId = chosen.TenantId;
+            roleInTenant = chosen.Role;
+        }
+        else if (requestedTenantId.HasValue && isSuperAdmin)
+        {
+            // SuperAdmin : accès cross-société autorisé même sans appartenance explicite.
+            tenantId = requestedTenantId.Value;
+            roleInTenant = "admin";
+        }
+        else
+        {
+            var def = memberships.FirstOrDefault(m => m.IsDefault) ?? memberships.FirstOrDefault();
+            if (def != null) { tenantId = def.TenantId; roleInTenant = def.Role; }
+            else { tenantId = user.TenantId; roleInTenant = user.Role; } // fallback (aucune appartenance)
+        }
+
+        var effectiveRole = isSuperAdmin
+            ? "SuperAdmin"
+            : (string.Equals(roleInTenant, "owner", StringComparison.OrdinalIgnoreCase) ? "admin" : roleInTenant);
+        return (tenantId, effectiveRole);
+    }
+
+    /// <summary>Liste des sociétés de l'utilisateur connecté (pour le sélecteur de société).</summary>
+    [HttpGet("/api/me/tenants")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    public async Task<IActionResult> MyTenants([FromServices] AppDbContext db)
+    {
+        var userId = User.GetUserId();
+        Guid activeTenantId = Guid.Empty;
+        var tc = User.Claims.FirstOrDefault(c => c.Type == "tenant_id")?.Value;
+        if (tc != null) Guid.TryParse(tc, out activeTenantId);
+
+        var memberships = await db.UserTenants
+            .Where(ut => ut.UserId == userId)
+            .ToListAsync();
+        var tenantIds = memberships.Select(m => m.TenantId).ToList();
+        var tenants = await db.Tenants
+            .Where(t => tenantIds.Contains(t.Id))
+            .Select(t => new { t.Id, t.Name, t.IsActive })
+            .ToListAsync();
+
+        var list = memberships
+            .Select(m =>
+            {
+                var t = tenants.FirstOrDefault(x => x.Id == m.TenantId);
+                return new
+                {
+                    tenantId = m.TenantId,
+                    name = t?.Name ?? "(société)",
+                    role = m.Role,
+                    isActive = m.TenantId == activeTenantId,
+                    isDefault = m.IsDefault,
+                    enabled = t?.IsActive ?? true,
+                };
+            })
+            .OrderByDescending(x => x.isActive)
+            .ThenBy(x => x.name)
+            .ToList();
+
+        return Ok(new { activeTenantId, tenants = list });
+    }
+
+    public record SetActiveTenantRequest(Guid TenantId);
+
+    /// <summary>Change la société active : ré-émet le JWT/cookies pour la nouvelle société.</summary>
+    [HttpPost("/api/me/active-tenant")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    public async Task<IActionResult> SetActiveTenant([FromBody] SetActiveTenantRequest req, [FromServices] AppDbContext db)
+    {
+        var userId = User.GetUserId();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null || !user.IsActive)
+            return Unauthorized(new { error = "Compte introuvable ou désactivé." });
+
+        var isSuperAdmin = await db.SuperAdmins
+            .AnyAsync(sa => sa.IsActive && sa.Email.ToLower() == user.Email.ToLower());
+
+        // SÉCURITÉ CRITIQUE : appartenance obligatoire (sauf SuperAdmin) avant d'émettre
+        // un JWT portant cette société active — sinon fuite cross-société.
+        var member = await db.UserTenants
+            .FirstOrDefaultAsync(ut => ut.UserId == userId && ut.TenantId == req.TenantId);
+        if (member is null && !isSuperAdmin)
+            return StatusCode(403, new { error = "Vous n'êtes pas membre de cette société." });
+
+        var (activeTenantId, effectiveRole) = await ResolveActiveAsync(db, user, isSuperAdmin, req.TenantId);
+
+        SetAuthCookie(BuildJwt(activeTenantId, user.Id, effectiveRole));
+        SetRoleCookie(effectiveRole);
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var refresh = await IssueRefreshTokenAsync(db, user.Id, ip, activeTenantId);
+        SetRefreshCookie(refresh.Token);
+
+        var redirectTo = effectiveRole switch
+        {
+            "SuperAdmin" => "/superadmin",
+            var r when string.Equals(r, "admin", StringComparison.OrdinalIgnoreCase) => "/admin/dashboard",
+            _ => "/dashboard",
+        };
+        return Ok(new { success = true, tenantId = activeTenantId, role = effectiveRole, redirectTo });
+    }
+
     private string BuildJwt(Guid tenantId, Guid userId, string role)
     {
         var section  = _config.GetSection("Jwt");
@@ -779,7 +963,7 @@ public class AuthController : ControllerBase
         return Convert.ToBase64String(bytes);
     }
 
-    private async Task<RefreshToken> IssueRefreshTokenAsync(AppDbContext db, Guid userId, string ip)
+    private async Task<RefreshToken> IssueRefreshTokenAsync(AppDbContext db, Guid userId, string ip, Guid? activeTenantId = null)
     {
         // Révoquer les anciens refresh tokens actifs de cet user
         var oldTokens = await db.RefreshTokens
@@ -798,6 +982,7 @@ public class AuthController : ControllerBase
             Token       = GenerateSecureToken(),
             CreatedByIp = ip,
             ExpiresAt   = DateTime.UtcNow.AddDays(7),
+            ActiveTenantId = activeTenantId,   // [MULTI-SOCIETES]
         };
         db.RefreshTokens.Add(token);
         await db.SaveChangesAsync();

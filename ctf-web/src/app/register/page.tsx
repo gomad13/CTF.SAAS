@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLegalDocuments } from "@/lib/hooks/useLegalDocuments";
+import ConsentSection, {
+    initialConsentsState,
+    areMandatoryConsentsAccepted,
+    type RegistrationConsentsState,
+} from "@/components/legal/ConsentSection";
+import type { ConsentItem } from "@/lib/types/legal";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
@@ -14,10 +22,12 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [accessCode, setAccessCode] = useState("");
-    const [showPwd, setShowPwd] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const { documents: legalDocs } = useLegalDocuments();
+    const [consents, setConsents] = useState<RegistrationConsentsState>(initialConsentsState);
+    const [showConsentsErrors, setShowConsentsErrors] = useState(false);
 
     // Bêta DSI : on bascule en mode "fermé" si le backend dit que l'inscription publique est désactivée.
     // null = en cours de chargement (on ne flashe pas le formulaire avant la réponse).
@@ -29,6 +39,21 @@ export default function RegisterPage() {
             .then((d: { open?: boolean }) => { if (!cancelled) setRegistrationOpen(Boolean(d?.open)); })
             .catch(() => { if (!cancelled) setRegistrationOpen(false); });
         return () => { cancelled = true; };
+    }, []);
+
+    // [MULTI-SOCIETES] Flux QR : token d'invitation -> société verrouillée (preview, non saisie).
+    const [inviteToken, setInviteToken] = useState<string | null>(null);
+    const [inviteTenantName, setInviteTenantName] = useState<string | null>(null);
+    useEffect(() => {
+        const t = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("token") : null;
+        if (!t) return;
+        setInviteToken(t);
+        fetch(`${API_BASE}/api/auth/invite-preview?token=${encodeURIComponent(t)}`, { credentials: "include" })
+            .then(r => r.json())
+            .then((d: { valid?: boolean; tenantName?: string | null }) => {
+                if (d?.valid && d.tenantName) setInviteTenantName(d.tenantName);
+            })
+            .catch(() => {});
     }, []);
 
     const getStrength = (pwd: string) => {
@@ -45,12 +70,44 @@ export default function RegisterPage() {
     const strengthLabel = ["", "Très faible", "Faible", "Moyen", "Fort", "Très fort"];
     const strengthColor = ["", "var(--er)", "var(--er)", "var(--wa)", "var(--ok)", "var(--ok)"];
 
-    const canSubmit = !loading && email && password && firstName && lastName && confirm === password && password.length >= 8;
+    const consentsOk = useMemo(
+        () => areMandatoryConsentsAccepted(consents, true),
+        [consents],
+    );
+
+    const canSubmit = !loading
+        && email && password && firstName && lastName
+        && confirm === password && password.length >= 8
+        && consentsOk;
+
+    const buildConsentsPayload = (): ConsentItem[] => {
+        // On envoie les consentements pour TOUS les documents actifs connus :
+        //   - obligatoires (politique, cgu, dpa si admin) avec accepted=true
+        //   - mentions-legales : pas obligatoire mais on logue l'acceptation
+        //     implicite à la version courante pour traçabilité
+        //   - optionnels (newsletter, commercial) : pas des LegalDocuments,
+        //     ne sont pas envoyés (pas de versioning RGPD pour ces choix marketing).
+        const result: ConsentItem[] = [];
+        const polDoc = legalDocs.find(d => d.slug === "politique-confidentialite");
+        const cguDoc = legalDocs.find(d => d.slug === "cgu");
+        const dpaDoc = legalDocs.find(d => d.slug === "dpa");
+        if (polDoc) result.push({ documentSlug: polDoc.slug, documentVersion: polDoc.version, accepted: consents.politiqueConfidentialite });
+        if (cguDoc) result.push({ documentSlug: cguDoc.slug, documentVersion: cguDoc.version, accepted: consents.cgu });
+        if (dpaDoc) {
+            result.push({ documentSlug: dpaDoc.slug, documentVersion: dpaDoc.version, accepted: consents.dpa });
+        }
+        return result;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (password !== confirm) { setError("Les mots de passe ne correspondent pas."); return; }
         if (password.length < 8) { setError("Mot de passe trop court (8 minimum)."); return; }
+        if (!consentsOk) {
+            setShowConsentsErrors(true);
+            setError("Merci d'accepter les consentements obligatoires avant de poursuivre.");
+            return;
+        }
         setLoading(true);
         setError("");
         try {
@@ -63,27 +120,21 @@ export default function RegisterPage() {
                     password,
                     firstName: firstName.trim(),
                     lastName: lastName.trim(),
+                    consents: buildConsentsPayload(),
                     ...(activeTab === "enterprise" && accessCode ? { tenantId: accessCode } : {}),
                 }),
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error || data.message || "Erreur lors de la création."); return; }
-            router.push("/login?registered=1");
+            // [MULTI-SOCIETES] QR : le cookie d'auth est posé -> rejoindre la société via le token vérifié.
+            if (inviteToken) router.push(`/join?token=${encodeURIComponent(inviteToken)}`);
+            else router.push("/login?registered=1");
         } catch {
             setError("Impossible de contacter le serveur.");
         } finally {
             setLoading(false);
         }
     };
-
-    const EyeIcon = ({ show }: { show: boolean }) => (
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
-            {show
-                ? <><path d="M1.5 8C3 4.5 13 4.5 14.5 8" /><line x1="2" y1="2" x2="14" y2="14" /></>
-                : <><path d="M1.5 8C3 4.5 13 4.5 14.5 8C13 11.5 3 11.5 1.5 8z" /><circle cx="8" cy="8" r="2.5" /></>
-            }
-        </svg>
-    );
 
     // Pendant le chargement de l'état d'inscription, on ne rend rien (évite flash du formulaire).
     if (registrationOpen === null) {
@@ -100,7 +151,7 @@ export default function RegisterPage() {
                     maxWidth: 520, width: "100%",
                     background: "var(--bg-card, #1E293B)",
                     border: "1px solid var(--border, #334155)",
-                    borderRadius: 14, padding: 36, color: "var(--text-primary, #E2E8F0)",
+                    borderRadius: 14, padding: "clamp(24px, 6vw, 36px)", color: "var(--text-primary, #E2E8F0)",
                 }}>
                     <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted, #94A3B8)", marginBottom: 14 }}>
                         Bêta privée
@@ -109,7 +160,7 @@ export default function RegisterPage() {
                         Inscription réservée aux organisations partenaires
                     </h1>
                     <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary, #CBD5E1)", margin: "0 0 14px" }}>
-                        Viper est actuellement en bêta fermée. Les comptes sont créés directement par
+                        Sentys est actuellement en bêta fermée. Les comptes sont créés directement par
                         l&apos;administrateur de votre organisation, ou par notre équipe si votre entreprise
                         rejoint le programme partenaire.
                     </p>
@@ -119,21 +170,21 @@ export default function RegisterPage() {
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                         <a
-                            href="mailto:contact@viper.fr?subject=Demande%20d%27acc%C3%A8s%20bêta%20Viper"
+                            href="mailto:contact@sentys.fr?subject=Demande%20d%27acc%C3%A8s%20bêta%20Sentys"
                             style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                                 background: "#3B82F6", color: "#FFFFFF", textDecoration: "none",
-                                padding: "12px 20px", borderRadius: 10, fontSize: 14, fontWeight: 600,
+                                padding: "12px 20px", minHeight: 44, borderRadius: 10, fontSize: 14, fontWeight: 600,
                             }}
                         >
-                            Contacter l&apos;équipe Viper
+                            Contacter l&apos;équipe Sentys
                         </a>
                         <a
                             href="/landing"
                             style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                                 background: "transparent", color: "var(--text-secondary, #CBD5E1)",
-                                textDecoration: "none", padding: "10px 20px", borderRadius: 10,
+                                textDecoration: "none", padding: "10px 20px", minHeight: 44, borderRadius: 10,
                                 fontSize: 13, border: "1px solid var(--border, #334155)",
                             }}
                         >
@@ -160,7 +211,7 @@ export default function RegisterPage() {
 
                 <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 32, height: 32, background: "rgba(255,255,255,0.2)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: "white", fontFamily: "'JetBrains Mono', monospace" }}>V</div>
-                    <span style={{ fontSize: 17, fontWeight: 700, color: "white" }}>Viper</span>
+                    <span style={{ fontSize: 17, fontWeight: 700, color: "white" }}>Sentys</span>
                 </div>
 
                 <div style={{ position: "relative", zIndex: 1 }}>
@@ -173,7 +224,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", position: "relative", zIndex: 1 }}>
-                    © 2026 Viper CTF SaaS
+                    © 2026 Sentys
                 </div>
             </div>
 
@@ -193,8 +244,8 @@ export default function RegisterPage() {
 
                     {/* Tabs */}
                     <div className="tabs" style={{ width: "100%", marginBottom: 18 }}>
-                        <button className={`tab ${activeTab === "demo" ? "tab-active" : ""}`} onClick={() => setActiveTab("demo")} style={{ flex: 1 }}>Compte Demo</button>
-                        <button className={`tab ${activeTab === "enterprise" ? "tab-active" : ""}`} onClick={() => setActiveTab("enterprise")} style={{ flex: 1 }}>Compte Entreprise</button>
+                        <button className={`tab ${activeTab === "demo" ? "tab-active" : ""}`} onClick={() => setActiveTab("demo")} style={{ flex: 1, minHeight: 44 }}>Compte Demo</button>
+                        <button className={`tab ${activeTab === "enterprise" ? "tab-active" : ""}`} onClick={() => setActiveTab("enterprise")} style={{ flex: 1, minHeight: 44 }}>Compte Entreprise</button>
                     </div>
 
                     {/* Banner */}
@@ -212,8 +263,15 @@ export default function RegisterPage() {
                     )}
 
                     <form onSubmit={handleSubmit}>
+                        {/* [MULTI-SOCIETES] Société verrouillée issue du QR (non saisie manuellement) */}
+                        {inviteToken && inviteTenantName && (
+                            <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(59,130,246,0.10)", border: "1px solid rgba(59,130,246,0.35)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--text-primary, #E2E8F0)" }}>
+                                Vous créez un compte pour rejoindre la société <strong>« {inviteTenantName} »</strong>.
+                                Elle sera automatiquement associée à votre compte après l&apos;inscription.
+                            </div>
+                        )}
                         {/* Prénom + Nom */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 13 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 13 }}>
                             <div className="field" style={{ margin: 0 }}>
                                 <label className="label">Prénom</label>
                                 <input className="input input-md" type="text" placeholder="Alice" value={firstName} onChange={e => setFirstName(e.target.value)} required />
@@ -233,12 +291,14 @@ export default function RegisterPage() {
                         {/* Mot de passe */}
                         <div className="field">
                             <label className="label">Mot de passe</label>
-                            <div style={{ position: "relative" }}>
-                                <input className="input input-md" type={showPwd ? "text" : "password"} placeholder="8 caractères minimum" value={password} onChange={e => setPassword(e.target.value)} style={{ paddingRight: 40 }} required />
-                                <button type="button" onClick={() => setShowPwd(s => !s)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--tx-3)", cursor: "pointer", padding: 4, display: "flex" }}>
-                                    <EyeIcon show={showPwd} />
-                                </button>
-                            </div>
+                            <PasswordInput
+                                className="input input-md"
+                                placeholder="8 caractères minimum"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                autoComplete="new-password"
+                                required
+                            />
                             {password.length > 0 && (
                                 <div style={{ marginTop: 8 }}>
                                     <div style={{ display: "flex", gap: 3, marginBottom: 5 }}>
@@ -246,14 +306,21 @@ export default function RegisterPage() {
                                             <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, background: i <= strength ? strengthColor[strength] : "var(--bg-4)", transition: "background 0.3s" }} />
                                         ))}
                                     </div>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                        <span style={{ fontSize: 11, color: "var(--tx-3)" }}>
-                                            {password.length >= 8 ? "✓ " : "· "}8 min
-                                            {/[A-Z]/.test(password) ? " · ✓ Maj" : ""}
-                                            {/[0-9]/.test(password) ? " · ✓ Chiffre" : ""}
-                                            {/[^A-Za-z0-9]/.test(password) ? " · ✓ Spécial" : ""}
-                                        </span>
-                                        <span style={{ fontSize: 11, fontWeight: 500, color: strengthColor[strength] }}>{strengthLabel[strength]}</span>
+                                    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
+                                        <span style={{ fontSize: 11, fontWeight: 600, color: strengthColor[strength] }}>{strengthLabel[strength]}</span>
+                                    </div>
+                                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 12px" }}>
+                                        {[
+                                            { ok: password.length >= 8, label: "8 caractères minimum" },
+                                            { ok: /[a-z]/.test(password), label: "Une minuscule" },
+                                            { ok: /[A-Z]/.test(password), label: "Une majuscule" },
+                                            { ok: /[0-9]/.test(password), label: "Un chiffre" },
+                                            { ok: /[^A-Za-z0-9]/.test(password), label: "Un caractère spécial" },
+                                        ].map((c, i) => (
+                                            <span key={i} style={{ fontSize: 11, fontWeight: 500, color: c.ok ? "var(--ok)" : "var(--tx-3)" }}>
+                                                {c.ok ? "✓" : "○"} {c.label}
+                                            </span>
+                                        ))}
                                     </div>
                                 </div>
                             )}
@@ -262,12 +329,14 @@ export default function RegisterPage() {
                         {/* Confirmer */}
                         <div className="field">
                             <label className="label">Confirmer le mot de passe</label>
-                            <div style={{ position: "relative" }}>
-                                <input className={`input input-md ${confirm && confirm !== password ? "input-error" : ""}`} type={showConfirm ? "text" : "password"} placeholder="Répéter le mot de passe" value={confirm} onChange={e => setConfirm(e.target.value)} style={{ paddingRight: 40 }} required />
-                                <button type="button" onClick={() => setShowConfirm(s => !s)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--tx-3)", cursor: "pointer", padding: 4, display: "flex" }}>
-                                    <EyeIcon show={showConfirm} />
-                                </button>
-                            </div>
+                            <PasswordInput
+                                className={`input input-md ${confirm && confirm !== password ? "input-error" : ""}`}
+                                placeholder="Répéter le mot de passe"
+                                value={confirm}
+                                onChange={e => setConfirm(e.target.value)}
+                                autoComplete="new-password"
+                                required
+                            />
                             {confirm && confirm !== password && <div className="input-hint err">Les mots de passe ne correspondent pas.</div>}
                             {confirm && confirm === password && <div style={{ fontSize: 11, color: "var(--ok-l)", marginTop: 5 }}>✓ Les mots de passe correspondent.</div>}
                         </div>
@@ -279,6 +348,14 @@ export default function RegisterPage() {
                                 <input className="input input-md" type="text" placeholder="XXXX-XXXX-XXXX" value={accessCode} onChange={e => setAccessCode(e.target.value.toUpperCase())} style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em" }} />
                             </div>
                         )}
+
+                        <ConsentSection
+                            documents={legalDocs}
+                            isAdmin={true}
+                            state={consents}
+                            onChange={setConsents}
+                            showErrors={showConsentsErrors}
+                        />
 
                         {error && (
                             <div className="alert alert-er" style={{ marginBottom: 14 }}>

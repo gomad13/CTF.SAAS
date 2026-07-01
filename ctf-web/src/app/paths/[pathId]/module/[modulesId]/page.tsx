@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 
 type ActionId =
     | "wire_now"
@@ -41,102 +42,102 @@ type Scenario = {
 const SCENARIOS: Record<string, Scenario> = {
     "arnaque-au-president": {
         id: "arnaque-au-president",
-        title: "Exemple immersif : Arnaque au Président",
+        title: "Exemple immersif : Arnaque au Prï¿½sident",
         urgencyLabel: "URGENCE CRITIQUE",
         contextTitle: "Le Contexte (18h47)",
         fromLabel: "PDG",
         subjectLabel: "Confidentiel / Urgent",
         quoteHtml: (
             <>
-                “Je suis en déplacement avec un partenaire stratégique.
+                ï¿½Je suis en dï¿½placement avec un partenaire stratï¿½gique.
                 <br />
-                J’ai besoin d’un virement confidentiel de <b>48 500€</b>.
+                Jï¿½ai besoin dï¿½un virement confidentiel de <b>48 500ï¿½</b>.
                 <br />
-                Ne contacte personne. C’est urgent.”
+                Ne contacte personne. Cï¿½est urgent.ï¿½
             </>
         ),
         rightHintTitle: "Indice visuel",
         rightHintHtml: (
             <>
-                L’attaquant utilise souvent : <b>urgence</b>, <b>confidentialité</b>, et une{" "}
-                <b>autorité</b> (“PDG”, “direction”) pour court-circuiter la procédure.
+                Lï¿½attaquant utilise souvent : <b>urgence</b>, <b>confidentialitï¿½</b>, et une{" "}
+                <b>autoritï¿½</b> (ï¿½PDGï¿½, ï¿½directionï¿½) pour court-circuiter la procï¿½dure.
             </>
         ),
         imageSrc: "/modules/arnaque-au-president.jpg",
         actions: [
             {
                 id: "wire_now",
-                label: "Faire le virement immédiatement",
+                label: "Faire le virement immï¿½diatement",
                 short: "Virement direct",
                 points: -40,
                 type: "Incident Majeur",
-                consequenceTitle: "Vous exécutez la demande sans vérification.",
+                consequenceTitle: "Vous exï¿½cutez la demande sans vï¿½rification.",
                 consequenceText:
-                    "Le paiement part. Quelques minutes plus tard, vous réalisez que la demande était frauduleuse.",
-                impactLines: ["? Perte : 48 500€", "? Impact : Fraude comptable", "?? Risque réputation : Élevé"],
+                    "Le paiement part. Quelques minutes plus tard, vous rï¿½alisez que la demande ï¿½tait frauduleuse.",
+                impactLines: ["? Perte : 48 500ï¿½", "? Impact : Fraude comptable", "?? Risque rï¿½putation : ï¿½levï¿½"],
             },
             {
                 id: "reply_mail",
-                label: 'Répondre au mail ("Ok, je m’en occupe")',
-                short: "Répondre au mail",
+                label: 'Rï¿½pondre au mail ("Ok, je mï¿½en occupe")',
+                short: "Rï¿½pondre au mail",
                 points: -15,
                 type: "Mauvais Canal",
-                consequenceTitle: "Vous répondez à l’attaquant.",
+                consequenceTitle: "Vous rï¿½pondez ï¿½ lï¿½attaquant.",
                 consequenceText:
-                    "Vous confirmez votre disponibilité et donnez de la matière pour la manipulation (urgence, pression).",
-                impactLines: ["?? Risque : Relance immédiate", "?? Impact : Pression accrue", "?? Risque réputation : Moyen"],
+                    "Vous confirmez votre disponibilitï¿½ et donnez de la matiï¿½re pour la manipulation (urgence, pression).",
+                impactLines: ["?? Risque : Relance immï¿½diate", "?? Impact : Pression accrue", "?? Risque rï¿½putation : Moyen"],
             },
             {
                 id: "ignore",
                 label: "Ignorer sans signaler",
                 short: "Ignorer sans signaler",
                 points: -10,
-                type: "Manque Proactivité",
-                consequenceTitle: "Vous n’agissez pas et ne signalez pas.",
-                consequenceText: "Le risque reste actif : quelqu’un d’autre peut tomber dans le piège.",
-                impactLines: ["?? Risque : Attaque toujours active", "?? Impact : Dépend d’un autre collègue", "?? Risque réputation : Moyen"],
+                type: "Manque Proactivitï¿½",
+                consequenceTitle: "Vous nï¿½agissez pas et ne signalez pas.",
+                consequenceText: "Le risque reste actif : quelquï¿½un dï¿½autre peut tomber dans le piï¿½ge.",
+                impactLines: ["?? Risque : Attaque toujours active", "?? Impact : Dï¿½pend dï¿½un autre collï¿½gue", "?? Risque rï¿½putation : Moyen"],
             },
             {
                 id: "check_domain",
-                label: "Vérifier l’adresse email / le domaine",
-                short: "Vérifier le domaine",
+                label: "Vï¿½rifier lï¿½adresse email / le domaine",
+                short: "Vï¿½rifier le domaine",
                 points: +10,
-                type: "Bon Réflexe",
-                consequenceTitle: "Vous vérifiez l’identité du canal.",
-                consequenceText: "Vous repérez des signaux faibles (domaine proche, alias, affichage trompeur).",
-                impactLines: ["? Risque réduit : Détection possible", "?? Impact : À compléter par une validation forte", "?? Risque réputation : Moyen"],
+                type: "Bon Rï¿½flexe",
+                consequenceTitle: "Vous vï¿½rifiez lï¿½identitï¿½ du canal.",
+                consequenceText: "Vous repï¿½rez des signaux faibles (domaine proche, alias, affichage trompeur).",
+                impactLines: ["? Risque rï¿½duit : Dï¿½tection possible", "?? Impact : ï¿½ complï¿½ter par une validation forte", "?? Risque rï¿½putation : Moyen"],
             },
             {
                 id: "ask_proof",
-                label: "Demander justificatif (facture / RIB / ordre écrit)",
+                label: "Demander justificatif (facture / RIB / ordre ï¿½crit)",
                 short: "Demander justificatif",
                 points: +5,
-                type: "Réflexe Moyen",
-                consequenceTitle: "Vous demandez des éléments de preuve.",
+                type: "Rï¿½flexe Moyen",
+                consequenceTitle: "Vous demandez des ï¿½lï¿½ments de preuve.",
                 consequenceText:
-                    "C’est mieux que rien, mais un attaquant peut fournir de faux documents. Il faut une validation hors canal.",
-                impactLines: ["? Risque réduit : Un peu", "?? Impact : Faux justificatifs possibles", "?? Risque réputation : Moyen"],
+                    "Cï¿½est mieux que rien, mais un attaquant peut fournir de faux documents. Il faut une validation hors canal.",
+                impactLines: ["? Risque rï¿½duit : Un peu", "?? Impact : Faux justificatifs possibles", "?? Risque rï¿½putation : Moyen"],
             },
             {
                 id: "call_internal",
-                label: "Appeler le PDG via numéro interne / standard",
-                short: "Appeler (numéro interne)",
+                label: "Appeler le PDG via numï¿½ro interne / standard",
+                short: "Appeler (numï¿½ro interne)",
                 points: +30,
                 type: "Validation Forte",
                 consequenceTitle: "Vous appelez via un canal interne fiable.",
-                consequenceText: "Le PDG confirme qu’il n’a rien demandé. Vous coupez la manipulation immédiatement.",
-                impactLines: ["? Risque évité : 48 500€", "? Impact évité : Fraude comptable", "?? Risque réputation : Élevé (attaque ciblée)"],
+                consequenceText: "Le PDG confirme quï¿½il nï¿½a rien demandï¿½. Vous coupez la manipulation immï¿½diatement.",
+                impactLines: ["? Risque ï¿½vitï¿½ : 48 500ï¿½", "? Impact ï¿½vitï¿½ : Fraude comptable", "?? Risque rï¿½putation : ï¿½levï¿½ (attaque ciblï¿½e)"],
             },
             {
                 id: "report_security",
-                label: "Signaler au manager / sécurité / RSSI",
+                label: "Signaler au manager / sï¿½curitï¿½ / RSSI",
                 short: "Signaler",
                 points: +20,
-                type: "Procédure",
-                consequenceTitle: "Vous déclenchez la procédure interne.",
+                type: "Procï¿½dure",
+                consequenceTitle: "Vous dï¿½clenchez la procï¿½dure interne.",
                 consequenceText:
-                    "L’alerte est tracée, l’email est analysé, et un message de prévention peut être envoyé à l’organisation.",
-                impactLines: ["? Risque réduit : Organisation protégée", "? Impact : Sensibilisation immédiate", "?? Risque réputation : Moyen"],
+                    "Lï¿½alerte est tracï¿½e, lï¿½email est analysï¿½, et un message de prï¿½vention peut ï¿½tre envoyï¿½ ï¿½ lï¿½organisation.",
+                impactLines: ["? Risque rï¿½duit : Organisation protï¿½gï¿½e", "? Impact : Sensibilisation immï¿½diate", "?? Risque rï¿½putation : Moyen"],
             },
         ],
     },
@@ -147,14 +148,14 @@ function clamp(n: number, min: number, max: number) {
 }
 
 export default function ModulePage() {
-    const params = useParams<{ pathId: string; moduleId: string }>();
+    const params = useParams<{ pathId: string; modulesId: string }>();
 
     // Route params
     const pathId = params?.pathId ?? "";
-    const moduleId = params?.moduleId ?? "";
+    const moduleId = params?.modulesId ?? "";
 
-    // On supporte "general" pour l'instant (structure prod prête)
-    // Tu peux élargir plus tard.
+    // On supporte "general" pour l'instant (structure prod prï¿½te)
+    // Tu peux ï¿½largir plus tard.
     if (!pathId) return notFound();
 
     const scenario = SCENARIOS[moduleId];
@@ -163,12 +164,13 @@ export default function ModulePage() {
     const [step, setStep] = useState<"context" | "result">("context");
     const [selected, setSelected] = useState<ActionDef | null>(null);
     const [score, setScore] = useState<number>(100);
+    const isMobile = useIsMobile();
 
     const scoreLabel = useMemo(() => {
-        if (score >= 90) return "Réflexes exemplaires";
+        if (score >= 90) return "Rï¿½flexes exemplaires";
         if (score >= 70) return "Bon niveau";
-        if (score >= 50) return "Vigilance à améliorer";
-        return "Risque élevé";
+        if (score >= 50) return "Vigilance ï¿½ amï¿½liorer";
+        return "Risque ï¿½levï¿½";
     }, [score]);
 
     const onChoose = (a: ActionDef) => {
@@ -185,12 +187,12 @@ export default function ModulePage() {
     };
 
     return (
-        <div style={styles.page}>
+        <div style={{ ...styles.page, padding: isMobile ? "20px var(--page-x) 40px" : styles.page.padding }}>
             {/* Header */}
             <div style={styles.header}>
                 <div style={styles.headerBar} />
-                <div>
-                    <h1 style={styles.h1}>{scenario.title}</h1>
+                <div style={{ minWidth: 0 }}>
+                    <h1 style={{ ...styles.h1, fontSize: isMobile ? 28 : styles.h1.fontSize }}>{scenario.title}</h1>
                     <div style={styles.subRow}>
                         <span style={styles.badge}>{scenario.urgencyLabel}</span>
                         <span style={styles.subTitle}>{scenario.contextTitle}</span>
@@ -199,7 +201,7 @@ export default function ModulePage() {
             </div>
 
             {/* Layout 2 colonnes */}
-            <div style={styles.grid}>
+            <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr" }}>
                 {/* LEFT */}
                 <div style={styles.leftCard}>
                     {step === "context" && (
@@ -217,9 +219,9 @@ export default function ModulePage() {
                                 <div style={styles.quote}>{scenario.quoteHtml}</div>
                             </div>
 
-                            <h2 style={styles.h2}>Choix d’action</h2>
+                            <h2 style={styles.h2}>Choix dï¿½action</h2>
                             <div style={styles.help}>
-                                L’utilisateur doit décider : Virement ? Réponse ? Vérification ? Appel ?
+                                Lï¿½utilisateur doit dï¿½cider : Virement ? Rï¿½ponse ? Vï¿½rification ? Appel ?
                             </div>
 
                             <div style={styles.actions}>
@@ -245,33 +247,33 @@ export default function ModulePage() {
 
                     {step === "result" && selected && (
                         <>
-                            <div style={styles.resultTopRow}>
+                            <div style={{ ...styles.resultTopRow, flexDirection: isMobile ? "column" : "row" }}>
                                 <div>
-                                    <h2 style={styles.h2}>Système de Scoring & Conséquences</h2>
+                                    <h2 style={{ ...styles.h2, fontSize: isMobile ? 22 : styles.h2.fontSize }}>Systï¿½me de Scoring & Consï¿½quences</h2>
                                     <div style={styles.help}>
-                                        Votre score évolue selon l’action choisie. Objectif : réduire le risque et appliquer les bons réflexes.
+                                        Votre score ï¿½volue selon lï¿½action choisie. Objectif : rï¿½duire le risque et appliquer les bons rï¿½flexes.
                                     </div>
                                 </div>
 
-                                <div style={styles.scoreBox}>
+                                <div style={{ ...styles.scoreBox, alignSelf: isMobile ? "stretch" : undefined, textAlign: isMobile ? "left" : "right" }}>
                                     <div style={styles.scoreTitle}>Score</div>
                                     <div style={styles.scoreValue}>{score}/100</div>
                                     <div style={styles.scoreLabel}>{scoreLabel}</div>
                                 </div>
                             </div>
 
-                            <div style={styles.twoCols}>
+                            <div style={{ ...styles.twoCols, gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr" }}>
                                 {/* Table points */}
                                 <div style={styles.tableCard}>
                                     <div style={styles.tableTitle}>Logique de Points</div>
-                                    <div style={styles.tableHeader}>
+                                    <div style={{ ...styles.tableHeader, gridTemplateColumns: isMobile ? "1fr 60px 90px" : "1fr 90px 140px" }}>
                                         <div>Action</div>
                                         <div style={{ textAlign: "right" }}>Score</div>
                                         <div style={{ textAlign: "right" }}>Type</div>
                                     </div>
 
                                     {scenario.actions.map((a) => (
-                                        <div key={a.id} style={styles.tableRow}>
+                                        <div key={a.id} style={{ ...styles.tableRow, gridTemplateColumns: isMobile ? "1fr 60px 90px" : "1fr 90px 140px" }}>
                                             <div style={styles.tableRowLeft}>{a.short}</div>
                                             <div
                                                 style={{
@@ -289,7 +291,7 @@ export default function ModulePage() {
                                 {/* Consequence card */}
                                 <div style={styles.consequenceCard}>
                                     <div style={styles.consequenceTitle}>
-                                        Si l’utilisateur choisit : <span style={styles.consequenceHighlight}>{selected.short}</span>
+                                        Si lï¿½utilisateur choisit : <span style={styles.consequenceHighlight}>{selected.short}</span>
                                     </div>
                                     <div style={styles.consequenceText}>
                                         <b>{selected.consequenceTitle}</b>
@@ -368,7 +370,7 @@ const styles: Record<string, React.CSSProperties> = {
 
     leftCard: {
         background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid #E2E8F0",
         borderRadius: 18,
         padding: 18,
         boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
@@ -376,7 +378,7 @@ const styles: Record<string, React.CSSProperties> = {
 
     rightCard: {
         background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid #E2E8F0",
         borderRadius: 18,
         padding: 14,
         boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
@@ -439,7 +441,7 @@ const styles: Record<string, React.CSSProperties> = {
         borderRadius: 14,
         padding: 12,
         background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid #E2E8F0",
     },
     rightInfoTitle: { fontWeight: 900, marginBottom: 6 },
     rightInfoText: { color: "rgba(234,240,255,0.78)", lineHeight: 1.4 },
@@ -480,7 +482,7 @@ const styles: Record<string, React.CSSProperties> = {
         gridTemplateColumns: "1fr 90px 140px",
         gap: 10,
         padding: "10px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        borderBottom: "1px solid #E2E8F0",
         alignItems: "center",
     },
     tableRowLeft: { fontWeight: 800 },

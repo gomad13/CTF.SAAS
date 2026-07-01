@@ -7,11 +7,12 @@ import type { Me } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useCompetitionStatus } from "@/hooks/useCompetitionStatus";
 import { useModesStatus } from "@/hooks/useModesStatus";
+import TenantSwitcher from "./TenantSwitcher";
 import {
     LayoutDashboard, BookOpen, Trophy, Settings,
     Users, ShieldAlert, LogOut, Shield,
     BarChart3, CheckCircle2, Target, BookUser,
-    Mail, Theater, QrCode,
+    Mail, Theater,
 } from "lucide-react";
 
 function Item({ href, icon, label, badge, exact = false, danger = false }: {
@@ -94,20 +95,22 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                     {onClose && <button onClick={onClose} className="md:hidden" style={{ marginLeft: "auto", background: "none", border: "none", color: "#94A3B8", cursor: "pointer", padding: 4 }}>✕</button>}
                 </div>
 
+                {/* [MULTI-SOCIETES] Sélecteur de société (masqué si une seule) */}
+                <TenantSwitcher />
+
                 {/* Nav */}
                 <nav style={{ flex: 1, overflowY: "auto", padding: "10px 10px" }}>
                     {isAdmin && (
                         <>
                             <div style={{ fontSize: "10px", fontWeight: "700", color: "#CBD5E1", textTransform: "uppercase", letterSpacing: "0.10em", padding: "14px 12px 5px" }}>Administration</div>
                             <Item href="/admin/dashboard" icon={<Users size={15} strokeWidth={1.75} />} label="Administration" />
-                            <Item href="/admin/catalog" icon={<BookOpen size={15} strokeWidth={1.75} />} label="Catalogue" />
-                            <Item href="/admin/directory" icon={<BookUser size={15} strokeWidth={1.75} />} label="Annuaire" />
                             <Item href="/admin/entreprise" icon={<Settings size={15} strokeWidth={1.75} />} label="Paramètres entreprise" />
-                            <Item href="/admin/invites" icon={<QrCode size={15} strokeWidth={1.75} />} label="Invitations" />
-                            <Item href="/admin/scenarios" icon={<Theater size={15} strokeWidth={1.75} />} label="Scénarios" />
                             {modes?.analytics && <Item href="/admin/analytics" icon={<BarChart3 size={15} strokeWidth={1.75} />} label="Analytics" />}
-                            {modes?.compliance && <Item href="/admin/compliance" icon={<CheckCircle2 size={15} strokeWidth={1.75} />} label="Compliance" />}
+                            <Item href="/admin/catalog" icon={<BookOpen size={15} strokeWidth={1.75} />} label="Catalogue" />
+                            <Item href="/admin/scenarios" icon={<Theater size={15} strokeWidth={1.75} />} label="Scénarios" />
+                            <Item href="/admin/directory" icon={<BookUser size={15} strokeWidth={1.75} />} label="Annuaire" />
                             {modes?.teams && <Item href="/admin/teams" icon={<Users size={15} strokeWidth={1.75} />} label="Équipes" />}
+                            {modes?.compliance && <Item href="/admin/compliance" icon={<CheckCircle2 size={15} strokeWidth={1.75} />} label="Compliance" />}
                             {modes?.campaigns && <Item href="/admin/campaigns" icon={<Target size={15} strokeWidth={1.75} />} label="Campagnes" />}
                             {isSuperAdmin && <Item href="/superadmin" icon={<ShieldAlert size={15} strokeWidth={1.75} />} label="SuperAdmin" danger />}
                             <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", margin: "10px 0" }} />
