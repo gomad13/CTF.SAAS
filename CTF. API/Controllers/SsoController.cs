@@ -115,12 +115,17 @@ public class SsoController : ControllerBase
         var avatar = principal.FindFirst("picture")?.Value
             ?? principal.FindFirst("urn:google:picture")?.Value;
 
-        // email_verified (règle absolue — refus sinon)
+        // [PENTEST] email_verified — fail-closed pour Google (anti account-takeover).
+        // Google : le claim est mappe (Program.cs MapJsonKey) ; on EXIGE "true" (rejet si absent ou faux).
+        // Autres providers (Microsoft work/school = email implicitement verifie par l'IdP) :
+        // rejet uniquement si le claim est present et explicitement faux.
         var emailVerifiedClaim = principal.FindFirst("email_verified")?.Value
             ?? principal.FindFirst("urn:oauth:email_verified")?.Value;
-        if (emailVerifiedClaim is not null && !string.Equals(emailVerifiedClaim, "true", StringComparison.OrdinalIgnoreCase))
+        var isGoogle = string.Equals(provider, "google", StringComparison.OrdinalIgnoreCase);
+        var emailVerified = string.Equals(emailVerifiedClaim, "true", StringComparison.OrdinalIgnoreCase);
+        if ((isGoogle && !emailVerified) || (emailVerifiedClaim is not null && !emailVerified))
         {
-            _logger.LogWarning("[SSO] {Provider} email_verified=false — rejected", provider);
+            _logger.LogWarning("[SSO] {Provider} email non verifie — rejected", provider);
             return Redirect($"{FrontendUrl()}/login?error=email_not_verified");
         }
 

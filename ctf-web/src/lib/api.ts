@@ -4,34 +4,40 @@ if (!BASE_URL) {
     throw new Error("NEXT_PUBLIC_API_BASE_URL is missing in .env.local");
 }
 
-export function getToken() {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("ctf_token");
-}
+type FetchOpts = Omit<RequestInit, "credentials">;
 
-export function setToken(token: string) {
-    localStorage.setItem("ctf_token", token);
-}
-
-export function clearToken() {
-    localStorage.removeItem("ctf_token");
-}
-
-type FetchOpts = RequestInit & { auth?: boolean };
-
-export async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<T> {
+async function doFetch(path: string, opts: FetchOpts) {
     const headers = new Headers(opts.headers);
-
-    if (!headers.has("Content-Type") && opts.body) {
+    if (!headers.has("Content-Type") && opts.body && !(opts.body instanceof FormData)) {
         headers.set("Content-Type", "application/json");
     }
+    // CSRF protection — header requis par le backend sur POST/PUT/DELETE/PATCH
+    headers.set("X-Requested-With", "XMLHttpRequest");
+    return fetch(`${BASE_URL}${path}`, { ...opts, headers, credentials: "include" });
+}
 
-    if (opts.auth !== false) {
-        const token = getToken();
-        if (token) headers.set("Authorization", `Bearer ${token}`);
+export async function apiFetch<T>(path: string, opts: FetchOpts = {}): Promise<T> {
+    let res = await doFetch(path, opts);
+
+    // 401 → tenter un refresh automatique (sauf sur les routes auth)
+    if (res.status === 401 && !path.startsWith("/api/auth")) {
+        const refreshRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        if (refreshRes.ok) {
+            res = await doFetch(path, opts);
+        } else {
+            window.location.replace("/login");
+            throw new Error("Session expirée.");
+        }
     }
 
-    const res = await fetch(`${BASE_URL}${path}`, { ...opts, headers });
+    if (res.status === 401 && !path.startsWith("/api/auth")) {
+        window.location.replace("/login");
+        throw new Error("Session expirée.");
+    }
 
     if (res.status === 204) return undefined as T;
 

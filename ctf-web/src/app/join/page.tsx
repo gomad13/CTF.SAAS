@@ -70,12 +70,15 @@ function JoinFlow() {
             }
 
             setTenantName(data?.tenantName ?? null);
-            // Le JWT contient encore l'ancien tenant : on rafraîchit pour récupérer le nouveau.
-            await fetch(`${API_BASE}/api/auth/refresh`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "X-Requested-With": "XMLHttpRequest" },
-            }).catch(() => { /* le redirect forcera une reconnexion si besoin */ });
+            // [MULTI-SOCIETES] Basculer la société active sur celle qu'on vient de rejoindre.
+            if (data?.tenantId) {
+                await fetch(`${API_BASE}/api/me/active-tenant`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+                    body: JSON.stringify({ tenantId: data.tenantId }),
+                }).catch(() => {});
+            }
             setPhase("success");
             setTimeout(() => router.push("/dashboard"), 1800);
         } catch {
@@ -84,7 +87,17 @@ function JoinFlow() {
         }
     }, [token, router]);
 
+    // [MULTI-SOCIETES] Auto-adhésion dès qu'on est authentifié avec un token (sans clic).
+    const [autoJoined, setAutoJoined] = useState(false);
+    useEffect(() => {
+        if (phase === "ready" && !autoJoined) {
+            setAutoJoined(true);
+            join();
+        }
+    }, [phase, autoJoined, join]);
+
     const loginHref = `/login?returnUrl=${encodeURIComponent(`/join?token=${token ?? ""}`)}`;
+    const registerHref = `/register?token=${encodeURIComponent(token ?? "")}`;
 
     if (phase === "notoken") {
         return <Shell><Title>Lien d’invitation invalide</Title>
@@ -102,7 +115,7 @@ function JoinFlow() {
             <p style={msg}>Connectez-vous pour rejoindre cette entreprise avec votre compte.</p>
             <Link href={loginHref} style={primaryBtn}>Se connecter pour rejoindre</Link>
             <p style={{ ...msg, marginTop: 14, fontSize: 13 }}>
-                Pas encore de compte ? <Link href="/register" style={{ color: "var(--primary)" }}>Créer un compte</Link>
+                Pas encore de compte ? <Link href={registerHref} style={{ color: "var(--primary)" }}>Créer un compte</Link>
             </p>
         </Shell>;
     }

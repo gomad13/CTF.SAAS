@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const STORAGE_KEY = "viper.cookieConsent";
+const STORAGE_KEY = "sentys.cookieConsent";
 type Consent = "accepted" | "essential-only";
 
 // Routes où le banner est inutile / parasite : zones authentifiées et page feedback.
@@ -56,7 +56,7 @@ export default function CookieBanner() {
             }}
         >
             <p style={{ margin: 0, marginBottom: 10 }}>
-                Viper utilise uniquement des <strong>cookies strictement nécessaires</strong> à votre authentification.{" "}
+                Sentys utilise uniquement des <strong>cookies strictement nécessaires</strong> à votre authentification.{" "}
                 <Link href="/privacy" style={{ color: "#2563EB", textDecoration: "underline" }}>
                     En savoir plus
                 </Link>
@@ -66,12 +66,14 @@ export default function CookieBanner() {
                     type="button"
                     onClick={() => persist("essential-only")}
                     style={{
+                        flex: "1 1 auto",
                         background: "transparent",
                         border: "1px solid #E2E8F0",
                         color: "#334155",
-                        padding: "7px 12px",
+                        padding: "10px 12px",
+                        minHeight: 44,
                         borderRadius: 8,
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: 500,
                         cursor: "pointer",
                     }}
@@ -82,12 +84,14 @@ export default function CookieBanner() {
                     type="button"
                     onClick={() => persist("accepted")}
                     style={{
+                        flex: "1 1 auto",
                         background: "#3B82F6",
                         border: "1px solid #3B82F6",
                         color: "#FFFFFF",
-                        padding: "7px 14px",
+                        padding: "10px 14px",
+                        minHeight: 44,
                         borderRadius: 8,
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: 600,
                         cursor: "pointer",
                     }}

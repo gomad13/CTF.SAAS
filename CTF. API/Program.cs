@@ -83,6 +83,16 @@ var authBuilder = builder.Services.AddAuthentication(JwtBearerDefaults.Authentic
         googleOptions.ClientSecret = string.IsNullOrEmpty(gsec) ? "not-configured" : gsec;
         googleOptions.CallbackPath = "/api/auth/google/callback";
         googleOptions.SignInScheme = "ExternalCookies";
+        // [PENTEST] PKCE (anti-interception du code) + extraction du claim email_verified
+        // depuis le payload userinfo Google, pour le controle fail-closed cote SsoController
+        // (anti account-takeover).
+        googleOptions.UsePkce = true;
+        googleOptions.Events.OnCreatingTicket = ctx =>
+        {
+            if (ctx.User.TryGetProperty("email_verified", out var ev) && ctx.Identity is not null)
+                ctx.Identity.AddClaim(new System.Security.Claims.Claim("email_verified", ev.ToString()));
+            return System.Threading.Tasks.Task.CompletedTask;
+        };
     })
     .AddMicrosoftAccount("MicrosoftAccount", msOptions =>
     {
@@ -92,8 +102,13 @@ var authBuilder = builder.Services.AddAuthentication(JwtBearerDefaults.Authentic
         msOptions.ClientSecret = string.IsNullOrEmpty(msec) ? "not-configured" : msec;
         msOptions.CallbackPath = "/api/auth/microsoft/callback";
         msOptions.SignInScheme = "ExternalCookies";
-        msOptions.AuthorizationEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
-        msOptions.TokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+        // [PENTEST] tenant Microsoft restreint si configure
+        // Par defaut Microsoft accepte n'importe quel tenant ('common'). Si un TenantId
+        // est configure, on restreint l'autorite a ce tenant ; sinon on garde 'common'.
+        var msTenantCfg = builder.Configuration["Authentication:Microsoft:TenantId"];
+        var msTenant = string.IsNullOrWhiteSpace(msTenantCfg) ? "common" : msTenantCfg;
+        msOptions.AuthorizationEndpoint = $"https://login.microsoftonline.com/{msTenant}/oauth2/v2.0/authorize";
+        msOptions.TokenEndpoint = $"https://login.microsoftonline.com/{msTenant}/oauth2/v2.0/token";
     });
 
 authBuilder.AddJwtBearer(options =>
@@ -273,6 +288,14 @@ if (app.Environment.IsDevelopment())
     // Documents légaux : seedés à chaque démarrage si table vide (Resources/Legal/*.html)
     var legalSeeder = scope.ServiceProvider.GetRequiredService<CTF.Api.Services.Legal.ILegalDocumentSeeder>();
     await legalSeeder.SeedAsync(CancellationToken.None);
+}
+
+// [POITIER] Parcours dédié à la société Poitier — seedé dans TOUS les environnements
+// (prod incluse), idempotent via GUIDs stables.
+using (var poitierScope = app.Services.CreateScope())
+{
+    var poitierDb = poitierScope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await CTF.Api.Data.Seeds.ParcoursPoitierSeeder.SeedAsync(poitierDb);
 }
 
 // ✅ Swagger DEV only

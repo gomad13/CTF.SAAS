@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "viper.betaBannerDismissed";
+const STORAGE_KEY = "sentys.betaBannerDismissed";
 
 export default function BetaBanner() {
     const [dismissed, setDismissed] = useState<boolean | null>(null);
@@ -26,18 +26,20 @@ export default function BetaBanner() {
         <div
             role="status"
             aria-live="polite"
+            className="beta-banner"
             style={{
                 width: "100%",
                 background: "linear-gradient(90deg, #1E3A8A 0%, #2563EB 100%)",
                 color: "#FFFFFF",
-                fontSize: 13,
-                padding: "8px 16px",
                 display: "flex",
+                flexWrap: "wrap",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 12,
+                gap: 8,
+                textAlign: "center",
                 position: "relative",
                 zIndex: 50,
+                boxSizing: "border-box",
             }}
         >
             <span aria-hidden="true">🧪</span>

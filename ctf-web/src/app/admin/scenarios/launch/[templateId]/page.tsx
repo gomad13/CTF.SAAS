@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import {
     useScenarioCatalogDetail,
     useEmployeesWithConsent,
@@ -24,6 +25,7 @@ export default function LaunchScenarioPage() {
 
     const { data: tpl, isLoading: tplLoading } = useScenarioCatalogDetail(templateId);
     const { data: employees, isLoading: employeesLoading } = useEmployeesWithConsent();
+    const isMobile = useIsMobile();
 
     const [stepIndex, setStepIndex] = useState(0);
     const [targetUserIds, setTargetUserIds] = useState<string[]>([]);
@@ -100,17 +102,17 @@ export default function LaunchScenarioPage() {
     if (!tpl) return <div style={{ padding: 24, color: "#EF4444" }}>Scénario introuvable.</div>;
 
     return (
-        <div style={{ padding: "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: isMobile ? "20px var(--page-x)" : "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
             {/* Header */}
             <Link href="/admin/scenarios" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 12 }}>
                 <ArrowLeft size={14} /> Retour catalogue
             </Link>
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 24, marginBottom: 24, display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 8, background: "rgba(59,130,246,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: isMobile ? 16 : 24, marginBottom: isMobile ? 16 : 24, display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 8, background: "rgba(59,130,246,0.10)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <Theater size={24} color="#3B82F6" strokeWidth={1.75} />
                 </div>
-                <div style={{ flex: 1 }}>
-                    <h1 style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", margin: 0 }}>{tpl.name}</h1>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <h1 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 700, color: "#1E293B", margin: 0 }}>{tpl.name}</h1>
                     <p style={{ fontSize: 13, color: "#64748B", margin: "4px 0 0" }}>{tpl.description}</p>
                 </div>
                 <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#64748B" }}>
@@ -119,29 +121,45 @@ export default function LaunchScenarioPage() {
                 </div>
             </div>
 
-            {/* Stepper */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-                {STEP_LABELS.map((label, i) => (
-                    <div key={label} style={{
-                        flex: 1, display: "flex", alignItems: "center", gap: 8,
-                        padding: "10px 14px", borderRadius: 8,
-                        background: i === stepIndex ? "#FFFFFF" : "transparent",
-                        border: i === stepIndex ? "1px solid #3B82F6" : "1px solid transparent",
-                    }}>
-                        <div style={{
-                            width: 24, height: 24, borderRadius: "50%",
-                            background: i < stepIndex ? "#10B981" : i === stepIndex ? "#3B82F6" : "#E2E8F0",
-                            color: i <= stepIndex ? "white" : "#64748B",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 12, fontWeight: 600,
-                        }}>{i < stepIndex ? <Check size={13} /> : i + 1}</div>
-                        <span style={{ fontSize: 13, fontWeight: i === stepIndex ? 600 : 400, color: i === stepIndex ? "#1E293B" : "#64748B" }}>{label}</span>
+            {/* Stepper : compact "Étape n/N" + barre de progression sur mobile */}
+            {isMobile ? (
+                <div style={{ marginBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1E293B" }}>
+                            Étape {stepIndex + 1}/{STEP_LABELS.length} — {STEP_LABELS[stepIndex]}
+                        </span>
                     </div>
-                ))}
-            </div>
+                    <div style={{ height: 6, background: "#E2E8F0", borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{
+                            height: "100%", width: `${((stepIndex + 1) / STEP_LABELS.length) * 100}%`,
+                            background: "#3B82F6", borderRadius: 999, transition: "width 0.2s",
+                        }} />
+                    </div>
+                </div>
+            ) : (
+                <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+                    {STEP_LABELS.map((label, i) => (
+                        <div key={label} style={{
+                            flex: 1, display: "flex", alignItems: "center", gap: 8,
+                            padding: "10px 14px", borderRadius: 8,
+                            background: i === stepIndex ? "#FFFFFF" : "transparent",
+                            border: i === stepIndex ? "1px solid #3B82F6" : "1px solid transparent",
+                        }}>
+                            <div style={{
+                                width: 24, height: 24, borderRadius: "50%",
+                                background: i < stepIndex ? "#10B981" : i === stepIndex ? "#3B82F6" : "#E2E8F0",
+                                color: i <= stepIndex ? "white" : "#64748B",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 12, fontWeight: 600,
+                            }}>{i < stepIndex ? <Check size={13} /> : i + 1}</div>
+                            <span style={{ fontSize: 13, fontWeight: i === stepIndex ? 600 : 400, color: i === stepIndex ? "#1E293B" : "#64748B" }}>{label}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Content */}
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 24, minHeight: 320 }}>
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: isMobile ? 16 : 24, minHeight: 320 }}>
                 {stepIndex === 0 && (
                     <StepTargetAndSender
                         employees={employees ?? []}
@@ -153,6 +171,7 @@ export default function LaunchScenarioPage() {
                         onSelectSender={setSenderUserId}
                         onScrollToTargets={scrollToTargetsList}
                         targetsListRef={targetsListRef}
+                        isMobile={isMobile}
                     />
                 )}
                 {stepIndex === 1 && (
@@ -162,6 +181,7 @@ export default function LaunchScenarioPage() {
                         onChange={setOverrides}
                         mode={mode}
                         onModeChange={setMode}
+                        isMobile={isMobile}
                     />
                 )}
                 {stepIndex === 2 && (
@@ -181,17 +201,21 @@ export default function LaunchScenarioPage() {
                 </div>
             )}
 
-            {/* Footer buttons */}
-            <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between" }}>
+            {/* Footer buttons : empilés et pleine largeur sur mobile */}
+            <div style={{
+                marginTop: 16, display: "flex", gap: 8,
+                flexDirection: isMobile ? "column-reverse" : "row",
+                justifyContent: "space-between",
+            }}>
                 <button
                     onClick={() => setStepIndex(i => Math.max(0, i - 1))}
                     disabled={stepIndex === 0}
                     style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                         padding: "10px 16px", border: "1px solid #E2E8F0", borderRadius: 8,
                         background: "#FFFFFF", color: stepIndex === 0 ? "#CBD5E1" : "#334155",
                         fontSize: 14, cursor: stepIndex === 0 ? "not-allowed" : "pointer",
-                        transition: "all 0.2s",
+                        transition: "all 0.2s", width: isMobile ? "100%" : "auto",
                     }}
                 ><ChevronLeft size={16} /> Précédent</button>
 
@@ -200,11 +224,11 @@ export default function LaunchScenarioPage() {
                         onClick={() => setStepIndex(i => Math.min(STEP_LABELS.length - 1, i + 1))}
                         disabled={!canNext}
                         style={{
-                            display: "inline-flex", alignItems: "center", gap: 6,
+                            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                             padding: "10px 16px", border: "none", borderRadius: 8,
                             background: canNext ? "#3B82F6" : "#CBD5E1", color: "white",
                             fontSize: 14, cursor: canNext ? "pointer" : "not-allowed",
-                            transition: "all 0.2s", fontWeight: 500,
+                            transition: "all 0.2s", fontWeight: 500, width: isMobile ? "100%" : "auto",
                         }}
                     >Suivant <ChevronRight size={16} /></button>
                 ) : (
@@ -212,11 +236,11 @@ export default function LaunchScenarioPage() {
                         onClick={onLaunch}
                         disabled={launching || targetUserIds.length === 0 || !senderUserId}
                         style={{
-                            display: "inline-flex", alignItems: "center", gap: 6,
+                            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                             padding: "10px 20px", border: "none", borderRadius: 8,
                             background: "#10B981", color: "white",
                             fontSize: 14, cursor: launching ? "wait" : "pointer",
-                            transition: "all 0.2s", fontWeight: 600,
+                            transition: "all 0.2s", fontWeight: 600, width: isMobile ? "100%" : "auto",
                         }}
                     ><Rocket size={16} /> {launching ? "Lancement…" : `Lancer (${targetUserIds.length})`}</button>
                 )}
@@ -231,7 +255,7 @@ function StepTargetAndSender({
     employees, loading,
     targetUserIds, senderUserId,
     onToggleTarget, onRemoveTarget, onSelectSender,
-    onScrollToTargets, targetsListRef,
+    onScrollToTargets, targetsListRef, isMobile,
 }: {
     employees: EmployeeWithConsent[]; loading: boolean;
     targetUserIds: string[]; senderUserId: string | null;
@@ -240,6 +264,7 @@ function StepTargetAndSender({
     onSelectSender: (id: string) => void;
     onScrollToTargets: () => void;
     targetsListRef: React.MutableRefObject<HTMLDivElement | null>;
+    isMobile: boolean;
 }) {
     const [filterTarget, setFilterTarget] = useState("");
     const [filterSender, setFilterSender] = useState("");
@@ -282,7 +307,7 @@ function StepTargetAndSender({
                 onScrollToList={onScrollToTargets}
             />
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginTop: 16 }}>
                 {/* Colonne destinataires (multi-select) */}
                 <div ref={targetsListRef}>
                     <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -473,12 +498,13 @@ function RecipientsRecap({
 
 // ── Étape 2 : personnalisation + mode ───────────────────────────────────────
 
-function StepCustomize({ tpl, overrides, onChange, mode, onModeChange }: {
+function StepCustomize({ tpl, overrides, onChange, mode, onModeChange, isMobile }: {
     tpl: { timeline?: { stepId: string; subject: string; bodyTemplate: string; isAttackStep: boolean; stepOrder: number }[] };
     overrides: Record<string, { subject?: string; bodyTemplate?: string }>;
     onChange: (next: Record<string, { subject?: string; bodyTemplate?: string }>) => void;
     mode: "normal" | "demo";
     onModeChange: (m: "normal" | "demo") => void;
+    isMobile: boolean;
 }) {
     const steps = (tpl.timeline ?? []).slice().sort((a, b) => a.stepOrder - b.stepOrder);
     const [activeStep, setActiveStep] = useState<string | null>(steps[0]?.stepId ?? null);
@@ -512,15 +538,22 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange }: {
                 </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "200px 1fr", gap: 16 }}>
+                <div style={{
+                    display: "flex",
+                    flexDirection: isMobile ? "row" : "column",
+                    gap: isMobile ? 8 : 4,
+                    overflowX: isMobile ? "auto" : "visible",
+                    paddingBottom: isMobile ? 4 : 0,
+                }}>
                     {steps.map(s => (
-                        <button key={s.stepId} onClick={() => setActiveStep(s.stepId)} style={{
+                        <button key={`${s.stepOrder}-${s.stepId}`} onClick={() => setActiveStep(s.stepId)} style={{
                             textAlign: "left", padding: "10px 12px", borderRadius: 8,
                             border: activeStep === s.stepId ? "2px solid #3B82F6" : "1px solid #E2E8F0",
                             background: activeStep === s.stepId ? "#F1F5F9" : "#FFFFFF",
                             cursor: "pointer", fontSize: 13,
-                            color: "#1E293B",
+                            color: "#1E293B", flexShrink: isMobile ? 0 : undefined,
+                            whiteSpace: isMobile ? "nowrap" : undefined,
                         }}>
                             <div style={{ fontWeight: 600 }}>Étape {s.stepOrder}</div>
                             <div style={{ fontSize: 11, color: s.isAttackStep ? "#EF4444" : "#64748B" }}>{s.isAttackStep ? "⚠ Attaque" : "Anodine"}</div>
@@ -534,8 +567,7 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange }: {
                                 <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 4 }}>SUJET</span>
                                 <input
                                     type="text"
-                                    defaultValue={current.subject}
-                                    value={ov?.subject ?? current.subject}
+                                    value={ov?.subject ?? current.subject ?? ""}
                                     onChange={e => setOverride(current.stepId, "subject", e.target.value)}
                                     style={{ width: "100%", padding: "8px 12px", border: "1px solid #E2E8F0", borderRadius: 6, fontSize: 13 }}
                                 />
@@ -544,7 +576,7 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange }: {
                                 <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 4 }}>CORPS HTML</span>
                                 <textarea
                                     rows={12}
-                                    value={ov?.bodyTemplate ?? current.bodyTemplate}
+                                    value={ov?.bodyTemplate ?? current.bodyTemplate ?? ""}
                                     onChange={e => setOverride(current.stepId, "bodyTemplate", e.target.value)}
                                     style={{ width: "100%", padding: 12, border: "1px solid #E2E8F0", borderRadius: 6, fontSize: 13, fontFamily: "monospace", resize: "vertical" }}
                                 />

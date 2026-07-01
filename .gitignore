@@ -137,3 +137,27 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# .NET build outputs
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Visual Studio
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET secrets — never commit credentials or JWT keys
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json
+!appsettings.json
+.env.local
+secrets.json
+SUPERADMIN_PROCEDURE.md

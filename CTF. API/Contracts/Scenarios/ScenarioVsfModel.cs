@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace CTF.Api.Contracts.Scenarios;
 
 /// <summary>
-/// Représentation strongly-typed du JSON VSF (Viper Scenario Format) qu'on
+/// Représentation strongly-typed du JSON VSF (Sentys Scenario Format) qu'on
 /// trouve dans Resources/Scenarios/*.json. Sert au seeder + au renderer +
 /// au moteur. Le contenu reste fidèle au fichier source ; il est gelé dans
 /// <c>ScenarioInstance.CustomizedJson</c> au lancement (immuable pendant

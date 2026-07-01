@@ -6,10 +6,12 @@ import Link from "next/link";
 import DOMPurify from "dompurify";
 import { useInboxEmail, useReportPhishing } from "@/lib/hooks/useScenarios";
 import { ArrowLeft, ShieldCheck, AlertTriangle } from "lucide-react";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 
 export default function EmailDetailPage() {
     const params = useParams<{ emailId: string }>();
     const router = useRouter();
+    const isMobile = useIsMobile();
     const { data: email, isLoading, refetch } = useInboxEmail(params.emailId);
     const { report, isLoading: reporting } = useReportPhishing();
     const [reportMessage, setReportMessage] = useState<string | null>(null);
@@ -20,9 +22,12 @@ export default function EmailDetailPage() {
         // DOMPurify avec config par défaut côté client. Le backend renvoie déjà
         // du HTML rendu et nettoyé (nos templates), mais on ajoute cette défense
         // en profondeur côté front au cas où un override admin contiendrait du XSS.
+        // [PENTEST] retrait de "style" (anti CSS-injection / UI redressing) + interdiction explicite des tags dangereux
         return DOMPurify.sanitize(email.bodyHtml, {
             ALLOWED_TAGS: ["p", "a", "br", "strong", "em", "b", "i", "u", "ul", "ol", "li", "img", "h1", "h2", "h3", "h4", "blockquote", "div", "span"],
-            ALLOWED_ATTR: ["href", "src", "alt", "title", "rel", "target", "width", "height", "style", "data-original-href"],
+            ALLOWED_ATTR: ["href", "src", "alt", "title", "rel", "target", "width", "height", "data-original-href"],
+            FORBID_TAGS: ["script", "iframe", "object", "embed", "style", "form"],
+            FORBID_ATTR: ["style", "onerror", "onload"],
         });
     }, [email?.bodyHtml]);
 
@@ -47,16 +52,16 @@ export default function EmailDetailPage() {
     }
 
     return (
-        <div style={{ padding: "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
-            <Link href="/inbox" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 12 }}>
+        <div style={{ padding: isMobile ? "20px 16px" : "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+            <Link href="/inbox" style={{ display: "inline-flex", alignItems: "center", gap: 6, minHeight: 44, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 8 }}>
                 <ArrowLeft size={14} /> Retour Inbox
             </Link>
 
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 24 }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid #E2E8F0" }}>
+            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: isMobile ? 16 : 24 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid #E2E8F0" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <h1 style={{ fontSize: 18, fontWeight: 600, color: "#1E293B", margin: "0 0 8px" }}>{email.subject}</h1>
-                        <div style={{ fontSize: 13, color: "#64748B" }}>
+                        <h1 style={{ fontSize: 18, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", overflowWrap: "break-word" }}>{email.subject}</h1>
+                        <div style={{ fontSize: 13, color: "#64748B", overflowWrap: "break-word", wordBreak: "break-word" }}>
                             <strong style={{ color: "#334155" }}>{email.fromName}</strong> &lt;{email.fromEmail}&gt;
                         </div>
                         <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 2 }}>
@@ -65,11 +70,12 @@ export default function EmailDetailPage() {
                     </div>
                     {!email.isSystemNotification && !email.isReported && (
                         <button onClick={onReport} disabled={reporting} style={{
-                            display: "inline-flex", alignItems: "center", gap: 6,
-                            padding: "10px 14px", border: "1px solid #FCA5A5",
+                            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
+                            padding: "10px 14px", minHeight: 44, border: "1px solid #FCA5A5",
                             background: "#FEF2F2", color: "#B91C1C",
                             borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: reporting ? "wait" : "pointer",
                             transition: "all 0.2s",
+                            width: isMobile ? "100%" : "auto",
                         }}>
                             <AlertTriangle size={14} /> {reporting ? "Signalement…" : "Signaler comme phishing"}
                         </button>
@@ -91,7 +97,8 @@ export default function EmailDetailPage() {
                 )}
 
                 <div
-                    style={{ fontSize: 14, color: "#334155", lineHeight: 1.6 }}
+                    className="inbox-email-body"
+                    style={{ fontSize: 14, color: "#334155", lineHeight: 1.6, overflowWrap: "break-word", wordBreak: "break-word" }}
                     dangerouslySetInnerHTML={{ __html: safeHtml }}
                 />
             </div>

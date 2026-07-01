@@ -18,7 +18,7 @@ export default function Footer({ compact = false }: { compact?: boolean }) {
                 alignItems: "center",
             }}
         >
-            <span>© 2026 Viper — Bêta privée · Plateforme hébergée en France 🇫🇷</span>
+            <span>© 2026 Sentys — Bêta privée · Plateforme hébergée en France 🇫🇷</span>
             <nav style={{ display: "flex", gap: 14, flexWrap: "wrap" }} aria-label="Liens légaux">
                 <Link href="/cgu" style={linkStyle()}>CGU</Link>
                 <Link href="/privacy" style={linkStyle()}>Confidentialité</Link>

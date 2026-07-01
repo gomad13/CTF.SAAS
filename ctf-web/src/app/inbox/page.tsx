@@ -3,21 +3,23 @@
 import Link from "next/link";
 import { useInbox } from "@/lib/hooks/useScenarios";
 import { Mail, ShieldCheck, AlertTriangle, Inbox as InboxIcon } from "lucide-react";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import type { InboxEmailListItem } from "@/lib/types/scenarios";
 
 export default function InboxPage() {
     const { data, isLoading } = useInbox(true);
+    const isMobile = useIsMobile();
 
     const unreadCount = data?.filter(e => !e.isRead).length ?? 0;
 
     return (
-        <div style={{ padding: "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
-            <div style={{ marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1E293B", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-                        <InboxIcon size={26} strokeWidth={1.75} /> Inbox
+        <div style={{ padding: isMobile ? "20px 16px" : "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+            <div style={{ marginBottom: isMobile ? 16 : 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ minWidth: 0 }}>
+                    <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#1E293B", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                        <InboxIcon size={isMobile ? 22 : 26} strokeWidth={1.75} /> Inbox
                     </h1>
-                    <p style={{ color: "#64748B", fontSize: 14, marginTop: 4 }}>Tes emails de simulation. Si tu repères un message suspect, signale-le immédiatement.</p>
+                    <p style={{ color: "#64748B", fontSize: isMobile ? 13 : 14, marginTop: 4 }}>Tes emails de simulation. Si tu repères un message suspect, signale-le immédiatement.</p>
                 </div>
                 {unreadCount > 0 && (
                     <span style={{ background: "#3B82F6", color: "white", padding: "4px 12px", borderRadius: 99, fontSize: 12, fontWeight: 600 }}>{unreadCount} non lu{unreadCount > 1 ? "s" : ""}</span>

@@ -47,35 +47,50 @@ public class AssignmentsController : ControllerBase
     // ----------------------------
     // USER: voir ses parcours assignés + progress
     // GET /api/assignments/mine
+    // Retourne la liste union (visibility service) avec métadonnées assignement/progression
+    // pour rétro-compatibilité avec l'ancien contrat.
     // ----------------------------
     [HttpGet("mine")]
-    public async Task<IActionResult> Mine()
+    public async Task<IActionResult> Mine([FromServices] CTF.Api.Services.ParcoursVisibilityService visibility)
     {
         var tenantId = GetTenantId();
         var userId = GetUserId();
 
-        var items = await (
-            from a in _db.Assignments.AsNoTracking()
-            join p in _db.Progresses.AsNoTracking()
-                on new { a.TenantId, a.UserId, a.PathId }
-                equals new { p.TenantId, p.UserId, p.PathId }
-                into pg
-            from p in pg.DefaultIfEmpty()
-            where a.TenantId == tenantId && a.UserId == userId
-            orderby a.AssignedAt descending
-            select new
+        var pathIds = await visibility.VisiblePathIdsForUserAsync(userId);
+        if (pathIds.Count == 0) return Ok(Array.Empty<object>());
+
+        var paths = await _db.Paths.AsNoTracking()
+            .Where(p => pathIds.Contains(p.Id))
+            .Select(p => new { p.Id, p.Title, p.Level })
+            .ToListAsync();
+
+        var progresses = await _db.Progresses.AsNoTracking()
+            .Where(p => p.UserId == userId && pathIds.Contains(p.PathId))
+            .ToDictionaryAsync(p => p.PathId, p => new { p.Status, p.Percent }, CancellationToken.None);
+
+        var assigns = await _db.Assignments.AsNoTracking()
+            .Where(a => a.TenantId == tenantId && a.UserId == userId && pathIds.Contains(a.PathId))
+            .ToDictionaryAsync(a => a.PathId, a => a, CancellationToken.None);
+
+        var items = paths.Select(p =>
+        {
+            assigns.TryGetValue(p.Id, out var a);
+            progresses.TryGetValue(p.Id, out var pr);
+            return new
             {
-                a.PathId,
-                a.Status,
-                a.DueAt,
-                a.AssignedAt,
-                a.StartedAt,
-                a.CompletedAt,
-                a.UpdatedAt,
-                ProgressStatus = p != null ? p.Status : "not_started",
-                ProgressPercent = p != null ? p.Percent : 0
-            }
-        ).ToListAsync();
+                PathId = p.Id,
+                PathTitle = p.Title,
+                PathLevel = p.Level,
+                Status = a?.Status ?? Assignment.Statuses.Assigned,
+                DueAt = a?.DueAt,
+                AssignedAt = a?.AssignedAt,
+                StartedAt = a?.StartedAt,
+                CompletedAt = a?.CompletedAt,
+                UpdatedAt = a?.UpdatedAt,
+                ProgressStatus = pr?.Status ?? "not_started",
+                ProgressPercent = pr?.Percent ?? 0
+            };
+        }).OrderByDescending(x => x.AssignedAt ?? DateTime.MinValue).ToList();
 
         return Ok(items);
     }
@@ -85,7 +100,9 @@ public class AssignmentsController : ControllerBase
     // POST /api/assignments/{pathId}/start
     // ----------------------------
     [HttpPost("{pathId:guid}/start")]
-    public async Task<IActionResult> Start(Guid pathId)
+    public async Task<IActionResult> Start(
+        Guid pathId,
+        [FromServices] CTF.Api.Services.ParcoursVisibilityService visibility)
     {
         var tenantId = GetTenantId();
         var userId = GetUserId();
@@ -98,7 +115,26 @@ public class AssignmentsController : ControllerBase
                 a.PathId == pathId);
 
         if (assignment is null)
-            return NotFound(new { message = "Assignment not found." });
+        {
+            // Le user peut avoir accès au parcours via global/team/compliance sans Assignment propagée
+            // (ex : compliance "all_users" qui n'écrit pas dans Assignments). On auto-provisionne
+            // un Assignment si le parcours est visible.
+            var visiblePathIds = await visibility.VisiblePathIdsForUserAsync(userId);
+            if (!visiblePathIds.Contains(pathId))
+                return NotFound(new { message = "Parcours non visible pour cet utilisateur." });
+
+            assignment = new Assignment
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                UserId = userId,
+                PathId = pathId,
+                Status = Assignment.Statuses.Assigned,
+                AssignedAt = now,
+                UpdatedAt = now
+            };
+            _db.Assignments.Add(assignment);
+        }
 
         if (assignment.Status == Assignment.Statuses.Completed ||
             assignment.Status == Assignment.Statuses.Started)
@@ -204,7 +240,9 @@ public class AssignmentsController : ControllerBase
 
     [HttpPost("assign")]
     [Authorize(Roles = "admin")]
-    public async Task<IActionResult> Assign([FromBody] AssignRequest req)
+    public async Task<IActionResult> Assign(
+        [FromBody] AssignRequest req,
+        [FromServices] CTF.Api.Services.ParcoursVisibilityService visibility)
     {
         var tenantId = GetTenantId();
         var adminId = GetUserId();
@@ -216,11 +254,9 @@ public class AssignmentsController : ControllerBase
         if (!userExists)
             return BadRequest(new { message = "User not found." });
 
-        var pathExists = await _db.Paths
-            .AnyAsync(p => p.TenantId == tenantId && p.Id == req.PathId);
-
-        if (!pathExists)
-            return BadRequest(new { message = "Path not found." });
+        var visible = await visibility.CanAccessAsync(tenantId, req.PathId);
+        if (!visible)
+            return BadRequest(new { message = "Path not accessible for your tenant." });
 
         var assignment = await _db.Assignments
             .SingleOrDefaultAsync(a =>

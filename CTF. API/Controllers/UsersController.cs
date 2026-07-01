@@ -1,6 +1,7 @@
 ﻿using CTF.Api.Data;
 using CTF.Api.Models;
 using CTF.Api.Security;
+using CTF.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -107,6 +108,9 @@ public class UsersController : ControllerBase
         };
 
         _db.Users.Add(user);
+        // Cohérence many-to-many : crée aussi l'appartenance si une équipe est fournie.
+        if (user.TeamId.HasValue)
+            await TeamMembershipSync.ApplyPrimaryTeamAsync(_db, tenantId, user.Id, user.TeamId, ct: default);
 
         try
         {

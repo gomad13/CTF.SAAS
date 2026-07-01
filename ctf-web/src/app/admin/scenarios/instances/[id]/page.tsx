@@ -13,7 +13,7 @@ export default function InstanceDetailPage() {
     if (!data) return <div style={{ padding: 24, color: "#EF4444" }}>Instance introuvable.</div>;
 
     return (
-        <div style={{ padding: "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: "var(--page-x)", background: "#F8FAFC", minHeight: "100%" }}>
             <Link href="/admin/scenarios/instances" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 12 }}>
                 <ArrowLeft size={14} /> Retour
             </Link>
@@ -34,7 +34,8 @@ export default function InstanceDetailPage() {
 
             <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 24, marginBottom: 24 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 16px", display: "flex", alignItems: "center", gap: 8 }}><Clock size={18} /> Étapes planifiées</h2>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <div className="resp-scroll-x">
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 620 }}>
                     <thead>
                         <tr style={{ background: "#F1F5F9", textTransform: "uppercase", fontSize: 11, color: "#64748B", letterSpacing: "0.05em" }}>
                             <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 600 }}>Ordre</th>
@@ -56,6 +57,7 @@ export default function InstanceDetailPage() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 24 }}>
