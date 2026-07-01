@@ -49,6 +49,9 @@ export default function RegisterPage() {
         const t = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("token") : null;
         if (!t) return;
         setInviteToken(t);
+        // [FIX ONGLET] Token entreprise dans l URL -> onglet Compte Entreprise actif par
+        // défaut (sinon demo). L utilisateur peut toujours basculer manuellement.
+        setActiveTab("enterprise");
         fetch(`${API_BASE}/api/auth/invite-preview?token=${encodeURIComponent(t)}`, { credentials: "include" })
             .then(r => r.json())
             .then((d: { valid?: boolean; tenantName?: string | null }) => {
