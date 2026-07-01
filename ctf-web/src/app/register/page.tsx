@@ -44,6 +44,7 @@ export default function RegisterPage() {
     // [MULTI-SOCIETES] Flux QR : token d'invitation -> société verrouillée (preview, non saisie).
     const [inviteToken, setInviteToken] = useState<string | null>(null);
     const [inviteTenantName, setInviteTenantName] = useState<string | null>(null);
+    const [inviteInvalid, setInviteInvalid] = useState(false);
     useEffect(() => {
         const t = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("token") : null;
         if (!t) return;
@@ -51,9 +52,10 @@ export default function RegisterPage() {
         fetch(`${API_BASE}/api/auth/invite-preview?token=${encodeURIComponent(t)}`, { credentials: "include" })
             .then(r => r.json())
             .then((d: { valid?: boolean; tenantName?: string | null }) => {
-                if (d?.valid && d.tenantName) setInviteTenantName(d.tenantName);
+                if (d?.valid && d.tenantName) { setInviteTenantName(d.tenantName); setInviteInvalid(false); }
+                else setInviteInvalid(true);
             })
-            .catch(() => {});
+            .catch(() => setInviteInvalid(true));
     }, []);
 
     const getStrength = (pwd: string) => {
@@ -121,13 +123,15 @@ export default function RegisterPage() {
                     firstName: firstName.trim(),
                     lastName: lastName.trim(),
                     consents: buildConsentsPayload(),
+                    ...(inviteToken ? { token: inviteToken } : {}),
                     ...(activeTab === "enterprise" && accessCode ? { tenantId: accessCode } : {}),
                 }),
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error || data.message || "Erreur lors de la création."); return; }
-            // [MULTI-SOCIETES] QR : le cookie d'auth est posé -> rejoindre la société via le token vérifié.
-            if (inviteToken) router.push(`/join?token=${encodeURIComponent(inviteToken)}`);
+            // [PRIORITE ENTREPRISE] Le compte est créé directement dans la société du token
+            // (rattachement fait côté serveur au register) -> pas de redeem /join nécessaire.
+            if (inviteToken) router.push("/dashboard");
             else router.push("/login?registered=1");
         } catch {
             setError("Impossible de contacter le serveur.");
@@ -268,6 +272,11 @@ export default function RegisterPage() {
                             <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(59,130,246,0.10)", border: "1px solid rgba(59,130,246,0.35)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--text-primary, #E2E8F0)" }}>
                                 Vous créez un compte pour rejoindre la société <strong>« {inviteTenantName} »</strong>.
                                 Elle sera automatiquement associée à votre compte après l&apos;inscription.
+                            </div>
+                        )}
+                        {inviteToken && inviteInvalid && (
+                            <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--er, #f87171)" }}>
+                                Cette invitation entreprise est invalide, expirée ou épuisée. Demandez un nouveau lien à votre administrateur.
                             </div>
                         )}
                         {/* Prénom + Nom */}

@@ -84,3 +84,21 @@ APRÈS : curl -sIL /join?token=…  -> 307  location:/register?token=…  -> 200
 ```
 E2E BDD (flux non connecté) : `/register?token=` → société verrouillée « Prepa Bloc » (via `invite-preview`) → inscription → `/join` (désormais connecté) → **rattaché à Prepa Bloc en User** (memberships Demo + Prepa Bloc).
 Non-régression : `/join?token=` connecté → 200 (auto-join) ; `/join` sans token → 200 ; `/dashboard` sans jwt → 307 `/login` (inchangé).
+
+---
+
+## [2026-07-01] — FIX : ordre de priorité du tenant à l'inscription (ENTREPRISE avant DEMO)
+
+**Ordre actuel (bug)** : `AuthController.Register` faisait `var tenantId = DemoTenantId;` **inconditionnellement**, puis le rattachement entreprise se faisait *après*, via le redeem `/join`. Le compte pointait donc vers **Demo d'abord**, entreprise ensuite (ou pas si le redeem échouait).
+
+**Inversion** :
+- Backend (`Register`) : ajout d'un champ `Token` ; résolution du tenant **entreprise d'abord** — si un token d'invitation entreprise **valide** est fourni, le compte est créé **directement** dans la société scellée au token (résolue serveur via le hash SHA-256, `req.TenantId` toujours ignoré). Demo **uniquement** en l'absence de token. Token présent mais **invalide → 400 clair, aucun compte, pas de fallback Demo**. Invitation consommée atomiquement (anti-TOCTOU) dans la transaction.
+- Frontend (`register/page.tsx`) : le token est envoyé dans le corps du `register` ; redirection post-inscription vers `/dashboard` (rattachement déjà fait, plus besoin du redeem `/join`) ; bannière d'erreur si le token est invalide.
+
+**Preuve BDD (5/5 PASS)** :
+```
+T1  QR Poitier  -> register 200 -> user.TenantId = c0000000…(Poitier), UserTenant Poitier:user:default, PAS de Demo
+T1b invitation consommée (UsedCount=1)
+T2  sans token  -> user.TenantId = 00000000…(Demo)  (non-régression)
+T3  token invalide -> 400 "Invitation entreprise invalide…" + 0 compte créé (pas de fallback Demo)
+```

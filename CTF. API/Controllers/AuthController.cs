@@ -172,7 +172,8 @@ public class AuthController : ControllerBase
         string Email,
         string Password,
         Guid? TenantId,
-        List<ConsentItem>? Consents
+        List<ConsentItem>? Consents,
+        string? Token
     );
 
     [HttpPost("register")]
@@ -209,13 +210,32 @@ public class AuthController : ControllerBase
         if (consentError is not null)
             return BadRequest(new { error = consentError });
 
-        // [PENTEST] tenant non issu du body — inscription publique self-service :
-        // on ignore req.TenantId pour éviter qu'un client se rattache à un tenant arbitraire.
-        var tenantId = DemoTenantId;
+        // [PRIORITE ENTREPRISE] Le tenant n'est JAMAIS pris du body (req.TenantId ignoré :
+        // un client ne doit pas pouvoir se rattacher à un tenant arbitraire). Ordre :
+        //   1) si un token d'invitation ENTREPRISE valide est fourni -> sa société (résolue serveur) ;
+        //   2) sinon seulement -> tenant Demo (inscription générale).
+        // Token présent mais invalide -> erreur claire, PAS de fallback Demo silencieux.
+        TenantInvite? invite = null;
+        Guid tenantId;
+        if (!string.IsNullOrWhiteSpace(req.Token))
+        {
+            var tokenHash = Convert.ToBase64String(
+                System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(req.Token)));
+            invite = await db.TenantInvites.FirstOrDefaultAsync(i => i.TokenHash == tokenHash, ct);
+            var nowChk = DateTime.UtcNow;
+            if (invite is null || invite.InviteType == InviteTypes.App || invite.TenantId is null
+                || invite.IsRevoked || invite.ExpiresAt <= nowChk || invite.UsedCount >= invite.MaxUses)
+                return BadRequest(new { error = "Invitation entreprise invalide, expirée ou épuisée." });
+            tenantId = invite.TenantId.Value;
+        }
+        else
+        {
+            tenantId = DemoTenantId;
+        }
 
         var tenantExists = await db.Tenants.AnyAsync(t => t.Id == tenantId, ct);
         if (!tenantExists)
-            return BadRequest(new { error = "Tenant introuvable. Vérifiez votre TenantId." });
+            return BadRequest(new { error = "Société cible introuvable." });
 
         var normalizedEmail = req.Email.Trim().ToLowerInvariant();
         var emailTaken = await db.Users.AnyAsync(u =>
@@ -226,6 +246,18 @@ public class AuthController : ControllerBase
         // Atomicité user + consentements : transaction explicite pour qu'un
         // échec d'insertion des consentements rollback aussi la création du user.
         await using var tx = await db.Database.BeginTransactionAsync(ct);
+
+        // [PRIORITE ENTREPRISE] Consommer l'invitation entreprise (atomique anti-TOCTOU)
+        // dans la transaction : si 0 ligne affectée -> épuisée/expirée/révoquée -> rollback.
+        if (invite is not null)
+        {
+            var nowUse = DateTime.UtcNow;
+            var used = await db.TenantInvites
+                .Where(i => i.Id == invite.Id && i.UsedCount < i.MaxUses && !i.IsRevoked && i.ExpiresAt > nowUse)
+                .ExecuteUpdateAsync(s => s.SetProperty(i => i.UsedCount, i => i.UsedCount + 1), ct);
+            if (used != 1)
+                return BadRequest(new { error = "Invitation entreprise invalide, expirée ou épuisée." });
+        }
 
         var user = new User
         {
