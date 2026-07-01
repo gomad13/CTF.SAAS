@@ -18,7 +18,23 @@ const ADMIN_PATHS = ["/admin"];
 const SUPERADMIN_PATHS = ["/superadmin"];
 
 export function proxy(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+    const { pathname, searchParams } = request.nextUrl;
+
+    // [FIX QR — invitation entreprise] Un utilisateur NON connecté qui ouvre le lien
+    // d'invitation /join?token=... doit arriver sur l'INSCRIPTION (société pré-remplie),
+    // PAS sur /login. Redirection côté serveur (307) qui CONSERVE le token :
+    //   - non connecté + token  -> /register?token=<token>  (nouveau compte, Type 2)
+    //   - connecté (cookie jwt)  -> on laisse passer, la page /join fait le rattachement (Type 3)
+    // Le token est base64url (aucun '/'), aucun double-encodage possible.
+    if (pathname === "/join") {
+        const token = searchParams.get("token");
+        const jwt = request.cookies.get("jwt")?.value;
+        if (token && !jwt) {
+            const reg = new URL("/register", request.url);
+            reg.searchParams.set("token", token);
+            return NextResponse.redirect(reg);
+        }
+    }
 
     // Laisser passer les assets, API publiques et routes publiques
     if (
