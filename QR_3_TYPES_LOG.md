@@ -68,3 +68,19 @@ Serveur `ubuntu@5.196.64.101` — backend `/home/ubuntu/sentys/backend/` (`senty
 2. **Type 2 vs 3** : **un seul QR entreprise intelligent** (`/join?token=`) — la page bascule inscription pré-remplie/verrouillée (nouveau) ou rejoindre (existant). Simplicité admin + robustesse.
 3. **Preuves** : 13/13 tests e2e ci-dessus, dont cloisonnement A≠B prouvé par injection.
 4. **À tester manuellement** : scan réel des 3 QR sur téléphone (rendu mobile déjà responsive).
+
+---
+
+## [2026-07-01] — FIX : le lien QR entreprise menait à /login au lieu de l'inscription
+
+**Pourquoi ça allait sur login** : le lien d'invitation entreprise encode `/join?token=`. La page `/join` est rendue **côté client** ; pour un visiteur **non connecté**, son écran « anon » présentait **la connexion** comme action principale (« Se connecter pour rejoindre »), l'inscription n'étant qu'un petit lien secondaire. Aucun redirect HTTP n'existait (`curl -IL /join?token=` → 200), donc l'utilisateur cliquait « Se connecter » et atterrissait sur `/login`. Le middleware `proxy.ts` laissait bien passer `/join` (route publique) — le problème venait de la logique de la page, pas d'une protection de route.
+
+**Correctif** (`ctf-web/src/proxy.ts`) : redirection **serveur (307)** ajoutée en tête du middleware — un `/join?token=` **sans cookie `jwt`** (non connecté) est renvoyé vers `/register?token=<token>` (INSCRIPTION, société pré-remplie/verrouillée), token conservé tel quel (base64url, aucun `%252F`). Un `/join?token=` **avec** cookie `jwt` (connecté, Type 3) passe inchangé → rattachement automatique.
+
+**Preuve (curl -IL)** :
+```
+AVANT : curl -sIL /join?token=…  -> HTTP 200 (client-side, écran login)
+APRÈS : curl -sIL /join?token=…  -> 307  location:/register?token=…  -> 200   (token intact)
+```
+E2E BDD (flux non connecté) : `/register?token=` → société verrouillée « Prepa Bloc » (via `invite-preview`) → inscription → `/join` (désormais connecté) → **rattaché à Prepa Bloc en User** (memberships Demo + Prepa Bloc).
+Non-régression : `/join?token=` connecté → 200 (auto-join) ; `/join` sans token → 200 ; `/dashboard` sans jwt → 307 `/login` (inchangé).
