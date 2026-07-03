@@ -5,8 +5,8 @@ import { useCoachingHistory } from "@/lib/hooks/useCoaching";
 import { CoachingDetailCard } from "@/components/coaching/CoachingDetailCard";
 
 const PAGE_SIZE = 20;
-const C_PRIMARY = "#03b5aa";
-const C_PRIMARY_DARK = "#037971";
+const C_PRIMARY = "var(--accent)";
+const C_PRIMARY_DARK = "var(--accent-hover)";
 
 export default function CoachingHistoryPage() {
     const [page, setPage] = useState(1);

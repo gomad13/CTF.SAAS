@@ -55,8 +55,10 @@ export default function RootLayout({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="fr" className={inter.variable}>
+        <html lang="fr" className={`dark ${inter.variable}`} data-theme="dark" suppressHydrationWarning>
             <body className={inter.className}>
+                {/* No-FOUC : applique le thème (défaut sombre) avant le paint */}
+                <script dangerouslySetInnerHTML={{ __html: "(function(){try{var t=localStorage.getItem('ctf_theme')||'dark';var e=document.documentElement;e.setAttribute('data-theme',t);e.classList.toggle('dark',t==='dark');}catch(_){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');}})();" }} />
                 <ThemeProvider>
                     <BetaBanner />
                     <Providers>

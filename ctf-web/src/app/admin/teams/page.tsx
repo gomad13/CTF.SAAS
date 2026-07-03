@@ -40,9 +40,9 @@ function capacityLabel(t: Team) {
 }
 
 function complianceColor(pct: number) {
-    if (pct >= 80) return "#047857";
-    if (pct >= 50) return "#B45309";
-    return "#B91C1C";
+    if (pct >= 80) return "var(--success)";
+    if (pct >= 50) return "var(--warning)";
+    return "var(--danger)";
 }
 
 export default function TeamsPage() {
@@ -187,7 +187,7 @@ export default function TeamsPage() {
                                     {renderTeamIcon(t.icon, 16)}
                                 </span>
                                 <div className="min-w-0 flex-1">
-                                    <div className="font-medium text-[#0F172A]">{t.name}</div>
+                                    <div className="font-medium text-[#0A0A0B]">{t.name}</div>
                                     {t.description && <div className="truncate text-xs text-[#475569]">{t.description}</div>}
                                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#64748B]">
                                         <span>{capacityLabel(t)}</span>
@@ -241,7 +241,7 @@ export default function TeamsPage() {
                                             {renderTeamIcon(t.icon, 16)}
                                         </span>
                                         <div>
-                                            <div className="font-medium text-[#0F172A]">{t.name}</div>
+                                            <div className="font-medium text-[#0A0A0B]">{t.name}</div>
                                             {t.description && <div className="text-xs text-[#475569]">{t.description}</div>}
                                         </div>
                                     </div>
@@ -342,7 +342,7 @@ function UnassignedMembersSection({ teams }: { teams: Team[] }) {
                 {list.map(u => (
                     <li key={u.userId} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
                         <div className="min-w-0">
-                            <div className="text-sm font-medium text-[#0F172A]">{u.firstName} {u.lastName}</div>
+                            <div className="text-sm font-medium text-[#0A0A0B]">{u.firstName} {u.lastName}</div>
                             <div className="text-xs text-[#475569]">{u.email}</div>
                         </div>
                         <div className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white pl-2 text-[#475569]">

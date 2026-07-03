@@ -4,9 +4,9 @@ import { memo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { CoachingFeedback } from "@/lib/types/coaching";
 
-const C_PRIMARY = "#03b5aa";
-const C_BG = "#023436";
-const C_ACCENT = "#00bfb3";
+const C_PRIMARY = "var(--accent)";
+const C_BG = "var(--surface-2)";
+const C_ACCENT = "var(--accent)";
 
 const TYPE_LABELS: Record<string, string> = {
     ceo_fraud: "Arnaque au président",

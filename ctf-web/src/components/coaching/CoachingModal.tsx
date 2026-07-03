@@ -6,14 +6,14 @@ import { X, Sparkles, Loader2 } from "lucide-react";
 import { useGenerateCoaching } from "@/lib/hooks/useCoaching";
 
 // Charte coaching (palette dédiée prompt P4) :
-// - Primary       #03b5aa
-// - Primary dark  #037971
-// - Background    #023436
-// - Accent        #00bfb3
-const C_PRIMARY = "#03b5aa";
-const C_PRIMARY_DARK = "#037971";
-const C_BG = "#023436";
-const C_ACCENT = "#00bfb3";
+// - Primary       var(--accent)
+// - Primary dark  var(--accent-hover)
+// - Background    var(--surface-2)
+// - Accent        var(--accent)
+const C_PRIMARY = "var(--accent)";
+const C_PRIMARY_DARK = "var(--accent-hover)";
+const C_BG = "var(--surface-2)";
+const C_ACCENT = "var(--accent)";
 
 type Props = {
     /** ChallengeAttempt qui a échoué — Guid (ex: ChallengeCompletion.Id). */

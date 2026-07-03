@@ -61,9 +61,9 @@ declare global { interface Window { Chart?: any } }
 
 function scoreColor(score: number) {
     // Palette ajustée pour WCAG AA (>= 4.5:1) sur fond blanc.
-    if (score >= 80) return "#047857"; // emerald-700
-    if (score >= 50) return "#B45309"; // amber-700
-    return "#B91C1C";                   // red-700
+    if (score >= 80) return "var(--success)"; // emerald-700
+    if (score >= 50) return "var(--warning)"; // amber-700
+    return "var(--danger)";                   // red-700
 }
 
 export default function AdminPage() {
@@ -118,10 +118,10 @@ export default function AdminPage() {
 
     return (
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "var(--page-x) var(--page-x) 80px" }}>
-            <h1 style={{ fontSize: 26, fontWeight: 700, color: "#F1F5F9", margin: 0 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--text)", margin: 0 }}>
                 Administration
             </h1>
-            <p style={{ marginTop: 6, fontSize: 13, color: "#64748B" }}>
+            <p style={{ marginTop: 6, fontSize: 13, color: "var(--text-2)" }}>
                 {company?.name ?? "—"} · {users.length} collaborateur{users.length > 1 ? "s" : ""}
             </p>
 
@@ -150,17 +150,17 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
                 padding: "10px 18px",
                 borderRadius: 0,
                 background: "transparent",
-                color: active ? "#60A5FA" : "#94A3B8",
+                color: active ? "var(--accent)" : "var(--text-3)",
                 border: "none",
-                borderBottom: active ? "2px solid #3B82F6" : "2px solid transparent",
+                borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
                 marginBottom: "-1px",
                 cursor: "pointer",
                 fontSize: 14,
                 fontWeight: active ? 600 : 500,
                 transition: "color 0.15s, border-color 0.15s",
             }}
-            onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "#E2E8F0"; }}
-            onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "#94A3B8"; }}
+            onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "var(--text-2)"; }}
+            onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "var(--text-3)"; }}
         >
             {children}
         </button>
@@ -192,9 +192,9 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
     return (
         <div style={{ marginTop: 32 }}>
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
-                <Kpi label="COLLABORATEURS" value={stats?.totalUsers ?? users.length} color="#1E293B" />
-                <Kpi label="ACTIFS" value={stats?.activeUsers ?? 0} color="#047857" />
-                <Kpi label="FORMATIONS FAITES" value={stats?.totalCompletions ?? 0} color="#2563EB" />
+                <Kpi label="COLLABORATEURS" value={stats?.totalUsers ?? users.length} color="var(--text)" />
+                <Kpi label="ACTIFS" value={stats?.activeUsers ?? 0} color="var(--success)" />
+                <Kpi label="FORMATIONS FAITES" value={stats?.totalCompletions ?? 0} color="var(--accent)" />
                 <Kpi label="SCORE MOYEN" value={`${stats?.averageScore ?? 0}%`} color={scoreColor(stats?.averageScore ?? 0)} />
             </div>
 
@@ -206,11 +206,11 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Rechercher un collaborateur..."
                     style={{
-                        background: "#FFFFFF",
-                        border: "1px solid #E2E8F0",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
                         borderRadius: 7,
                         padding: "9px 14px",
-                        color: "#1E293B",
+                        color: "var(--text)",
                         fontSize: 13,
                         width: isMobile ? "100%" : 280,
                         flex: isMobile ? "1 1 100%" : undefined,
@@ -223,11 +223,11 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                     value={sortBy}
                     onChange={e => setSortBy(e.target.value as "points" | "score" | "name")}
                     style={{
-                        background: "#FFFFFF",
-                        border: "1px solid #E2E8F0",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
                         borderRadius: 7,
                         padding: "9px 14px",
-                        color: "#1E293B",
+                        color: "var(--text)",
                         fontSize: 13,
                         outline: "none",
                         cursor: "pointer",
@@ -240,8 +240,8 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
             </div>
 
             <div style={{
-                background: "#FFFFFF",
-                border: "1px solid #E2E8F0",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
                 borderRadius: 10,
                 overflow: "hidden",
             }}>
@@ -251,13 +251,13 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                     gridTemplateColumns: "1.6fr 0.9fr 1.2fr 0.8fr 0.7fr 0.7fr 0.9fr",
                     gap: 12,
                     padding: "12px 18px",
-                    background: "#FFFFFF",
-                    borderBottom: "1px solid #E2E8F0",
+                    background: "var(--surface)",
+                    borderBottom: "1px solid var(--border)",
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 10,
                     letterSpacing: "0.1em",
                     textTransform: "uppercase",
-                    color: "#64748B",
+                    color: "var(--text-2)",
                 }}>
                     <div>NOM</div>
                     <div>PARCOURS</div>
@@ -280,7 +280,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                             gridTemplateColumns: "1.6fr 0.9fr 1.2fr 0.8fr 0.7fr 0.7fr 0.9fr",
                             gap: 12,
                             padding: "14px 18px",
-                            borderBottom: "1px solid #E2E8F0",
+                            borderBottom: "1px solid var(--border)",
                             alignItems: isMobile ? "stretch" : "center",
                             transition: "background 0.15s",
                         }}
@@ -290,40 +290,40 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                             <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                                 <div style={{
                                     width: 36, height: 36, borderRadius: "50%",
-                                    background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                                    background: "linear-gradient(135deg, var(--accent), var(--accent))",
                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 12, fontWeight: 700, color: "#1E293B",
+                                    fontSize: 12, fontWeight: 700, color: "var(--on-accent)",
                                     flexShrink: 0,
                                 }}>{initials}</div>
                                 <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontSize: 14, fontWeight: 500, color: "#1E293B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                         {u.firstName} {u.lastName}
                                     </div>
-                                    <div style={{ fontSize: 11, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    <div style={{ fontSize: 11, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                         {u.email}
                                     </div>
                                 </div>
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                <span style={{ fontSize: 13, color: "#64748B" }}>
+                                <span style={{ fontSize: 13, color: "var(--text-2)" }}>
                                     {u.completedParcours}/{u.totalParcours}
                                 </span>
                                 <div style={{ display: "flex", gap: 3 }}>
                                     {Array.from({ length: u.totalParcours }).map((_, i) => (
                                         <span key={i} style={{
                                             width: 6, height: 6, borderRadius: "50%",
-                                            background: i < u.completedParcours ? "#10B981" : "#374151",
+                                            background: i < u.completedParcours ? "var(--success)" : "#374151",
                                         }} />
                                     ))}
                                 </div>
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <div style={{ flex: 1, height: 4, background: "#E2E8F0", borderRadius: 2, overflow: "hidden" }}>
+                                <div style={{ flex: 1, height: 4, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
                                     <div style={{ width: `${u.progressPercent}%`, height: "100%", background: progColor, transition: "width 0.3s" }} />
                                 </div>
-                                <span style={{ fontSize: 11, color: "#64748B", fontFamily: "'JetBrains Mono', monospace", minWidth: 30, textAlign: "right" }}>
+                                <span style={{ fontSize: 11, color: "var(--text-2)", fontFamily: "'JetBrains Mono', monospace", minWidth: 30, textAlign: "right" }}>
                                     {u.progressPercent}%
                                 </span>
                             </div>
@@ -332,7 +332,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                 {u.averageScore}%
                             </span>
 
-                            <span style={{ fontSize: 14, fontWeight: 700, color: "#1E293B", fontFamily: "'JetBrains Mono', monospace", textAlign: "right" }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", fontFamily: "'JetBrains Mono', monospace", textAlign: "right" }}>
                                 {u.totalPoints}
                             </span>
 
@@ -342,7 +342,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                 borderRadius: 4,
                                 background: u.isActive ? "rgba(34,197,94,0.10)" : "rgba(239,68,68,0.10)",
                                 border: `1px solid ${u.isActive ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)"}`,
-                                color: u.isActive ? "#047857" : "#B91C1C",
+                                color: u.isActive ? "var(--success-t)" : "var(--danger-t)",
                                 fontFamily: "'JetBrains Mono', monospace",
                                 width: "fit-content",
                                 textTransform: "uppercase",
@@ -356,7 +356,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                     style={{
                                         background: "transparent",
                                         border: "1px solid rgba(255,255,255,0.1)",
-                                        color: "#64748B",
+                                        color: "var(--text-2)",
                                         fontSize: 11,
                                         padding: "5px 10px",
                                         borderRadius: 5,
@@ -368,7 +368,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                     style={{
                                         background: "transparent",
                                         border: `1px solid ${u.isActive ? "rgba(239,68,68,0.3)" : "rgba(34,197,94,0.3)"}`,
-                                        color: u.isActive ? "#B91C1C" : "#047857",
+                                        color: u.isActive ? "var(--danger)" : "var(--success)",
                                         fontSize: 11,
                                         padding: "5px 10px",
                                         borderRadius: 5,
@@ -381,7 +381,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                 })}
 
                 {filtered.length === 0 && (
-                    <div style={{ padding: 32, textAlign: "center", color: "#64748B", fontSize: 13 }}>
+                    <div style={{ padding: 32, textAlign: "center", color: "var(--text-2)", fontSize: 13 }}>
                         Aucun collaborateur trouvé.
                     </div>
                 )}
@@ -395,15 +395,15 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
 function Kpi({ label, value, color }: { label: string; value: string | number; color: string }) {
     return (
         <div style={{
-            background: "#FFFFFF",
-            border: "1px solid #E2E8F0",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
             borderRadius: 8,
             padding: 20,
         }}>
             <div style={{ fontSize: 32, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>
                 {value}
             </div>
-            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#64748B", marginTop: 4 }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-2)", marginTop: 4 }}>
                 {label}
             </div>
         </div>
@@ -419,7 +419,7 @@ function UserDetailModal({ user, onClose }: { user: CompanyUser; onClose: () => 
             zIndex: 1000, padding: 16,
         }} onClick={onClose}>
             <div onClick={e => e.stopPropagation()} style={{
-                background: "#FFFFFF",
+                background: "var(--surface)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 12,
                 padding: 28,
@@ -429,15 +429,15 @@ function UserDetailModal({ user, onClose }: { user: CompanyUser; onClose: () => 
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
                     <div style={{
                         width: 64, height: 64, borderRadius: "50%",
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent))",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 22, fontWeight: 700, color: "#1E293B",
+                        fontSize: 22, fontWeight: 700, color: "var(--on-accent)",
                     }}>{initials}</div>
                     <div>
-                        <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B", margin: 0 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", margin: 0 }}>
                             {user.firstName} {user.lastName}
                         </h3>
-                        <p style={{ fontSize: 13, color: "#64748B", margin: "2px 0 0" }}>{user.email}</p>
+                        <p style={{ fontSize: 13, color: "var(--text-2)", margin: "2px 0 0" }}>{user.email}</p>
                         <span style={{
                             display: "inline-block",
                             marginTop: 6,
@@ -462,24 +462,24 @@ function UserDetailModal({ user, onClose }: { user: CompanyUser; onClose: () => 
                 </div>
 
                 <div style={{ marginTop: 20 }}>
-                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 8, letterSpacing: "0.1em", textTransform: "uppercase" }}>
                         PROGRESSION GLOBALE
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ flex: 1, height: 6, background: "#E2E8F0", borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ flex: 1, height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
                             <div style={{ width: `${user.progressPercent}%`, height: "100%", background: scoreColor(user.progressPercent) }} />
                         </div>
-                        <span style={{ fontSize: 13, color: "#1E293B", fontFamily: "'JetBrains Mono', monospace" }}>{user.progressPercent}%</span>
+                        <span style={{ fontSize: 13, color: "var(--text)", fontFamily: "'JetBrains Mono', monospace" }}>{user.progressPercent}%</span>
                     </div>
-                    <div style={{ marginTop: 4, fontSize: 11, color: "#64748B" }}>
+                    <div style={{ marginTop: 4, fontSize: 11, color: "var(--text-2)" }}>
                         {user.completedParcours}/{user.totalParcours} parcours complétés
                     </div>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 24 }}>
                     <button onClick={onClose} style={{
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                        color: "#1E293B", border: "none",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent))",
+                        color: "var(--on-accent)", border: "none",
                         padding: "9px 18px", borderRadius: 7,
                         fontSize: 13, fontWeight: 600, cursor: "pointer",
                     }}>Fermer</button>
@@ -489,11 +489,11 @@ function UserDetailModal({ user, onClose }: { user: CompanyUser; onClose: () => 
     );
 }
 
-function DetailStat({ label, value, color = "#ffffff" }: { label: string; value: string | number; color?: string }) {
+function DetailStat({ label, value, color = "var(--text)" }: { label: string; value: string | number; color?: string }) {
     return (
-        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 7, padding: 12, textAlign: "center" }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 7, padding: 12, textAlign: "center" }}>
             <div style={{ fontSize: 20, fontWeight: 700, color, fontFamily: "'JetBrains Mono', monospace" }}>{value}</div>
-            <div style={{ fontSize: 9, color: "#64748B", marginTop: 2, letterSpacing: "0.1em" }}>{label}</div>
+            <div style={{ fontSize: 9, color: "var(--text-2)", marginTop: 2, letterSpacing: "0.1em" }}>{label}</div>
         </div>
     );
 }
@@ -523,7 +523,7 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
         chartsRef.current = [];
 
         const gridColor = "rgba(255,255,255,0.05)";
-        const tickColor = "#6b7280";
+        const tickColor = "var(--text-3)";
 
         if (lineRef.current) {
             chartsRef.current.push(new Chart(lineRef.current, {
@@ -560,7 +560,7 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                     datasets: [{
                         label: "Soumissions",
                         data: stats.scoreDistribution.map(s => s.count),
-                        backgroundColor: ["#ef4444", "#f59e0b", "#fbbf24", "#10B981"],
+                        backgroundColor: ["var(--danger)", "var(--warning)", "#fbbf24", "var(--success)"],
                         borderRadius: 4,
                     }],
                 },
@@ -583,8 +583,8 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                     labels: stats.parcoursStats.map(p => p.title),
                     datasets: [{
                         data: stats.parcoursStats.map(p => p.completionRate),
-                        backgroundColor: ["var(--pr)", "#10B981", "#f59e0b", "#ef4444"],
-                        borderColor: "#1a1a1a",
+                        backgroundColor: ["var(--pr)", "var(--success)", "var(--warning)", "var(--danger)"],
+                        borderColor: "var(--surface)",
                         borderWidth: 2,
                     }],
                 },
@@ -595,7 +595,7 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                     plugins: {
                         legend: {
                             position: "bottom",
-                            labels: { color: "#64748B", font: { size: 11 } },
+                            labels: { color: "var(--text-2)", font: { size: 11 } },
                         },
                     },
                 },
@@ -629,12 +629,12 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
             </div>
 
             <div>
-                <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1E293B", marginBottom: 12 }}>Top 3 collaborateurs</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>Top 3 collaborateurs</h3>
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
                     {stats.topPerformers.map((p, i) => (
                         <div key={i} style={{
-                            background: "#FFFFFF",
-                            border: "1px solid #E2E8F0",
+                            background: "var(--surface)",
+                            border: "1px solid var(--border)",
                             borderRadius: 10,
                             padding: 18,
                             position: "relative",
@@ -643,18 +643,18 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                                 <div style={{
                                     width: 44, height: 44, borderRadius: "50%",
-                                    background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                                    background: "linear-gradient(135deg, var(--accent), var(--accent))",
                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 14, fontWeight: 700, color: "#1E293B",
+                                    fontSize: 14, fontWeight: 700, color: "var(--on-accent)",
                                 }}>{p.initials}</div>
                                 <div>
-                                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1E293B" }}>{p.name}</div>
-                                    <div style={{ fontSize: 11, color: "#64748B" }}>{p.completedChallenges} modules</div>
+                                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>{p.name}</div>
+                                    <div style={{ fontSize: 11, color: "var(--text-2)" }}>{p.completedChallenges} modules</div>
                                 </div>
                             </div>
-                            <div style={{ marginTop: 14, fontSize: 24, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "#1E293B" }}>
+                            <div style={{ marginTop: 14, fontSize: 24, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--text)" }}>
                                 {p.totalPoints}
-                                <span style={{ fontSize: 11, color: "#64748B", marginLeft: 6, fontWeight: 400 }}>pts</span>
+                                <span style={{ fontSize: 11, color: "var(--text-2)", marginLeft: 6, fontWeight: 400 }}>pts</span>
                             </div>
                             <div style={{ fontSize: 12, fontWeight: 600, color: scoreColor(p.averageScore), fontFamily: "'JetBrains Mono', monospace" }}>
                                 {p.averageScore}% moyenne
@@ -665,13 +665,13 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
             </div>
 
             <div>
-                <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1E293B", marginBottom: 12 }}>Modules avec les scores les plus bas</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>Modules avec les scores les plus bas</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {stats.hardestChallenges.map((h, i) => (
                         <div key={i} style={{
-                            background: "#FFFFFF",
-                            border: "1px solid #E2E8F0",
-                            borderLeft: "3px solid #ef4444",
+                            background: "var(--surface)",
+                            border: "1px solid var(--border)",
+                            borderLeft: "3px solid var(--danger)",
                             borderRadius: 8,
                             padding: "14px 18px",
                             display: "flex",
@@ -680,46 +680,46 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                             gap: 16,
                         }}>
                             <div>
-                                <div style={{ fontSize: 14, fontWeight: 500, color: "#1E293B" }}>{h.title}</div>
-                                <div style={{ fontSize: 11, color: "#64748B", marginTop: 2 }}>{h.attempts} tentative{h.attempts > 1 ? "s" : ""}</div>
+                                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{h.title}</div>
+                                <div style={{ fontSize: 11, color: "var(--text-2)", marginTop: 2 }}>{h.attempts} tentative{h.attempts > 1 ? "s" : ""}</div>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                <div style={{ width: 100, height: 4, background: "#E2E8F0", borderRadius: 2, overflow: "hidden" }}>
-                                    <div style={{ width: `${h.averageScore}%`, height: "100%", background: "#ef4444" }} />
+                                <div style={{ width: 100, height: 4, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
+                                    <div style={{ width: `${h.averageScore}%`, height: "100%", background: "var(--danger)" }} />
                                 </div>
-                                <span style={{ fontSize: 14, fontWeight: 700, color: "#B91C1C", fontFamily: "'JetBrains Mono', monospace", minWidth: 40, textAlign: "right" }}>
+                                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--danger)", fontFamily: "'JetBrains Mono', monospace", minWidth: 40, textAlign: "right" }}>
                                     {h.averageScore}%
                                 </span>
                             </div>
                         </div>
                     ))}
                     {stats.hardestChallenges.length === 0 && (
-                        <div style={{ padding: 16, color: "#64748B", fontSize: 13, textAlign: "center" }}>Aucune donnée</div>
+                        <div style={{ padding: 16, color: "var(--text-2)", fontSize: 13, textAlign: "center" }}>Aucune donnée</div>
                     )}
                 </div>
             </div>
 
             <div>
-                <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1E293B", marginBottom: 12 }}>Résumé par parcours</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>Résumé par parcours</h3>
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
                     {stats.parcoursStats.map((p, i) => (
                         <div key={i} style={{
-                            background: "#FFFFFF",
-                            border: "1px solid #E2E8F0",
+                            background: "var(--surface)",
+                            border: "1px solid var(--border)",
                             borderRadius: 10,
                             padding: 20,
                         }}>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", marginBottom: 12 }}>{p.title}</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>{p.title}</div>
                             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
                                 <span style={{ fontSize: 28, fontWeight: 700, color: "var(--pr)", fontFamily: "'JetBrains Mono', monospace" }}>
                                     {p.completionRate}%
                                 </span>
-                                <span style={{ fontSize: 11, color: "#64748B" }}>de complétion</span>
+                                <span style={{ fontSize: 11, color: "var(--text-2)" }}>de complétion</span>
                             </div>
-                            <div style={{ height: 4, background: "#E2E8F0", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
-                                <div style={{ width: `${p.completionRate}%`, height: "100%", background: "linear-gradient(90deg, #2563EB, #3B82F6)" }} />
+                            <div style={{ height: 4, background: "var(--border)", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
+                                <div style={{ width: `${p.completionRate}%`, height: "100%", background: "linear-gradient(90deg, var(--accent), var(--accent))" }} />
                             </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748B" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-2)" }}>
                                 <span>Score moy. : <span style={{ color: scoreColor(p.averageScore) }}>{p.averageScore}%</span></span>
                                 <span>{p.totalCompletions} formations</span>
                             </div>
@@ -734,12 +734,12 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <div style={{
-            background: "#FFFFFF",
-            border: "1px solid #E2E8F0",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
             borderRadius: 10,
             padding: 20,
         }}>
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", marginBottom: 16 }}>{title}</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 16 }}>{title}</h3>
             {children}
         </div>
     );
@@ -810,10 +810,10 @@ function ImportExportBar() {
                     zIndex: 1000, padding: 16,
                 }} onClick={() => { if (!importing) setShowImport(false); }}>
                     <div onClick={e => e.stopPropagation()} style={{
-                        background: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)",
+                        background: "var(--surface)", border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: 12, padding: 28, maxWidth: 520, width: "100%",
                     }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1E293B", marginBottom: 16 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 16 }}>
                             Importer des utilisateurs
                         </h3>
 
@@ -834,15 +834,15 @@ function ImportExportBar() {
                             }}
                         >
                             <div style={{ fontSize: 32, marginBottom: 8 }}>📥</div>
-                            <div style={{ color: "#64748B", fontSize: 13, marginBottom: 12 }}>
+                            <div style={{ color: "var(--text-2)", fontSize: 13, marginBottom: 12 }}>
                                 {file ? file.name : "Déposer votre fichier CSV ici"}
                             </div>
                             <label style={{
                                 display: "inline-block",
                                 padding: "6px 14px",
-                                background: "#F1F5F9",
-                                color: "#334155",
-                                border: "1px solid #E2E8F0",
+                                background: "var(--surface-2)",
+                                color: "var(--text-2)",
+                                border: "1px solid var(--border)",
                                 borderRadius: 6,
                                 fontSize: 12,
                                 cursor: "pointer",
@@ -853,24 +853,24 @@ function ImportExportBar() {
                             </label>
                         </div>
 
-                        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#64748B", marginBottom: 16 }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-2)", marginBottom: 16 }}>
                             <input type="checkbox" checked={updateExisting} onChange={e => setUpdateExisting(e.target.checked)} />
                             Mettre à jour les utilisateurs existants
                         </label>
 
                         {result && !result.error && (
                             <div style={{
-                                background: "#0F172A",
-                                border: "1px solid #E2E8F0",
+                                background: "var(--surface-2)",
+                                border: "1px solid var(--border)",
                                 borderRadius: 8,
                                 padding: 16,
                                 marginBottom: 16,
                                 fontSize: 13,
                             }}>
-                                <div style={{ color: "#4ade80", marginBottom: 4 }}>✓ {result.created} créés</div>
+                                <div style={{ color: "var(--success)", marginBottom: 4 }}>✓ {result.created} créés</div>
                                 <div style={{ color: "var(--pr-l)", marginBottom: 4 }}>~ {result.updated} mis à jour</div>
-                                <div style={{ color: "#64748B", marginBottom: 4 }}>○ {result.skipped} ignorés</div>
-                                {result.errors > 0 && <div style={{ color: "#f87171", marginBottom: 4 }}>✗ {result.errors} erreurs</div>}
+                                <div style={{ color: "var(--text-2)", marginBottom: 4 }}>○ {result.skipped} ignorés</div>
+                                {result.errors > 0 && <div style={{ color: "var(--danger)", marginBottom: 4 }}>✗ {result.errors} erreurs</div>}
                                 {result.defaultPassword && (
                                     <div style={{
                                         background: "rgba(245,158,11,0.10)",
@@ -878,7 +878,7 @@ function ImportExportBar() {
                                         borderRadius: 6,
                                         padding: 10,
                                         marginTop: 10,
-                                        color: "#fbbf24",
+                                        color: "var(--warning-t)",
                                         fontSize: 12,
                                     }}>
                                         Mot de passe par défaut : <strong>{result.defaultPassword}</strong>
@@ -887,8 +887,8 @@ function ImportExportBar() {
                                 )}
                                 {result.errorMessages && result.errorMessages.length > 0 && (
                                     <details style={{ marginTop: 10 }}>
-                                        <summary style={{ color: "#f87171", cursor: "pointer", fontSize: 12 }}>Voir les erreurs ({result.errorMessages.length})</summary>
-                                        <ul style={{ marginTop: 8, paddingLeft: 16, color: "#f87171", fontSize: 11 }}>
+                                        <summary style={{ color: "var(--danger)", cursor: "pointer", fontSize: 12 }}>Voir les erreurs ({result.errorMessages.length})</summary>
+                                        <ul style={{ marginTop: 8, paddingLeft: 16, color: "var(--danger)", fontSize: 11 }}>
                                             {result.errorMessages.map((m: string, i: number) => <li key={i}>{m}</li>)}
                                         </ul>
                                     </details>
@@ -896,7 +896,7 @@ function ImportExportBar() {
                             </div>
                         )}
                         {result?.error && (
-                            <div style={{ color: "#f87171", fontSize: 12, marginBottom: 12 }}>{result.error}</div>
+                            <div style={{ color: "var(--danger)", fontSize: 12, marginBottom: 12 }}>{result.error}</div>
                         )}
 
                         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>

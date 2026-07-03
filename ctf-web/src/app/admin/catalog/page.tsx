@@ -47,10 +47,10 @@ const levelLabel = (l: string | null): string => {
 
 const statusMeta = (s: CatalogItem["status"]): { label: string; color: string; bg: string } => {
     switch (s) {
-        case "not_granted": return { label: "🔒 Non accordé", color: "#64748B", bg: "#F1F5F9" };
-        case "granted_inactive": return { label: "✅ Accordé — à activer", color: "#3B82F6", bg: "rgba(59,130,246,0.12)" };
-        case "activated_global": return { label: "🚀 Activé (entreprise)", color: "#10B981", bg: "rgba(16,185,129,0.12)" };
-        case "activated_teams_only": return { label: "🚀 Activé (équipes)", color: "#10B981", bg: "rgba(16,185,129,0.12)" };
+        case "not_granted": return { label: "🔒 Non accordé", color: "var(--text-2)", bg: "var(--surface-2)" };
+        case "granted_inactive": return { label: "✅ Accordé — à activer", color: "var(--accent)", bg: "var(--accent-subtle)" };
+        case "activated_global": return { label: "🚀 Activé (entreprise)", color: "var(--success-t)", bg: "var(--success-subtle)" };
+        case "activated_teams_only": return { label: "🚀 Activé (équipes)", color: "var(--success-t)", bg: "var(--success-subtle)" };
     }
 };
 
@@ -99,10 +99,10 @@ export default function AdminCatalogPage() {
     });
 
     return (
-        <div style={{ padding: "var(--page-x)", background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: "var(--page-x)", background: "var(--bg)", minHeight: "100%" }}>
             <div style={{ marginBottom: 16 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: "#1E293B", margin: 0 }}>Catalogue des parcours</h1>
-                <p style={{ fontSize: 13, color: "#64748B", margin: "4px 0 0" }}>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", margin: 0 }}>Catalogue des parcours</h1>
+                <p style={{ fontSize: 13, color: "var(--text-2)", margin: "4px 0 0" }}>
                     Activez les parcours pour votre entreprise ou équipes. Les parcours 🔒 non accordés peuvent être débloqués via votre commercial.
                 </p>
             </div>
@@ -112,10 +112,10 @@ export default function AdminCatalogPage() {
                 <input
                     placeholder="Rechercher..."
                     value={search} onChange={e => setSearch(e.target.value)}
-                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13, minWidth: 220 }}
+                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, minWidth: 220 }}
                 />
                 <select value={filterSector} onChange={e => setFilterSector(e.target.value)}
-                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}>
+                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 }}>
                     <option value="">Tous secteurs</option>
                     <option value="sante">Santé</option>
                     <option value="cyber-general">Cyber</option>
@@ -123,21 +123,21 @@ export default function AdminCatalogPage() {
                     <option value="finance">Finance</option>
                 </select>
                 <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)}
-                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}>
+                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 }}>
                     <option value="">Tous niveaux</option>
                     <option value="beginner">Débutant</option>
                     <option value="intermediate">Intermédiaire</option>
                     <option value="advanced">Avancé</option>
                 </select>
-                <span style={{ fontSize: 12, color: "#64748B", marginLeft: "auto" }}>
+                <span style={{ fontSize: 12, color: "var(--text-2)", marginLeft: "auto" }}>
                     {filtered.length} parcours
                 </span>
             </div>
 
             {cat.isLoading ? (
-                <div style={{ textAlign: "center", padding: 40, color: "#64748B" }}>Chargement...</div>
+                <div style={{ textAlign: "center", padding: 40, color: "var(--text-2)" }}>Chargement...</div>
             ) : filtered.length === 0 ? (
-                <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: 40, textAlign: "center", color: "#64748B" }}>
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center", color: "var(--text-2)" }}>
                     Aucun parcours disponible. Contactez votre gestionnaire de compte pour accéder au catalogue.
                 </div>
             ) : (
@@ -147,8 +147,8 @@ export default function AdminCatalogPage() {
                         const greyed = p.status === "not_granted";
                         return (
                             <div key={p.id} style={{
-                                background: "#FFFFFF",
-                                border: "1px solid #E2E8F0",
+                                background: "var(--surface)",
+                                border: "1px solid var(--border)",
                                 borderRadius: 12,
                                 padding: 24,
                                 opacity: greyed ? 0.65 : 1,
@@ -167,12 +167,12 @@ export default function AdminCatalogPage() {
                                     }}>{st.label}</span>
                                 </div>
 
-                                <div style={{ fontWeight: 600, color: "#1E293B", fontSize: 15, lineHeight: 1.3, marginBottom: 6 }}>{p.title}</div>
-                                {p.description && <div style={{ fontSize: 12, color: "#64748B", marginBottom: 12, lineHeight: 1.45 }}>
+                                <div style={{ fontWeight: 600, color: "var(--text)", fontSize: 15, lineHeight: 1.3, marginBottom: 6 }}>{p.title}</div>
+                                {p.description && <div style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 12, lineHeight: 1.45 }}>
                                     {p.description.length > 110 ? p.description.slice(0, 110) + "..." : p.description}
                                 </div>}
 
-                                <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748B", flexWrap: "wrap", marginBottom: 12 }}>
+                                <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--text-2)", flexWrap: "wrap", marginBottom: 12 }}>
                                     <span>🎯 {sectorLabel(p.sector)}</span>
                                     <span>📊 {levelLabel(p.level)}</span>
                                     <span>⏱ {p.estimatedMinutes ?? "—"} min</span>
@@ -185,8 +185,8 @@ export default function AdminCatalogPage() {
                                         onClick={() => setPreviewFor(p)}
                                         style={{
                                             padding: "6px 12px", borderRadius: 6,
-                                            background: "transparent", border: "1px solid #E2E8F0",
-                                            color: "#334155", fontSize: 12, cursor: "pointer",
+                                            background: "transparent", border: "1px solid var(--border)",
+                                            color: "var(--text-2)", fontSize: 12, cursor: "pointer",
                                             display: "inline-flex", alignItems: "center", gap: 4,
                                             transition: "all 200ms",
                                         }}
@@ -198,8 +198,8 @@ export default function AdminCatalogPage() {
                                             title="Contactez votre commercial pour débloquer"
                                             style={{
                                                 padding: "6px 12px", borderRadius: 6,
-                                                background: "#F1F5F9", border: "1px solid #E2E8F0",
-                                                color: "#64748B", fontSize: 12, cursor: "not-allowed",
+                                                background: "var(--surface-2)", border: "1px solid var(--border)",
+                                                color: "var(--text-2)", fontSize: 12, cursor: "not-allowed",
                                                 display: "inline-flex", alignItems: "center", gap: 4,
                                             }}
                                         ><Lock size={12} /> Contacter commercial</button>
@@ -210,7 +210,7 @@ export default function AdminCatalogPage() {
                                             onClick={() => setActivateFor(p)}
                                             style={{
                                                 padding: "6px 12px", borderRadius: 6,
-                                                background: "#3B82F6", border: "none",
+                                                background: "var(--accent)", border: "none",
                                                 color: "#fff", fontSize: 12, cursor: "pointer",
                                                 display: "inline-flex", alignItems: "center", gap: 4,
                                                 transition: "background 200ms",
@@ -223,8 +223,8 @@ export default function AdminCatalogPage() {
                                             onClick={() => { if (confirm("Désactiver ce parcours ? La progression des users sera conservée.")) deactivateMut.mutate(p.id); }}
                                             style={{
                                                 padding: "6px 12px", borderRadius: 6,
-                                                background: "transparent", border: "1px solid #EF4444",
-                                                color: "#EF4444", fontSize: 12, cursor: "pointer",
+                                                background: "transparent", border: "1px solid var(--danger)",
+                                                color: "var(--danger)", fontSize: 12, cursor: "pointer",
                                                 display: "inline-flex", alignItems: "center", gap: 4,
                                                 transition: "all 200ms",
                                             }}
@@ -240,14 +240,14 @@ export default function AdminCatalogPage() {
             {/* Modal activation */}
             {activateFor && (
                 <Modal onClose={() => setActivateFor(null)} title={`Activer : ${activateFor.title}`}>
-                    <p style={{ color: "#64748B", fontSize: 13, marginBottom: 16 }}>Choisissez comment ce parcours sera disponible :</p>
+                    <p style={{ color: "var(--text-2)", fontSize: 13, marginBottom: 16 }}>Choisissez comment ce parcours sera disponible :</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                         <button
                             onClick={() => activateMut.mutate({ id: activateFor.id, mode: "global" })}
                             disabled={activateMut.isPending}
                             style={{
                                 padding: 14, borderRadius: 10,
-                                background: "#3B82F6", border: "none",
+                                background: "var(--accent)", border: "none",
                                 color: "#fff", fontSize: 13, textAlign: "left", cursor: "pointer",
                                 transition: "background 200ms"
                             }}
@@ -260,13 +260,13 @@ export default function AdminCatalogPage() {
                             disabled={activateMut.isPending}
                             style={{
                                 padding: 14, borderRadius: 10,
-                                background: "transparent", border: "1px solid #E2E8F0",
-                                color: "#1E293B", fontSize: 13, textAlign: "left", cursor: "pointer",
+                                background: "transparent", border: "1px solid var(--border)",
+                                color: "var(--text)", fontSize: 13, textAlign: "left", cursor: "pointer",
                                 transition: "all 200ms"
                             }}
                         >
                             <div style={{ fontWeight: 600, marginBottom: 4 }}>Uniquement équipes</div>
-                            <div style={{ fontSize: 12, color: "#64748B" }}>Vous l'assignerez explicitement à certaines équipes depuis la page Équipes.</div>
+                            <div style={{ fontSize: 12, color: "var(--text-2)" }}>Vous l'assignerez explicitement à certaines équipes depuis la page Équipes.</div>
                         </button>
                     </div>
                 </Modal>
@@ -275,9 +275,9 @@ export default function AdminCatalogPage() {
             {/* Modal preview */}
             {previewFor && (
                 <Modal onClose={() => setPreviewFor(null)} title={previewFor.title}>
-                    <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.5 }}>
                         {previewFor.description && <p style={{ marginBottom: 12 }}>{previewFor.description}</p>}
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, fontSize: 12, color: "#64748B" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
                             <div><strong>Secteur:</strong> {sectorLabel(previewFor.sector)}</div>
                             <div><strong>Niveau:</strong> {levelLabel(previewFor.level)}</div>
                             <div><strong>Durée:</strong> {previewFor.estimatedMinutes ?? "—"} min</div>
@@ -285,7 +285,7 @@ export default function AdminCatalogPage() {
                         </div>
                         {previewFor.tags && <div style={{ marginTop: 12, display: "flex", gap: 6, flexWrap: "wrap" }}>
                             {previewFor.tags.split(",").map(t => t.trim()).filter(Boolean).map(t => (
-                                <span key={t} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "#F1F5F9", color: "#64748B", border: "1px solid #E2E8F0" }}>{t}</span>
+                                <span key={t} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>{t}</span>
                             ))}
                         </div>}
                     </div>
@@ -302,16 +302,16 @@ function Modal({ children, onClose, title }: { children: React.ReactNode; onClos
             display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16,
         }}>
             <div onClick={e => e.stopPropagation()} style={{
-                background: "#fff", borderRadius: 12, padding: 24,
+                background: "var(--surface)", borderRadius: 12, padding: 24,
                 maxWidth: 480, width: "90%", maxHeight: "80vh", overflow: "auto",
                 boxShadow: "0 10px 40px rgba(0,0,0,0.15)"
             }}>
-                <div style={{ fontWeight: 600, color: "#1E293B", fontSize: 16, marginBottom: 14 }}>{title}</div>
+                <div style={{ fontWeight: 600, color: "var(--text)", fontSize: 16, marginBottom: 14 }}>{title}</div>
                 {children}
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
                     <button onClick={onClose} style={{
-                        padding: "8px 14px", background: "transparent", border: "1px solid #E2E8F0",
-                        borderRadius: 8, color: "#334155", fontSize: 13, cursor: "pointer"
+                        padding: "8px 14px", background: "transparent", border: "1px solid var(--border)",
+                        borderRadius: 8, color: "var(--text-2)", fontSize: 13, cursor: "pointer"
                     }}>Fermer</button>
                 </div>
             </div>

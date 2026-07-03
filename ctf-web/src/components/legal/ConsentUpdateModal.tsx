@@ -68,7 +68,7 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                 borderRadius: 12, padding: "clamp(20px, 5vw, 28px)", maxWidth: 640, width: "100%",
                 maxHeight: "90vh", overflowY: "auto",
                 boxShadow: "0 20px 50px -10px rgba(0,0,0,0.4)",
-                borderTop: "4px solid #03b5aa",
+                borderTop: "4px solid var(--accent)",
             }}>
                 <h2 id="consent-update-title" style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px" }}>
                     Mise à jour de nos conditions
@@ -98,7 +98,7 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                                     href={`/legal/${m.documentSlug}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{ fontSize: 12, color: "#03b5aa", whiteSpace: "nowrap", textDecoration: "underline" }}
+                                    style={{ fontSize: 12, color: "var(--accent)", whiteSpace: "nowrap", textDecoration: "underline" }}
                                 >
                                     Lire la nouvelle version
                                 </a>
@@ -117,7 +117,7 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                                     type="checkbox"
                                     checked={!!accepted[m.documentSlug]}
                                     onChange={e => toggle(m.documentSlug, e.target.checked)}
-                                    style={{ accentColor: "#03b5aa", width: 20, height: 20, flexShrink: 0 }}
+                                    style={{ accentColor: "var(--accent)", width: 20, height: 20, flexShrink: 0 }}
                                 />
                                 <span>J&apos;accepte la version {m.currentVersion} de {m.documentTitle}</span>
                             </label>
@@ -140,7 +140,7 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                         width: "100%",
                         padding: "12px 20px",
                         minHeight: 44,
-                        background: allChecked && !submitting ? "#03b5aa" : "#94A3B8",
+                        background: allChecked && !submitting ? "var(--accent)" : "#94A3B8",
                         color: "#FFFFFF",
                         border: "none",
                         borderRadius: 10,
@@ -149,8 +149,8 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                         cursor: allChecked && !submitting ? "pointer" : "not-allowed",
                         transition: "background 0.2s",
                     }}
-                    onMouseEnter={e => { if (allChecked && !submitting) (e.currentTarget as HTMLButtonElement).style.background = "#037971"; }}
-                    onMouseLeave={e => { if (allChecked && !submitting) (e.currentTarget as HTMLButtonElement).style.background = "#03b5aa"; }}
+                    onMouseEnter={e => { if (allChecked && !submitting) (e.currentTarget as HTMLButtonElement).style.background = "var(--accent-hover)"; }}
+                    onMouseLeave={e => { if (allChecked && !submitting) (e.currentTarget as HTMLButtonElement).style.background = "var(--accent)"; }}
                 >
                     {submitting ? "Enregistrement…" : "Accepter et continuer"}
                 </button>

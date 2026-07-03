@@ -24,11 +24,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div style={{
                 display: "flex", minHeight: "100svh",
                 alignItems: "center", justifyContent: "center",
-                background: "#0F172A",
+                background: "#0A0A0B",
             }}>
                 <div style={{
                     width: 32, height: 32,
-                    border: "2px solid #3B82F6",
+                    border: "2px solid var(--accent)",
                     borderTopColor: "transparent",
                     borderRadius: "50%",
                     animation: "spin 0.8s linear infinite",
@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div style={{
             display: "flex",
             height: "100svh",
-            background: "#0F172A",
+            background: "#0A0A0B",
             overflow: "hidden",
         }}>
             <Sidebar me={me} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
@@ -63,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "0 24px",
-                    background: "#0F172A",
+                    background: "#0A0A0B",
                     borderBottom: "1px solid rgba(255,255,255,0.06)",
                     position: "sticky",
                     top: 0,

@@ -31,8 +31,8 @@ type Me = { email: string; role: string };
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 const card: React.CSSProperties = {
-    background: "#fff",
-    border: "1px solid #E2E8F0",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
     borderRadius: 12,
     padding: 20,
     boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
@@ -156,11 +156,11 @@ export default function DirectoryPage() {
     const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize));
 
     return (
-        <div style={{ padding: isMobile ? "16px var(--page-x)" : 24, background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: isMobile ? "16px var(--page-x)" : 24, background: "var(--bg)", minHeight: "100%" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
                 <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1E293B", margin: 0 }}>Annuaire</h1>
-                    <div style={{ fontSize: 13, color: "#64748B", marginTop: 4 }}>
+                    <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", margin: 0 }}>Annuaire</h1>
+                    <div style={{ fontSize: 13, color: "var(--text-2)", marginTop: 4 }}>
                         {data?.aggregations.total ?? "…"} collaborateur{(data?.aggregations.total ?? 0) > 1 ? "s" : ""}
                         {data && ` · ${data.aggregations.activeCount} actif${data.aggregations.activeCount > 1 ? "s" : ""} · ${data.aggregations.adminCount} admin${data.aggregations.adminCount > 1 ? "s" : ""}`}
                     </div>
@@ -178,11 +178,11 @@ export default function DirectoryPage() {
             {/* Filtres */}
             <div style={{ ...card, marginBottom: 16, padding: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ position: "relative", flex: "1 1 280px", minWidth: 240 }}>
-                    <Search size={14} style={{ position: "absolute", left: 10, top: 10, color: "#64748B" }} />
+                    <Search size={14} style={{ position: "absolute", left: 10, top: 10, color: "var(--text-2)" }} />
                     <input
                         placeholder="Rechercher nom, prénom, email"
                         value={search} onChange={e => setSearch(e.target.value)}
-                        style={{ width: "100%", padding: "8px 12px 8px 32px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                        style={{ width: "100%", padding: "8px 12px 8px 32px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 }}
                     />
                 </div>
                 <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)} style={filterSelect}>
@@ -217,8 +217,8 @@ export default function DirectoryPage() {
 
             {/* Bulk actions */}
             {selectedIds.size > 0 && (
-                <div style={{ ...card, marginBottom: 12, padding: 12, background: "#EFF6FF", border: "1px solid #BFDBFE", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
-                    <span style={{ fontSize: 13, color: "#1E40AF", fontWeight: 500 }}>
+                <div style={{ ...card, marginBottom: 12, padding: 12, background: "var(--accent-subtle)", border: "1px solid var(--accent-border)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
+                    <span style={{ fontSize: 13, color: "var(--accent)", fontWeight: 500 }}>
                         {selectedIds.size} sélectionné{selectedIds.size > 1 ? "s" : ""}
                     </span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -237,12 +237,12 @@ export default function DirectoryPage() {
             <div style={{ ...card, padding: 0, overflow: "hidden" }}>
                 {isMobile ? (
                     <div>
-                        {isLoading && <div style={{ padding: 32, textAlign: "center", color: "#64748B" }}>Chargement…</div>}
+                        {isLoading && <div style={{ padding: 32, textAlign: "center", color: "var(--text-2)" }}>Chargement…</div>}
                         {!isLoading && (data?.items?.length ?? 0) === 0 && (
-                            <div style={{ padding: 32, textAlign: "center", color: "#64748B" }}>Aucun collaborateur trouvé — ajustez vos filtres</div>
+                            <div style={{ padding: 32, textAlign: "center", color: "var(--text-2)" }}>Aucun collaborateur trouvé — ajustez vos filtres</div>
                         )}
                         {(data?.items ?? []).map(r => (
-                            <div key={r.id} style={{ borderTop: "1px solid #E2E8F0", padding: 14, background: selectedIds.has(r.id) ? "#EFF6FF" : "#fff", display: "flex", gap: 10 }}>
+                            <div key={r.id} style={{ borderTop: "1px solid var(--border)", padding: 14, background: selectedIds.has(r.id) ? "var(--accent-subtle)" : "var(--surface)", display: "flex", gap: 10 }}>
                                 <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => onToggleRow(r.id)} style={{ marginTop: 6 }} />
                                 <div style={{ flex: 1, minWidth: 0 }} onClick={() => setDetailOpen(r.id)}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -253,22 +253,22 @@ export default function DirectoryPage() {
                                             fontSize: 12, fontWeight: 600,
                                         }}>{initials(r.firstName, r.lastName)}</div>
                                         <div style={{ minWidth: 0 }}>
-                                            <div style={{ fontWeight: 500, color: "#1E293B" }}>{r.firstName} {r.lastName}</div>
-                                            <div style={{ fontSize: 12, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.email}</div>
+                                            <div style={{ fontWeight: 500, color: "var(--text)" }}>{r.firstName} {r.lastName}</div>
+                                            <div style={{ fontSize: 12, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.email}</div>
                                         </div>
                                     </div>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                                         <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500,
-                                            background: r.role === "admin" ? "rgba(245,158,11,0.12)" : "rgba(59,130,246,0.12)",
-                                            color: r.role === "admin" ? "#D97706" : "#1E40AF" }}>
+                                            background: r.role === "admin" ? "var(--warning-subtle)" : "var(--accent-subtle)",
+                                            color: r.role === "admin" ? "var(--warning-t)" : "var(--accent)" }}>
                                             {r.role === "admin" ? "Admin" : "User"}
                                         </span>
                                         {r.teamName && (
                                             <span style={{ padding: "2px 8px", borderRadius: 999, background: (r.teamColor ?? "#64748B") + "22", color: r.teamColor ?? "#64748B", fontSize: 11, fontWeight: 500 }}>{r.teamName}</span>
                                         )}
-                                        {!r.isActive && <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, color: "#EF4444", background: "rgba(239,68,68,0.10)" }}>Suspendu</span>}
+                                        {!r.isActive && <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, color: "var(--danger-t)", background: "var(--danger-subtle)" }}>Suspendu</span>}
                                     </div>
-                                    <div style={{ fontSize: 12, color: "#64748B", marginTop: 6 }}>
+                                    <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 6 }}>
                                         {relTime(r.lastActivityAt ?? r.lastLoginAt)} · {r.completedPathsCount}/{r.assignedPathsCount} parcours
                                     </div>
                                 </div>
@@ -281,7 +281,7 @@ export default function DirectoryPage() {
                 ) : (
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                     <thead>
-                        <tr style={{ background: "#F1F5F9" }}>
+                        <tr style={{ background: "var(--surface-2)" }}>
                             <th style={{ padding: 10, width: 36, textAlign: "center" }}>
                                 <input type="checkbox"
                                     checked={(data?.items?.length ?? 0) > 0 && (data?.items ?? []).every(r => selectedIds.has(r.id))}
@@ -298,16 +298,16 @@ export default function DirectoryPage() {
                     </thead>
                     <tbody>
                         {isLoading && (
-                            <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: "#64748B" }}>Chargement…</td></tr>
+                            <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: "var(--text-2)" }}>Chargement…</td></tr>
                         )}
                         {!isLoading && (data?.items?.length ?? 0) === 0 && (
-                            <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: "#64748B" }}>
+                            <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: "var(--text-2)" }}>
                                 Aucun collaborateur trouvé — ajustez vos filtres
                             </td></tr>
                         )}
                         {(data?.items ?? []).map(r => (
                             <tr key={r.id}
-                                style={{ borderTop: "1px solid #E2E8F0", background: selectedIds.has(r.id) ? "#EFF6FF" : "#fff" }}>
+                                style={{ borderTop: "1px solid var(--border)", background: selectedIds.has(r.id) ? "var(--accent-subtle)" : "var(--surface)" }}>
                                 <td style={{ padding: 10, textAlign: "center" }} onClick={e => e.stopPropagation()}>
                                     <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => onToggleRow(r.id)} />
                                 </td>
@@ -320,30 +320,30 @@ export default function DirectoryPage() {
                                             fontSize: 12, fontWeight: 600
                                         }}>{initials(r.firstName, r.lastName)}</div>
                                         <div>
-                                            <div style={{ fontWeight: 500, color: "#1E293B" }}>{r.firstName} {r.lastName}</div>
-                                            {!r.isActive && <div style={{ fontSize: 10, color: "#EF4444" }}>Suspendu</div>}
+                                            <div style={{ fontWeight: 500, color: "var(--text)" }}>{r.firstName} {r.lastName}</div>
+                                            {!r.isActive && <div style={{ fontSize: 10, color: "var(--danger)" }}>Suspendu</div>}
                                         </div>
                                     </div>
                                 </td>
                                 <td style={tdStyle} onClick={() => setDetailOpen(r.id)}>
-                                    <span style={{ color: "#64748B", cursor: "pointer" }}>{r.email}</span>
+                                    <span style={{ color: "var(--text-2)", cursor: "pointer" }}>{r.email}</span>
                                 </td>
                                 <td style={tdStyle}>
                                     {r.teamName ? (
                                         <span style={{ padding: "2px 8px", borderRadius: 999, background: (r.teamColor ?? "#64748B") + "22", color: r.teamColor ?? "#64748B", fontSize: 11, fontWeight: 500 }}>
                                             {r.teamName}
                                         </span>
-                                    ) : <span style={{ color: "#64748B" }}>—</span>}
+                                    ) : <span style={{ color: "var(--text-2)" }}>—</span>}
                                 </td>
                                 <td style={tdStyle}>
                                     <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500,
-                                        background: r.role === "admin" ? "rgba(245,158,11,0.12)" : "rgba(59,130,246,0.12)",
-                                        color: r.role === "admin" ? "#D97706" : "#1E40AF" }}>
+                                        background: r.role === "admin" ? "var(--warning-subtle)" : "var(--accent-subtle)",
+                                        color: r.role === "admin" ? "var(--warning-t)" : "var(--accent)" }}>
                                         {r.role === "admin" ? "Admin" : "User"}
                                     </span>
                                 </td>
-                                <td style={{ ...tdStyle, color: "#64748B", fontSize: 12 }}>{relTime(r.lastActivityAt ?? r.lastLoginAt)}</td>
-                                <td style={{ ...tdStyle, color: "#64748B", fontSize: 12 }}>
+                                <td style={{ ...tdStyle, color: "var(--text-2)", fontSize: 12 }}>{relTime(r.lastActivityAt ?? r.lastLoginAt)}</td>
+                                <td style={{ ...tdStyle, color: "var(--text-2)", fontSize: 12 }}>
                                     {r.completedPathsCount}/{r.assignedPathsCount} parcours
                                 </td>
                                 <td style={tdStyle} onClick={e => e.stopPropagation()}>
@@ -356,9 +356,9 @@ export default function DirectoryPage() {
                 )}
 
                 {/* Pagination */}
-                <div style={{ padding: 12, borderTop: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#64748B", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ padding: 12, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "var(--text-2)", flexWrap: "wrap", gap: 8 }}>
                     <div>
-                        <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))} style={{ padding: "4px 8px", fontSize: 12, border: "1px solid #E2E8F0", borderRadius: 6 }}>
+                        <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))} style={{ padding: "4px 8px", fontSize: 12, border: "1px solid var(--border)", borderRadius: 6 }}>
                             <option value={25}>25 / page</option>
                             <option value={50}>50 / page</option>
                             <option value={100}>100 / page</option>
@@ -386,13 +386,13 @@ function RowMenu({ user, onPatch }: { user: Row; onPatch: (body: Record<string, 
     const [open, setOpen] = useState(false);
     return (
         <div style={{ position: "relative" }}>
-            <button onClick={() => setOpen(v => !v)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#64748B", padding: 6 }}>
+            <button onClick={() => setOpen(v => !v)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-2)", padding: 6 }}>
                 <MoreVertical size={16} />
             </button>
             {open && (
                 <div onMouseLeave={() => setOpen(false)} style={{
                     position: "absolute", top: "100%", right: 0, minWidth: 180, zIndex: 10,
-                    background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     padding: 4
                 }}>
                     {user.role === "admin"
@@ -401,8 +401,8 @@ function RowMenu({ user, onPatch }: { user: Row; onPatch: (body: Record<string, 
                     {user.isActive
                         ? <button style={menuItem} onClick={() => { onPatch({ isActive: false }); setOpen(false); }}>Suspendre</button>
                         : <button style={menuItem} onClick={() => { onPatch({ isActive: true }); setOpen(false); }}>Réactiver</button>}
-                    <div style={{ height: 1, background: "#E2E8F0", margin: "4px 0" }} />
-                    <button style={{ ...menuItem, color: "#EF4444" }} onClick={() => {
+                    <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                    <button style={{ ...menuItem, color: "var(--danger)" }} onClick={() => {
                         if (confirm(`Supprimer définitivement ${user.firstName} ${user.lastName} ? Cette action est irréversible.`)) {
                             apiFetch(`/api/admin/directory/bulk-action`, { method: "POST", body: JSON.stringify({ userIds: [user.id], action: "delete" }) })
                                 .then(() => window.location.reload());
@@ -432,20 +432,20 @@ function UserDetailPanel({ userId, onClose }: { userId: string; onClose: () => v
 
     return (
         <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.5)", zIndex: 100, display: "flex", justifyContent: "flex-end" }}>
-            <div onClick={e => e.stopPropagation()} style={{ width: 560, maxWidth: "100%", background: "#fff", height: "100%", overflowY: "auto", padding: 24 }}>
+            <div onClick={e => e.stopPropagation()} style={{ width: 560, maxWidth: "100%", background: "var(--surface)", height: "100%", overflowY: "auto", padding: 24 }}>
                 {!data ? (
                     <div>Chargement…</div>
                 ) : (
                     <>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                             <div>
-                                <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B" }}>{data.firstName} {data.lastName}</div>
-                                <div style={{ fontSize: 13, color: "#64748B" }}>{data.email}</div>
+                                <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text)" }}>{data.firstName} {data.lastName}</div>
+                                <div style={{ fontSize: 13, color: "var(--text-2)" }}>{data.email}</div>
                             </div>
                             <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer" }}><X size={20} /></button>
                         </div>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, fontSize: 12, color: "#64748B", marginBottom: 16 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, fontSize: 12, color: "var(--text-2)", marginBottom: 16 }}>
                             <div><strong>Rôle :</strong> {data.role}</div>
                             <div><strong>Statut :</strong> {data.isActive ? "Actif" : "Suspendu"}</div>
                             <div><strong>Équipe :</strong> {data.teamName ?? "—"}</div>
@@ -454,12 +454,12 @@ function UserDetailPanel({ userId, onClose }: { userId: string; onClose: () => v
                             <div><strong>Maj :</strong> {data.updatedAt ? new Date(data.updatedAt).toLocaleDateString("fr-FR") : "—"}</div>
                         </div>
 
-                        <div style={{ display: "flex", gap: 4, borderBottom: "1px solid #E2E8F0", marginBottom: 12 }}>
+                        <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                             {(["parcours", "activite", "admin"] as const).map(t => (
                                 <button key={t} onClick={() => setTab(t)} style={{
                                     padding: "8px 14px", background: "transparent", border: "none",
-                                    borderBottom: tab === t ? "2px solid #3B82F6" : "2px solid transparent",
-                                    color: tab === t ? "#3B82F6" : "#64748B",
+                                    borderBottom: tab === t ? "2px solid var(--accent)" : "2px solid transparent",
+                                    color: tab === t ? "var(--accent)" : "var(--text-2)",
                                     fontSize: 13, fontWeight: 500, cursor: "pointer", textTransform: "capitalize"
                                 }}>{t === "parcours" ? "Parcours" : t === "activite" ? "Activité" : "Administration"}</button>
                             ))}
@@ -468,44 +468,44 @@ function UserDetailPanel({ userId, onClose }: { userId: string; onClose: () => v
                         {tab === "parcours" && (
                             <div>
                                 {data.parcours.length === 0 ? (
-                                    <div style={{ color: "#64748B", fontSize: 13 }}>Aucun parcours assigné.</div>
+                                    <div style={{ color: "var(--text-2)", fontSize: 13 }}>Aucun parcours assigné.</div>
                                 ) : data.parcours.map(p => (
-                                    <div key={p.pathId} style={{ padding: 12, border: "1px solid #E2E8F0", borderRadius: 8, marginBottom: 8 }}>
+                                    <div key={p.pathId} style={{ padding: 12, border: "1px solid var(--border)", borderRadius: 8, marginBottom: 8 }}>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <div style={{ fontWeight: 500, color: "#1E293B", fontSize: 13 }}>{p.title}</div>
-                                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "#F1F5F9", color: "#64748B" }}>{p.source}</span>
+                                            <div style={{ fontWeight: 500, color: "var(--text)", fontSize: 13 }}>{p.title}</div>
+                                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "var(--surface-2)", color: "var(--text-2)" }}>{p.source}</span>
                                         </div>
-                                        <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", gap: 10 }}>
+                                        <div style={{ fontSize: 11, color: "var(--text-2)", marginTop: 4, display: "flex", gap: 10 }}>
                                             <span>{p.level}</span><span>{p.sector}</span>
-                                            {p.isMandatory && p.dueAt && <span style={{ color: "#F59E0B" }}>⏰ {new Date(p.dueAt).toLocaleDateString("fr-FR")}</span>}
+                                            {p.isMandatory && p.dueAt && <span style={{ color: "var(--warning)" }}>⏰ {new Date(p.dueAt).toLocaleDateString("fr-FR")}</span>}
                                         </div>
-                                        <div style={{ marginTop: 8, height: 4, background: "#E2E8F0", borderRadius: 999 }}>
-                                            <div style={{ width: `${p.percent}%`, height: "100%", background: p.status === "completed" ? "#10B981" : "#3B82F6", borderRadius: 999 }} />
+                                        <div style={{ marginTop: 8, height: 4, background: "var(--border)", borderRadius: 999 }}>
+                                            <div style={{ width: `${p.percent}%`, height: "100%", background: p.status === "completed" ? "var(--success)" : "var(--accent)", borderRadius: 999 }} />
                                         </div>
-                                        <div style={{ fontSize: 10, color: "#64748B", marginTop: 4 }}>{p.status} — {p.percent}%</div>
+                                        <div style={{ fontSize: 10, color: "var(--text-2)", marginTop: 4 }}>{p.status} — {p.percent}%</div>
                                     </div>
                                 ))}
                             </div>
                         )}
 
                         {tab === "activite" && (
-                            <div style={{ fontSize: 12, color: "#64748B" }}>
+                            <div style={{ fontSize: 12, color: "var(--text-2)" }}>
                                 Timeline d'activité (à enrichir avec Analytics). Dernière connexion : {relTime(data.lastLoginAt)}
                             </div>
                         )}
 
                         {tab === "admin" && (
                             <div>
-                                <div style={{ fontWeight: 500, color: "#1E293B", fontSize: 13, marginBottom: 8 }}>Journal d'audit</div>
-                                {data.auditLog.length === 0 ? <div style={{ color: "#64748B", fontSize: 12 }}>Aucune action.</div> : (
+                                <div style={{ fontWeight: 500, color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Journal d'audit</div>
+                                {data.auditLog.length === 0 ? <div style={{ color: "var(--text-2)", fontSize: 12 }}>Aucune action.</div> : (
                                     <table style={{ width: "100%", fontSize: 11 }}>
                                         <tbody>
                                             {data.auditLog.map(a => (
-                                                <tr key={a.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
-                                                    <td style={{ padding: 6, color: "#64748B", whiteSpace: "nowrap" }}>{new Date(a.createdAt).toLocaleDateString("fr-FR")}</td>
+                                                <tr key={a.id} style={{ borderBottom: "1px solid var(--surface-2)" }}>
+                                                    <td style={{ padding: 6, color: "var(--text-2)", whiteSpace: "nowrap" }}>{new Date(a.createdAt).toLocaleDateString("fr-FR")}</td>
                                                     <td style={{ padding: 6, fontWeight: 500 }}>{a.action}</td>
-                                                    <td style={{ padding: 6, color: "#64748B" }}>{a.details ?? ""}</td>
-                                                    <td style={{ padding: 6, color: "#64748B" }}>{a.actorEmail ?? "—"}</td>
+                                                    <td style={{ padding: 6, color: "var(--text-2)" }}>{a.details ?? ""}</td>
+                                                    <td style={{ padding: 6, color: "var(--text-2)" }}>{a.actorEmail ?? "—"}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -529,7 +529,7 @@ function InviteModal({ onClose, onSubmit, teams, isSubmitting }: { onClose: () =
     return (
         <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
             <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "#1E293B" }}>Inviter un collaborateur</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "var(--text)" }}>Inviter un collaborateur</h2>
                 <form onSubmit={e => { e.preventDefault(); onSubmit({ email, firstName, lastName, role, teamId: teamId || null }); }}>
                     <div style={{ ...twoCol, marginBottom: 10 }}>
                         <input required placeholder="Prénom" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ ...inputStyle, width: "100%" }} />
@@ -546,7 +546,7 @@ function InviteModal({ onClose, onSubmit, teams, isSubmitting }: { onClose: () =
                             {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                         </select>
                     </div>
-                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 16 }}>
                         Mot de passe temporaire par défaut : <strong>Employe@2026</strong>
                     </div>
                     <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexDirection: isMobile ? "column-reverse" : "row" }}>
@@ -560,13 +560,13 @@ function InviteModal({ onClose, onSubmit, teams, isSubmitting }: { onClose: () =
 }
 
 // ── Styles ──
-const btnPrimary: React.CSSProperties = { padding: "8px 14px", background: "#3B82F6", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "background 200ms" };
-const btnSecondary: React.CSSProperties = { padding: "8px 14px", background: "#fff", color: "#334155", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 };
-const btnBulk: React.CSSProperties = { padding: "6px 12px", background: "#fff", color: "#1E40AF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 12, cursor: "pointer" };
-const btnBulkDanger: React.CSSProperties = { padding: "6px 12px", background: "#fff", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, fontSize: 12, cursor: "pointer" };
-const btnPagination: React.CSSProperties = { padding: "6px 10px", background: "transparent", border: "1px solid #E2E8F0", borderRadius: 6, cursor: "pointer" };
-const filterSelect: React.CSSProperties = { padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 };
-const inputStyle: React.CSSProperties = { padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 };
-const thStyle: React.CSSProperties = { padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" };
+const btnPrimary: React.CSSProperties = { padding: "8px 14px", background: "var(--accent)", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "background 200ms" };
+const btnSecondary: React.CSSProperties = { padding: "8px 14px", background: "var(--surface)", color: "var(--text-2)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 };
+const btnBulk: React.CSSProperties = { padding: "6px 12px", background: "var(--surface)", color: "var(--accent)", border: "1px solid var(--accent-border)", borderRadius: 6, fontSize: 12, cursor: "pointer" };
+const btnBulkDanger: React.CSSProperties = { padding: "6px 12px", background: "var(--surface)", color: "var(--danger)", border: "1px solid var(--danger-subtle)", borderRadius: 6, fontSize: 12, cursor: "pointer" };
+const btnPagination: React.CSSProperties = { padding: "6px 10px", background: "transparent", border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer" };
+const filterSelect: React.CSSProperties = { padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 };
+const inputStyle: React.CSSProperties = { padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 };
+const thStyle: React.CSSProperties = { padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" };
 const tdStyle: React.CSSProperties = { padding: 10 };
-const menuItem: React.CSSProperties = { display: "block", width: "100%", textAlign: "left", padding: "8px 12px", background: "transparent", border: "none", fontSize: 12, color: "#334155", cursor: "pointer", borderRadius: 4 };
+const menuItem: React.CSSProperties = { display: "block", width: "100%", textAlign: "left", padding: "8px 12px", background: "transparent", border: "none", fontSize: 12, color: "var(--text-2)", cursor: "pointer", borderRadius: 4 };

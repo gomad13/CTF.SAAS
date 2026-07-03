@@ -16,7 +16,7 @@ const DIFF_LABELS: Record<number, string> = {
  * En-tête de la page challenge : badges (difficulté, points, interactif) + titre.
  *
  * Corrige le bug de contraste : le titre était en `var(--text-primary)` (#1E293B,
- * gris foncé) sur le fond sombre du dashboard (#0F172A) → quasi invisible.
+ * gris foncé) sur le fond sombre du dashboard (#0A0A0B) → quasi invisible.
  * Il est désormais en blanc (`--text-on-dark`), grand format et bold.
  */
 export default function ChallengeHeader({ challenge: c }: { challenge: ChallengeItem }) {

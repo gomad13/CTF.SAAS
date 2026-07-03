@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 /**
  * Button — composant de démonstration shadcn/ui configuré à la charte Sentys (teal).
  * Pattern shadcn : cva (variantes) + cn (fusion de classes) + Radix Slot (asChild).
- * Charte : primary = #03b5aa (bg-sentys), hover = #037971 (bg-sentys-dark),
- * accent = #00bfb3 (bg-sentys-accent). Cibles tactiles ≥ 44px (mobile-first).
- * Contraste WCAG AA : texte blanc sur teal (#03b5aa) ≈ 3.0:1 pour un gros bouton ;
- * pour du petit texte préférer bg-sentys-dark (#037971) ≈ 4.6:1.
+ * Charte : primary = var(--accent) (bg-sentys), hover = var(--accent-hover) (bg-sentys-dark),
+ * accent = var(--accent) (bg-sentys-accent). Cibles tactiles ≥ 44px (mobile-first).
+ * Contraste WCAG AA : texte blanc sur teal (var(--accent)) ≈ 3.0:1 pour un gros bouton ;
+ * pour du petit texte préférer bg-sentys-dark (var(--accent-hover)) ≈ 4.6:1.
  */
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sentys/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
@@ -17,7 +17,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-sentys text-white hover:bg-sentys-dark",
-        accent: "bg-sentys-accent text-[#023436] hover:bg-sentys",
+        accent: "bg-sentys-accent text-[var(--surface-2)] hover:bg-sentys",
         outline: "border border-sentys text-sentys bg-transparent hover:bg-sentys/10",
         ghost: "text-sentys hover:bg-sentys/10",
         secondary: "bg-[#F1F5F9] text-[#334155] hover:bg-[#E2E8F0]",

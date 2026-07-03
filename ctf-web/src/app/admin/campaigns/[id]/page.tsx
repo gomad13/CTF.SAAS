@@ -310,7 +310,7 @@ function AssignModal({
                         <input
                             type="text"
                             placeholder="Rechercher un employé…"
-                            className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B]"
+                            className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B] placeholder:text-[#64748B]"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />

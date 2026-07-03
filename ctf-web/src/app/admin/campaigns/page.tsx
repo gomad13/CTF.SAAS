@@ -131,7 +131,7 @@ export default function CampaignsPage() {
                     <div>
                         <label className="text-xs font-medium text-[#334155]">Nom</label>
                         <input
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B] placeholder:text-[#64748B]"
                             placeholder="Sensibilisation T2 2026"
                             value={name}
                             onChange={e => setName(e.target.value)}
@@ -141,7 +141,7 @@ export default function CampaignsPage() {
                     <div>
                         <label className="text-xs font-medium text-[#334155]">Description</label>
                         <input
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B] placeholder:text-[#64748B]"
                             placeholder="Optionnel — contexte / objectifs"
                             value={description}
                             onChange={e => setDescription(e.target.value)}
@@ -152,7 +152,7 @@ export default function CampaignsPage() {
                         <label className="text-xs font-medium text-[#334155]">Date de début</label>
                         <input
                             type="date"
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B]"
                             value={startDate}
                             onChange={e => setStartDate(e.target.value)}
                         />
@@ -161,7 +161,7 @@ export default function CampaignsPage() {
                         <label className="text-xs font-medium text-[#334155]">Date de fin</label>
                         <input
                             type="date"
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B]"
                             value={endDate}
                             onChange={e => setEndDate(e.target.value)}
                         />

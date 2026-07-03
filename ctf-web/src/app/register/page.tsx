@@ -156,31 +156,31 @@ export default function RegisterPage() {
             <main style={{ minHeight: "100svh", background: "var(--bg-0)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
                 <div style={{
                     maxWidth: 520, width: "100%",
-                    background: "var(--bg-card, #1E293B)",
-                    border: "1px solid var(--border, #334155)",
-                    borderRadius: 14, padding: "clamp(24px, 6vw, 36px)", color: "var(--text-primary, #E2E8F0)",
+                    background: "var(--bg-card, var(--surface))",
+                    border: "1px solid var(--border, var(--border))",
+                    borderRadius: 14, padding: "clamp(24px, 6vw, 36px)", color: "var(--text-primary, var(--text))",
                 }}>
-                    <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted, #94A3B8)", marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted, var(--text-3))", marginBottom: 14 }}>
                         Bêta privée
                     </div>
                     <h1 style={{ fontSize: 26, fontWeight: 700, margin: "0 0 16px" }}>
                         Inscription réservée aux organisations partenaires
                     </h1>
-                    <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary, #CBD5E1)", margin: "0 0 14px" }}>
+                    <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary, var(--text-2))", margin: "0 0 14px" }}>
                         Sentys est actuellement en bêta fermée. Les comptes sont créés directement par
                         l&apos;administrateur de votre organisation, ou par notre équipe si votre entreprise
                         rejoint le programme partenaire.
                     </p>
-                    <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary, #CBD5E1)", margin: "0 0 26px" }}>
+                    <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary, var(--text-2))", margin: "0 0 26px" }}>
                         Vous avez déjà reçu vos identifiants ?{" "}
-                        <a href="/login" style={{ color: "var(--pr-l, #60A5FA)", fontWeight: 600 }}>Se connecter</a>.
+                        <a href="/login" style={{ color: "var(--pr-l, var(--accent))", fontWeight: 600 }}>Se connecter</a>.
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                         <a
                             href="mailto:contact@sentys.fr?subject=Demande%20d%27acc%C3%A8s%20bêta%20Sentys"
                             style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                background: "#3B82F6", color: "#FFFFFF", textDecoration: "none",
+                                background: "var(--accent)", color: "#FFFFFF", textDecoration: "none",
                                 padding: "12px 20px", minHeight: 44, borderRadius: 10, fontSize: 14, fontWeight: 600,
                             }}
                         >
@@ -190,9 +190,9 @@ export default function RegisterPage() {
                             href="/landing"
                             style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                background: "transparent", color: "var(--text-secondary, #CBD5E1)",
+                                background: "transparent", color: "var(--text-secondary, var(--text-2))",
                                 textDecoration: "none", padding: "10px 20px", minHeight: 44, borderRadius: 10,
-                                fontSize: 13, border: "1px solid var(--border, #334155)",
+                                fontSize: 13, border: "1px solid var(--border, var(--border))",
                             }}
                         >
                             ← Retour à l&apos;accueil
@@ -208,7 +208,7 @@ export default function RegisterPage() {
             {/* ── GAUCHE ── */}
             <div className="register-left" style={{
                 width: "42%", flexShrink: 0,
-                background: "linear-gradient(145deg,#1E40AF,#2563EB 40%,#3B82F6)",
+                background: "linear-gradient(145deg,var(--accent-hover),var(--accent) 40%,var(--accent))",
                 padding: "40px 48px",
                 display: "flex", flexDirection: "column", justifyContent: "space-between",
                 position: "relative", overflow: "hidden",
@@ -272,13 +272,13 @@ export default function RegisterPage() {
                     <form onSubmit={handleSubmit}>
                         {/* [MULTI-SOCIETES] Société verrouillée issue du QR (non saisie manuellement) */}
                         {inviteToken && inviteTenantName && (
-                            <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(59,130,246,0.10)", border: "1px solid rgba(59,130,246,0.35)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--text-primary, #E2E8F0)" }}>
+                            <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--accent-subtle)", border: "1px solid var(--accent-border)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--text-primary, var(--text))" }}>
                                 Vous créez un compte pour rejoindre la société <strong>« {inviteTenantName} »</strong>.
                                 Elle sera automatiquement associée à votre compte après l&apos;inscription.
                             </div>
                         )}
                         {inviteToken && inviteInvalid && (
-                            <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--er, #f87171)" }}>
+                            <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: "var(--er, var(--danger-t))" }}>
                                 Cette invitation entreprise est invalide, expirée ou épuisée. Demandez un nouveau lien à votre administrateur.
                             </div>
                         )}

@@ -142,7 +142,7 @@ export default function ModesSettings() {
             </div>
 
             {pending && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/60 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0B]/60 backdrop-blur-sm">
                     <div className="mx-4 w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-lg">
                         <div className="flex items-start justify-between gap-3">
                             <h4 className="text-base font-semibold text-[#1E293B]">

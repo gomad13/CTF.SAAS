@@ -61,7 +61,7 @@ export default function LegalDocumentViewer({ slug }: { slug: string }) {
             />
             <footer style={{ marginTop: 40, paddingTop: 16, borderTop: "1px solid #E2E8F0", fontSize: 13, color: "#64748B" }}>
                 Vous avez des questions ? Contactez notre DPO :{" "}
-                <a href="mailto:dpo@sentys.fr" style={{ color: "#03b5aa", fontWeight: 500 }}>dpo@sentys.fr</a>.
+                <a href="mailto:dpo@sentys.fr" style={{ color: "var(--accent)", fontWeight: 500 }}>dpo@sentys.fr</a>.
             </footer>
             <style>{`
                 .legal-content h2 { font-size: 20px; font-weight: 700; margin: 28px 0 12px; color: #1E293B; }
@@ -73,8 +73,8 @@ export default function LegalDocumentViewer({ slug }: { slug: string }) {
                 .legal-content table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
                 .legal-content th, .legal-content td { border: 1px solid #E2E8F0; padding: 10px 12px; text-align: left; vertical-align: top; }
                 .legal-content thead { background: #F1F5F9; }
-                .legal-content a { color: #03b5aa; text-decoration: underline; }
-                .legal-content a:hover { color: #037971; }
+                .legal-content a { color: var(--accent); text-decoration: underline; }
+                .legal-content a:hover { color: var(--accent-hover); }
                 .legal-content strong { color: #1E293B; }
             `}</style>
         </article>

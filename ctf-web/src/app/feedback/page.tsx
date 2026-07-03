@@ -176,7 +176,7 @@ function cardStyle(): React.CSSProperties {
 function inputStyle(): React.CSSProperties {
     return {
         width: "100%",
-        background: "var(--bg-input, #0F172A)",
+        background: "var(--bg-input, #0A0A0B)",
         border: "1px solid var(--border, #334155)",
         color: "var(--text-primary, #E2E8F0)",
         borderRadius: 8,

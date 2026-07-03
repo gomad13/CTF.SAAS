@@ -32,7 +32,7 @@ export default function ConsentCheckbox({ id, label, documentSlug, checked, requ
                     onChange={e => onChange(e.target.checked)}
                     style={{
                         marginTop: 2, width: 20, height: 20,
-                        accentColor: "#03b5aa", flexShrink: 0,
+                        accentColor: "var(--accent)", flexShrink: 0,
                     }}
                     aria-required={required ? "true" : undefined}
                     aria-invalid={error ? "true" : undefined}
@@ -48,7 +48,7 @@ export default function ConsentCheckbox({ id, label, documentSlug, checked, requ
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={e => e.stopPropagation()}
-                                style={{ color: "#03b5aa", fontWeight: 500, textDecoration: "underline" }}
+                                style={{ color: "var(--accent)", fontWeight: 500, textDecoration: "underline" }}
                             >
                                 Lire le document complet
                             </a>

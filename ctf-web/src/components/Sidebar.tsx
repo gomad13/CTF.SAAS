@@ -29,10 +29,10 @@ function Item({ href, icon, label, badge, exact = false, danger = false }: {
             fontWeight: active ? "600" : "400",
             color: danger ? "#FCA5A5" : active ? "#FFFFFF" : "#94A3B8",
             background: danger ? "rgba(239,68,68,0.12)" : active ? "rgba(59,130,246,0.20)" : "transparent",
-            borderLeft: danger ? "2px solid #EF4444" : active ? "2px solid #3B82F6" : "2px solid transparent",
+            borderLeft: danger ? "2px solid #EF4444" : active ? "2px solid var(--accent)" : "2px solid transparent",
             transition: "all 0.15s ease",
         }}
-            onMouseEnter={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "#1E293B"; (e.currentTarget as HTMLElement).style.color = "#CBD5E1"; } }}
+            onMouseEnter={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "#1F1F22"; (e.currentTarget as HTMLElement).style.color = "#CBD5E1"; } }}
             onMouseLeave={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#94A3B8"; } }}
         >
             <span style={{ color: danger ? "#EF4444" : active ? "#60A5FA" : "#475569", display: "flex", flexShrink: 0 }}>{icon}</span>
@@ -79,13 +79,13 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
             {mobileOpen && <div style={{ position: "fixed", inset: 0, zIndex: 30, background: "rgba(0,0,0,0.5)" }} className="md:hidden" onClick={onClose} />}
             <aside style={{
                 width: "220px", flexShrink: 0, height: "100vh", top: 0,
-                display: "flex", flexDirection: "column", background: "#0F172A",
+                display: "flex", flexDirection: "column", background: "#0A0A0B",
                 borderRight: "1px solid #E2E8F0", zIndex: 40, transition: "transform 0.2s",
             }} className={sidebarClass}>
 
                 {/* Logo */}
                 <div style={{ height: "60px", display: "flex", alignItems: "center", gap: "10px", padding: "0 16px", borderBottom: "1px solid #E2E8F0", flexShrink: 0 }}>
-                    <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 12px rgba(59,130,246,0.4)" }}>
+                    <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,#1D4ED8,var(--accent))", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 12px rgba(59,130,246,0.4)" }}>
                         <Shield size={16} color="white" strokeWidth={2} />
                     </div>
                     <div>
@@ -130,7 +130,7 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                 {/* User */}
                 <div style={{ borderTop: "1px solid #E2E8F0", padding: "12px 10px", flexShrink: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 10px", background: "rgba(255,255,255,0.04)", borderRadius: "10px", marginBottom: "8px" }}>
-                        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "700", color: "white", flexShrink: 0 }}>{initials}</div>
+                        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "linear-gradient(135deg,#1D4ED8,var(--accent))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "700", color: "white", flexShrink: 0 }}>{initials}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "12.5px", fontWeight: "600", color: "#F1F5F9", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{me?.firstName} {me?.lastName}</div>
                             <div style={{ fontSize: "11px", color: "#94A3B8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{me?.role}</div>

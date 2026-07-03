@@ -52,10 +52,10 @@ export default function DashboardHome() {
             <DemoFallbackBanner tenantName={me?.tenantName} />
             {/* Section 1 — Bienvenue */}
             <div style={{ marginBottom: 32 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 700, color: "#F1F5F9" }}>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text)" }}>
                     Bonjour, {me?.firstName ?? "…"} 👋
                 </h1>
-                <p style={{ marginTop: 4, fontSize: 14, color: "#64748B" }}>
+                <p style={{ marginTop: 4, fontSize: 14, color: "var(--text-2)" }}>
                     {me?.tenantName ?? "—"}
                 </p>
             </div>
@@ -272,7 +272,7 @@ function PathRow({ assignment: a }: { assignment: AssignmentMine }) {
                         {level && (
                             <span style={{
                                 fontSize: 11,
-                                background: "rgba(59,130,246,0.08)",
+                                background: "var(--accent-subtle)",
                                 border: "1px solid var(--border)",
                                 borderRadius: 4,
                                 padding: "2px 8px",
@@ -286,8 +286,8 @@ function PathRow({ assignment: a }: { assignment: AssignmentMine }) {
                             borderRadius: 4,
                             padding: "2px 8px",
                             fontWeight: 500,
-                            background: a.status === "completed" ? "rgba(59,130,246,0.10)" : a.status === "started" ? "rgba(234,179,8,0.12)" : "#F1F5F9",
-                            color: a.status === "completed" ? "var(--primary)" : a.status === "started" ? "#eab308" : "var(--text-muted)",
+                            background: a.status === "completed" ? "var(--accent-subtle)" : a.status === "started" ? "var(--warning-subtle)" : "var(--surface-2)",
+                            color: a.status === "completed" ? "var(--primary)" : a.status === "started" ? "var(--warning)" : "var(--text-muted)",
                         }}>
                             {STATUS_LABEL[a.status] ?? a.status}
                         </span>
@@ -301,12 +301,12 @@ function PathRow({ assignment: a }: { assignment: AssignmentMine }) {
                             <span>Progression</span>
                             <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-primary)" }}>{pct}%</span>
                         </div>
-                        <div style={{ height: 3, background: "rgba(59,130,246,0.1)", borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ height: 3, background: "var(--accent-subtle)", borderRadius: 2, overflow: "hidden" }}>
                             <div style={{
                                 height: "100%",
                                 width: `${pct}%`,
                                 background: "linear-gradient(90deg, var(--primary-dark), var(--primary))",
-                                boxShadow: "0 0 6px rgba(59,130,246,0.4)",
+                                boxShadow: "0 0 6px var(--accent-subtle)",
                                 borderRadius: 2,
                                 transition: "width 0.5s",
                             }} />
@@ -322,7 +322,7 @@ function PathRow({ assignment: a }: { assignment: AssignmentMine }) {
                     href={`/dashboard/parcours/${a.pathId}`}
                     style={{
                         flexShrink: 0,
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                         color: "#FFFFFF",
                         fontWeight: 700,
                         fontSize: 12,
@@ -333,7 +333,7 @@ function PathRow({ assignment: a }: { assignment: AssignmentMine }) {
                         textDecoration: "none",
                         transition: "box-shadow 0.2s",
                     }}
-                    onMouseOver={e => { e.currentTarget.style.boxShadow = "0 0 16px rgba(59,130,246,0.4)"; }}
+                    onMouseOver={e => { e.currentTarget.style.boxShadow = "0 0 16px var(--accent-subtle)"; }}
                     onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; }}
                 >
                     Continuer
@@ -352,8 +352,8 @@ function SkeletonCard() {
             padding: 20,
             height: 80,
         }}>
-            <div style={{ width: 60, height: 28, background: "rgba(59,130,246,0.06)", borderRadius: 4, marginBottom: 8 }} />
-            <div style={{ width: 100, height: 12, background: "rgba(59,130,246,0.04)", borderRadius: 4 }} />
+            <div style={{ width: 60, height: 28, background: "var(--surface-2)", borderRadius: 4, marginBottom: 8 }} />
+            <div style={{ width: 100, height: 12, background: "var(--surface-2)", borderRadius: 4 }} />
         </div>
     );
 }
@@ -416,8 +416,8 @@ function FirstStepsBanner({ assignments }: { assignments?: AssignmentMine[] }) {
             style={{
                 marginBottom: 24,
                 padding: "20px 24px",
-                background: "linear-gradient(90deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04))",
-                border: "1px solid rgba(59,130,246,0.30)",
+                background: "linear-gradient(90deg, var(--accent-subtle), var(--accent-subtle))",
+                border: "1px solid var(--accent-border)",
                 borderRadius: 12,
                 display: "flex",
                 gap: 16,
@@ -428,17 +428,17 @@ function FirstStepsBanner({ assignments }: { assignments?: AssignmentMine[] }) {
         >
             <span aria-hidden="true" style={{ fontSize: 28 }}>🚀</span>
             <div style={{ flex: 1, minWidth: 240 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 700, color: "#F1F5F9", margin: 0 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", margin: 0 }}>
                     Prêt à commencer votre formation ?
                 </h2>
-                <p style={{ fontSize: 13, color: "#CBD5E1", margin: "4px 0 0", lineHeight: 1.5 }}>
+                <p style={{ fontSize: 13, color: "var(--text-2)", margin: "4px 0 0", lineHeight: 1.5 }}>
                     Vous avez {assignments.length} parcours assigné{assignments.length > 1 ? "s" : ""}. Démarrez avec le premier.
                 </p>
             </div>
             <Link
                 href={`/dashboard/parcours/${first.pathId}`}
                 style={{
-                    background: "#3B82F6",
+                    background: "var(--accent)",
                     color: "#FFFFFF",
                     textDecoration: "none",
                     padding: "10px 18px",
@@ -460,7 +460,7 @@ function FirstStepsBanner({ assignments }: { assignments?: AssignmentMine[] }) {
                     right: 10,
                     background: "transparent",
                     border: "none",
-                    color: "#94A3B8",
+                    color: "var(--text-3)",
                     cursor: "pointer",
                     fontSize: 16,
                     padding: 4,
@@ -480,7 +480,7 @@ function ErrorBox({ message }: { message?: string }) {
             borderRadius: 8,
             padding: "10px 14px",
             fontSize: 14,
-            color: "#f87171",
+            color: "var(--danger-t)",
         }}>
             {message || "Erreur de chargement"}
         </div>
@@ -504,25 +504,25 @@ function DemoFallbackBanner({ tenantName }: { tenantName?: string | null }) {
     return (
         <div style={{
             marginBottom: 20,
-            background: "linear-gradient(90deg, rgba(59,130,246,0.08), rgba(59,130,246,0.04))",
-            border: "1px solid rgba(59,130,246,0.30)",
+            background: "linear-gradient(90deg, var(--accent-subtle), var(--accent-subtle))",
+            border: "1px solid var(--accent-border)",
             borderRadius: 10,
             padding: "14px 18px",
             display: "flex", alignItems: "center", gap: 14,
         }}>
             <span style={{ fontSize: 22 }}>✨</span>
-            <div style={{ flex: 1, fontSize: 13, color: "#E2E8F0", lineHeight: 1.5 }}>
-                <strong style={{ color: "#60A5FA" }}>Bienvenue sur Sentys en mode Démo.</strong>
+            <div style={{ flex: 1, fontSize: 13, color: "var(--text-2)", lineHeight: 1.5 }}>
+                <strong style={{ color: "var(--accent)" }}>Bienvenue sur Sentys en mode Démo.</strong>
                 {" "}Votre organisation {tenantName ? `(${tenantName})` : ""} n'est pas encore cliente —{" "}
                 <a href="mailto:commercial@sentys.local?subject=Accès%20Sentys%20entreprise"
-                    style={{ color: "#60A5FA", textDecoration: "underline" }}>
+                    style={{ color: "var(--accent)", textDecoration: "underline" }}>
                     contacter notre équipe commerciale
                 </a>
                 {" "}pour accéder aux formations dédiées à votre entreprise.
             </div>
             <button
                 onClick={() => { setDismissed(true); sessionStorage.setItem("demo_banner_dismissed", "1"); }}
-                style={{ background: "transparent", border: "none", color: "#94A3B8", cursor: "pointer", fontSize: 18, padding: 4 }}
+                style={{ background: "transparent", border: "none", color: "var(--text-3)", cursor: "pointer", fontSize: 18, padding: 4 }}
                 aria-label="Fermer"
             >✕</button>
         </div>

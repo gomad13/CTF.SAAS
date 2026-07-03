@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, LogOut } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export function AppShell({
     title,
@@ -27,9 +28,9 @@ export function AppShell({
             <div className="mx-auto max-w-6xl px-4 py-8">
                 <div className="grid grid-cols-12 gap-4">
                     <aside className="col-span-12 md:col-span-3">
-                        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm text-fg-heading">
+                        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm text-fg-heading">
                             <div className="mb-4">
-                                <div className="text-xs text-black">CTF SaaS</div>
+                                <div className="text-xs text-fg-body">CTF SaaS</div>
                                 <div className="text-lg font-semibold">Classic Path V1</div>
                             </div>
 
@@ -43,23 +44,27 @@ export function AppShell({
                                 </NavItem>
                             </nav>
 
-                            <div className="mt-6 border-t border-gray-200 pt-4">
+                            <div className="mt-6 border-t border-border pt-4">
                                 <button
-                                    className="flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-gray-50/40 px-3 py-2 text-sm text-black hover:bg-gray-100/40"
+                                    className="flex w-full items-center gap-2 rounded-xl border border-border bg-surface-2 px-3 py-2 text-sm text-fg-body hover:bg-surface-2"
                                     onClick={handleLogout}
                                 >
                                     <LogOut size={18} />
                                     Logout
                                 </button>
+                                <div className="mt-3 flex items-center gap-2">
+                                    <ThemeToggle />
+                                    <span className="text-xs text-fg-muted">Thème</span>
+                                </div>
                             </div>
                         </div>
                     </aside>
 
                     <main className="col-span-12 md:col-span-9">
-                        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm text-fg-heading">
+                        <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm text-fg-heading">
                             <div className="mb-5">
                                 <h1 className="text-2xl font-semibold">{title}</h1>
-                                {subtitle && <p className="mt-1 text-sm text-black">{subtitle}</p>}
+                                {subtitle && <p className="mt-1 text-sm text-fg-body">{subtitle}</p>}
                             </div>
 
                             {children}
@@ -87,7 +92,7 @@ function NavItem({
             href={href}
             className={cn(
                 "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition",
-                active ? "bg-primary border border-primary text-white" : "text-black hover:bg-gray-100/40"
+                active ? "bg-primary border border-primary text-white" : "text-fg-body hover:bg-surface-2"
             )}
         >
             {icon}

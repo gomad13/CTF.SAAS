@@ -6,7 +6,7 @@ import type { RiskLevel, RiskScore } from "@/lib/types/riskScore";
 import { RISK_LEVEL_LABELS } from "@/lib/types/riskScore";
 
 // Palette : tokens CLAUDE.md §5.4 (#3B82F6, #10B981, #EF4444, #F59E0B).
-// Le prompt CRI mentionnait #03b5aa / #023436 mais CLAUDE.md (autorité) prescrit
+// Le prompt CRI mentionnait var(--accent) / var(--surface-2) mais CLAUDE.md (autorité) prescrit
 // la palette ci-dessous, et tous les composants existants la respectent.
 // Décision documentée dans le rapport final.
 const COLOR_DANGER = "#EF4444";

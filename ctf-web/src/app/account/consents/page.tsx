@@ -98,7 +98,7 @@ function ConsentsContent() {
                                         href={`/legal/${c.documentSlug}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        style={{ fontSize: 12, color: "#03b5aa", textDecoration: "underline" }}
+                                        style={{ fontSize: 12, color: "var(--accent)", textDecoration: "underline" }}
                                     >
                                         Voir le document
                                     </Link>

@@ -45,7 +45,7 @@ export default function CookieBanner() {
                 maxWidth: 640,
                 margin: "0 auto",
                 background: "#FFFFFF",
-                color: "#0F172A",
+                color: "#0A0A0B",
                 border: "1px solid #E2E8F0",
                 borderRadius: 12,
                 boxShadow: "0 10px 30px rgba(15, 23, 42, 0.18)",
@@ -57,7 +57,7 @@ export default function CookieBanner() {
         >
             <p style={{ margin: 0, marginBottom: 10 }}>
                 Sentys utilise uniquement des <strong>cookies strictement nécessaires</strong> à votre authentification.{" "}
-                <Link href="/privacy" style={{ color: "#2563EB", textDecoration: "underline" }}>
+                <Link href="/privacy" style={{ color: "var(--accent-hover)", textDecoration: "underline" }}>
                     En savoir plus
                 </Link>
             </p>
@@ -85,8 +85,8 @@ export default function CookieBanner() {
                     onClick={() => persist("accepted")}
                     style={{
                         flex: "1 1 auto",
-                        background: "#3B82F6",
-                        border: "1px solid #3B82F6",
+                        background: "var(--accent)",
+                        border: "1px solid var(--accent)",
                         color: "#FFFFFF",
                         padding: "10px 14px",
                         minHeight: 44,

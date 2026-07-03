@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (isError || !me) return null;
 
     return (
-        <div style={{ display: "flex", minHeight: "100vh", background: "#0F172A" }}>
+        <div style={{ display: "flex", minHeight: "100vh", background: "#0A0A0B" }}>
             <Sidebar me={me} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
             <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     position: "sticky",
                     top: 0,
                     zIndex: 20,
-                    background: "#0F172A",
+                    background: "#0A0A0B",
                     borderBottom: "1px solid rgba(255,255,255,0.06)",
                     padding: "0 24px",
                     height: 56,

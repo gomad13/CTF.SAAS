@@ -10,7 +10,7 @@ const chartColors = {
     yellow: "#F59E0B",    // warning / en cours
     green: "#10B981",     // success / réussi
     red: "#EF4444",       // danger / échec
-    primary: "#3B82F6",   // bleu DS
+    primary: "var(--accent)",   // bleu DS
 } as const;
 import { apiFetch } from "@/lib/api";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -159,13 +159,13 @@ export default function AdminDashboardPage() {
                             {hasChartData ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
-                                        <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={90} stroke="#0F172A" strokeWidth={2}>
+                                        <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={90} stroke="#0A0A0B" strokeWidth={2}>
                                             {pieData.map((d, i) => (
                                                 <Cell key={i} fill={d.color} />
                                             ))}
                                         </Pie>
                                         <Tooltip
-                                            contentStyle={{ background: "#0F172A", border: "1px solid #334155", borderRadius: 8, color: "#F1F5F9", fontSize: 13 }}
+                                            contentStyle={{ background: "#0A0A0B", border: "1px solid #334155", borderRadius: 8, color: "#F1F5F9", fontSize: 13 }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
                                         <YAxis tick={{ fill: "rgb(163 163 163)", fontSize: 12 }} allowDecimals={false} />
                                         <Tooltip
                                             cursor={{ fill: "rgba(59,130,246,0.08)" }}
-                                            contentStyle={{ background: "#0F172A", border: "1px solid #334155", borderRadius: 8, color: "#F1F5F9", fontSize: 13 }}
+                                            contentStyle={{ background: "#0A0A0B", border: "1px solid #334155", borderRadius: 8, color: "#F1F5F9", fontSize: 13 }}
                                         />
                                         <Bar dataKey="value">
                                             {barData.map((d, i) => (

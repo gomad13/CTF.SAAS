@@ -20,7 +20,7 @@ export default function LegalSlugPage({ params }: { params: Promise<{ slug: stri
                 <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                     <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", color: "#1E293B" }}>
                         <span style={{
-                            width: 28, height: 28, background: "#03b5aa", borderRadius: 6,
+                            width: 28, height: 28, background: "var(--accent)", borderRadius: 6,
                             display: "inline-flex", alignItems: "center", justifyContent: "center",
                             color: "#FFFFFF", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", fontSize: 13,
                         }}>V</span>
@@ -39,7 +39,7 @@ export default function LegalSlugPage({ params }: { params: Promise<{ slug: stri
                     <h1 style={{ fontSize: 24, color: "#1E293B" }}>Document introuvable</h1>
                     <p style={{ fontSize: 14, color: "#64748B" }}>
                         Le document demandé n&apos;existe pas. Voir{" "}
-                        <Link href="/legal/politique-confidentialite" style={{ color: "#03b5aa" }}>la liste des documents</Link>.
+                        <Link href="/legal/politique-confidentialite" style={{ color: "var(--accent)" }}>la liste des documents</Link>.
                     </p>
                 </div>
             ) : (

@@ -35,21 +35,21 @@ export default function ScenarioLandingPage() {
 
     if (isLoading) {
         return (
-            <div style={{ minHeight: "100vh", background: "#0F172A", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8" }}>
+            <div style={{ minHeight: "100vh", background: "#0A0A0B", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8" }}>
                 Chargement…
             </div>
         );
     }
     if (!landing) {
         return (
-            <div style={{ minHeight: "100vh", background: "#0F172A", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8" }}>
+            <div style={{ minHeight: "100vh", background: "#0A0A0B", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8" }}>
                 Lien invalide ou expiré.
             </div>
         );
     }
 
     return (
-        <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#0F172A 0%,#1E293B 100%)", padding: isMobile ? "28px 16px" : "48px 24px" }}>
+        <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#0A0A0B 0%,#1E293B 100%)", padding: isMobile ? "28px 16px" : "48px 24px" }}>
             <div style={{ maxWidth: 720, margin: "0 auto" }}>
                 {/* Hero */}
                 <div style={{

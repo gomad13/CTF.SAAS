@@ -186,7 +186,7 @@ export default function ChatWidget({
                     width: 56,
                     height: 56,
                     borderRadius: "50%",
-                    background: isAvailable ? "linear-gradient(135deg, #3B82F6, #2563EB)" : "#374151",
+                    background: isAvailable ? "linear-gradient(135deg, var(--accent), var(--accent-hover))" : "#374151",
                     border: "none",
                     cursor: "pointer",
                     zIndex: 1000,
@@ -208,7 +208,7 @@ export default function ChatWidget({
                     position: "absolute", top: 2, right: 2,
                     width: 12, height: 12, borderRadius: "50%",
                     background: isAvailable ? "#10B981" : "#ef4444",
-                    border: "2px solid #0F172A",
+                    border: "2px solid #0A0A0B",
                 }} />
             </button>
 
@@ -241,7 +241,7 @@ export default function ChatWidget({
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{
                                 width: 36, height: 36, borderRadius: "50%",
-                                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                                background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 fontSize: 16,
                             }}>🤖</div>
@@ -372,7 +372,7 @@ export default function ChatWidget({
                                 {msg.role === "assistant" && (
                                     <div style={{
                                         width: 28, height: 28, borderRadius: "50%",
-                                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                                        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                                         display: "flex", alignItems: "center", justifyContent: "center",
                                         fontSize: 12, flexShrink: 0,
                                     }}>🤖</div>
@@ -384,7 +384,7 @@ export default function ChatWidget({
                                     background: msg.error
                                         ? "rgba(239,68,68,0.1)"
                                         : msg.role === "user"
-                                            ? "linear-gradient(135deg, #3B82F6, #2563EB)"
+                                            ? "linear-gradient(135deg, var(--accent), var(--accent-hover))"
                                             : "var(--bg-card)",
                                     border: msg.error
                                         ? "1px solid rgba(239,68,68,0.3)"
@@ -409,7 +409,7 @@ export default function ChatWidget({
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <div style={{
                                     width: 28, height: 28, borderRadius: "50%",
-                                    background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                                    background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                                     display: "flex", alignItems: "center", justifyContent: "center",
                                     fontSize: 12,
                                 }}>🤖</div>
@@ -472,7 +472,7 @@ export default function ChatWidget({
                                     borderRadius: 10,
                                     background: !input.trim() || !isAvailable
                                         ? "var(--bg-card)"
-                                        : "linear-gradient(135deg, #3B82F6, #2563EB)",
+                                        : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                                     border: "none",
                                     cursor: !input.trim() || !isAvailable ? "not-allowed" : "pointer",
                                     display: "flex",

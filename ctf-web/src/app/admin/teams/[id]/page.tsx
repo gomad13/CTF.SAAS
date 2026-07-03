@@ -222,7 +222,7 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                     {(membersQ.data ?? []).map(m => (
                         <li key={m.userId} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
                             <div className="min-w-0">
-                                <div className="text-sm font-medium text-[#0F172A]">{m.firstName} {m.lastName}</div>
+                                <div className="text-sm font-medium text-[#0A0A0B]">{m.firstName} {m.lastName}</div>
                                 <div className="text-xs text-[#475569]">{m.email}</div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
                         <li key={p.pathId} className="flex flex-col gap-3 px-4 py-3 sm:grid sm:grid-cols-[1fr_auto_auto_auto] sm:items-center sm:gap-4 sm:px-6">
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-[#0F172A]">{p.title}</span>
+                                    <span className="text-sm font-medium text-[#0A0A0B]">{p.title}</span>
                                     {p.isMandatory && (
                                         <span className="rounded-full bg-[#FEE2E2] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#B91C1C]">
                                             Obligatoire

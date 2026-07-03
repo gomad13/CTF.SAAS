@@ -431,8 +431,8 @@ function RecipientsRecap({
     }
     return (
         <div style={{
-            background: "#023436",
-            borderLeft: "4px solid #03b5aa",
+            background: "var(--surface-2)",
+            borderLeft: "4px solid var(--accent)",
             borderRadius: 8,
             padding: 16,
             color: "#FFFFFF",
@@ -445,15 +445,15 @@ function RecipientsRecap({
                     <span key={u.id} style={{
                         display: "inline-flex", alignItems: "center", gap: 6,
                         padding: "4px 12px",
-                        background: "#037971",
+                        background: "var(--accent-hover)",
                         color: "#FFFFFF",
                         borderRadius: 999,
                         fontSize: 12,
                         fontWeight: 500,
                         transition: "background 0.2s",
                     }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#03b5aa"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#037971"}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--accent)"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "var(--accent-hover)"}
                     >
                         {u.firstName} {u.lastName}
                         <button

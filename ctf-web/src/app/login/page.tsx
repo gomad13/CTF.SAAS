@@ -172,7 +172,7 @@ function LoginForm() {
                     right: 0,
                     width: 48,
                     height: 48,
-                    background: "linear-gradient(225deg, rgba(59,130,246,0.25) 0%, transparent 60%)",
+                    background: "linear-gradient(225deg, var(--accent-border) 0%, transparent 60%)",
                     clipPath: "polygon(100% 0, 0 0, 100% 100%)",
                 }} />
 
@@ -182,8 +182,8 @@ function LoginForm() {
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 8,
-                        background: "rgba(59,130,246,0.08)",
-                        border: "1px solid rgba(59,130,246,0.25)",
+                        background: "var(--accent-subtle)",
+                        border: "1px solid var(--accent-border)",
                         borderRadius: 20,
                         padding: "4px 12px",
                         fontFamily: "'JetBrains Mono', monospace",
@@ -196,7 +196,7 @@ function LoginForm() {
                             height: 6,
                             borderRadius: "50%",
                             background: "var(--pr)",
-                            boxShadow: "0 0 6px #3B82F6",
+                            boxShadow: "0 0 6px var(--accent)",
                             flexShrink: 0,
                         }} />
                         ACC&Egrave;S S&Eacute;CURIS&Eacute;
@@ -224,8 +224,8 @@ function LoginForm() {
                 {/* Banners */}
                 {justRegistered && (
                     <div style={{
-                        background: "rgba(59,130,246,0.08)",
-                        border: "1px solid rgba(59,130,246,0.25)",
+                        background: "var(--accent-subtle)",
+                        border: "1px solid var(--accent-border)",
                         borderRadius: 7,
                         padding: "10px 14px",
                         fontSize: 13,
@@ -238,8 +238,8 @@ function LoginForm() {
                 )}
                 {justReset && (
                     <div style={{
-                        background: "rgba(59,130,246,0.08)",
-                        border: "1px solid rgba(59,130,246,0.25)",
+                        background: "var(--accent-subtle)",
+                        border: "1px solid var(--accent-border)",
                         borderRadius: 7,
                         padding: "10px 14px",
                         fontSize: 13,
@@ -257,7 +257,7 @@ function LoginForm() {
                         borderRadius: 7,
                         padding: "10px 14px",
                         fontSize: 13,
-                        color: "#ef4444",
+                        color: "var(--danger-t)",
                         textAlign: "center",
                         marginBottom: 18,
                     }}>
@@ -272,7 +272,7 @@ function LoginForm() {
                         border: "1px solid rgba(239,68,68,0.25)",
                         borderRadius: 7,
                         padding: "10px 14px",
-                        color: "#f87171",
+                        color: "var(--danger-t)",
                         fontSize: 13,
                         marginBottom: 16,
                     }} role="alert">
@@ -283,8 +283,8 @@ function LoginForm() {
                 {/* M3 — étape de vérification 2FA */}
                 {twoFaInfo && twoFaRequired && (
                     <div style={{
-                        background: "rgba(59,130,246,0.08)",
-                        border: "1px solid rgba(59,130,246,0.25)",
+                        background: "var(--accent-subtle)",
+                        border: "1px solid var(--accent-border)",
                         borderRadius: 7, padding: "10px 14px", fontSize: 13,
                         color: "var(--accent)", textAlign: "center", marginBottom: 16,
                     }}>
@@ -316,7 +316,7 @@ function LoginForm() {
                             />
                         </div>
                         <button type="submit" disabled={loading} style={{
-                            width: "100%", background: loading ? "rgba(59,130,246,0.4)" : "linear-gradient(135deg, #3B82F6, #2563EB)",
+                            width: "100%", background: loading ? "var(--accent-subtle)" : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                             color: "#FFFFFF", fontWeight: 700, fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
                             letterSpacing: "0.08em", textTransform: "uppercase", border: "none", borderRadius: 8,
                             padding: "13px 0", minHeight: 44, cursor: loading ? "not-allowed" : "pointer", marginTop: 8,
@@ -369,7 +369,7 @@ function LoginForm() {
                                 boxSizing: "border-box",
                                 transition: "border-color 0.2s, box-shadow 0.2s",
                             }}
-                            onFocus={e => { e.currentTarget.style.borderColor = "var(--border-focus)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.1)"; }}
+                            onFocus={e => { e.currentTarget.style.borderColor = "var(--border-focus)"; e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-subtle)"; }}
                             onBlur={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none"; }}
                         />
                     </div>
@@ -415,7 +415,7 @@ function LoginForm() {
                         disabled={loading}
                         style={{
                             width: "100%",
-                            background: loading ? "rgba(59,130,246,0.4)" : "linear-gradient(135deg, #3B82F6, #2563EB)",
+                            background: loading ? "var(--accent-subtle)" : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                             color: "#FFFFFF",
                             fontWeight: 700,
                             fontSize: 14,
@@ -430,7 +430,7 @@ function LoginForm() {
                             marginTop: 8,
                             transition: "all 0.2s",
                         }}
-                        onMouseOver={e => { if (!loading) { e.currentTarget.style.boxShadow = "0 0 20px rgba(59,130,246,0.35)"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
+                        onMouseOver={e => { if (!loading) { e.currentTarget.style.boxShadow = "0 0 20px var(--accent-subtle)"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
                         onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
                     >
                         {loading ? "[ CONNEXION... ]" : "Se connecter"}

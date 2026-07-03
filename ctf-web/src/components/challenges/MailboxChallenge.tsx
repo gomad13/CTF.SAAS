@@ -116,48 +116,48 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                     ].map(t => (
                         <div key={t.label} style={{ background: t.bg, border: `1px solid ${t.color}33`, borderRadius: 8, padding: "12px 8px", textAlign: "center" }}>
                             <p style={{ fontSize: 26, fontWeight: 700, color: t.color, lineHeight: 1 }}>{t.value}</p>
-                            <p style={{ fontSize: 11, color: "#64748B", marginTop: 4 }}>{t.label}</p>
+                            <p style={{ fontSize: 11, color: "var(--text-2)", marginTop: 4 }}>{t.label}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* Score */}
-                <div style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 10, padding: "16px", textAlign: "center" }}>
-                    <p style={{ color: "#64748B", fontSize: 12 }}>Score final</p>
+                <div style={{ background: "var(--accent-subtle)", border: "1px solid var(--accent-border)", borderRadius: 10, padding: "16px", textAlign: "center" }}>
+                    <p style={{ color: "var(--text-2)", fontSize: 12 }}>Score final</p>
                     <p style={{ color: "var(--pr)", fontSize: 36, fontWeight: 700, lineHeight: 1.1 }}>{result.score}</p>
-                    <p style={{ color: "#64748B", fontSize: 12 }}>/ {result.maxScore} pts</p>
+                    <p style={{ color: "var(--text-2)", fontSize: 12 }}>/ {result.maxScore} pts</p>
                 </div>
 
                 {/* Email list + detail */}
-                <div style={{ display: "flex", gap: 0, border: "1px solid rgba(59,130,246,0.2)", borderRadius: 10, overflow: "hidden", minHeight: 300 }}>
+                <div style={{ display: "flex", gap: 0, border: "1px solid var(--accent-border)", borderRadius: 10, overflow: "hidden", minHeight: 300 }}>
                     {/* Left list */}
                     {showList && (
-                    <div style={{ width: isMobile ? "100%" : "40%", borderRight: isMobile ? "none" : "1px solid #E2E8F0", overflowY: "auto", background: "var(--bg-card)" }}>
-                        <div style={{ background: "var(--bg-surface)", padding: "10px 14px", borderBottom: "1px solid #E2E8F0" }}>
-                            <p style={{ color: "#64748B", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Boîte de réception</p>
+                    <div style={{ width: isMobile ? "100%" : "40%", borderRight: isMobile ? "none" : "1px solid var(--border)", overflowY: "auto", background: "var(--bg-card)" }}>
+                        <div style={{ background: "var(--bg-surface)", padding: "10px 14px", borderBottom: "1px solid var(--border)" }}>
+                            <p style={{ color: "var(--text-2)", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Boîte de réception</p>
                         </div>
                         {content.emails.map(email => {
                             const detail = detailMap.get(email.id);
                             const badge = detail?.isDangerous && detail?.wasChecked   ? { icon: "✅", color: "#10B981" }
                                         : detail?.isDangerous && !detail?.wasChecked  ? { icon: "❌", color: "#ef4444" }
                                         : !detail?.isDangerous && detail?.wasChecked  ? { icon: "⚠️", color: "#f97316" }
-                                        : { icon: "✓",  color: "#64748B" };
+                                        : { icon: "✓",  color: "var(--text-2)" };
                             return (
                                 <button
                                     key={email.id}
                                     onClick={() => openEmail(email)}
                                     style={{
                                         width: "100%", textAlign: "left", padding: "10px 14px", minHeight: 44,
-                                        background: selected?.id === email.id ? "rgba(59,130,246,0.1)" : "transparent",
-                                        borderLeft: selected?.id === email.id ? "3px solid #3B82F6" : "3px solid transparent",
-                                        borderBottom: "1px solid #E2E8F0",
+                                        background: selected?.id === email.id ? "var(--accent-subtle)" : "transparent",
+                                        borderLeft: selected?.id === email.id ? "3px solid var(--accent)" : "3px solid transparent",
+                                        borderBottom: "1px solid var(--border)",
                                         cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
                                     }}
                                 >
                                     <span style={{ fontSize: 16, flexShrink: 0 }}>{badge.icon}</span>
                                     <div style={{ minWidth: 0, flex: 1 }}>
-                                        <p style={{ fontSize: 12, fontWeight: 600, color: "#1E293B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.from_name}</p>
-                                        <p style={{ fontSize: 11, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject}</p>
+                                        <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.from_name}</p>
+                                        <p style={{ fontSize: 11, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject}</p>
                                     </div>
                                 </button>
                             );
@@ -177,17 +177,17 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                         )}
                         {selected ? (
                             <>
-                                <p style={{ color: "#1E293B", fontWeight: 700, fontSize: 14, marginBottom: 8, overflowWrap: "break-word" }}>{selected.subject}</p>
-                                <p style={{ fontSize: 12, color: "#64748B", marginBottom: 2, overflowWrap: "break-word", wordBreak: "break-word" }}>De : <span style={{ color: "#1E293B" }}>{selected.from_name}</span> &lt;{selected.from_address}&gt;</p>
-                                <p style={{ fontSize: 11, color: "#64748B", marginBottom: 12 }}>{selected.sent_at}</p>
-                                <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", fontFamily: "inherit", fontSize: 13, lineHeight: 1.7, color: "#334155", margin: 0 }}>{selected.body}</pre>
+                                <p style={{ color: "var(--text)", fontWeight: 700, fontSize: 14, marginBottom: 8, overflowWrap: "break-word" }}>{selected.subject}</p>
+                                <p style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 2, overflowWrap: "break-word", wordBreak: "break-word" }}>De : <span style={{ color: "var(--text)" }}>{selected.from_name}</span> &lt;{selected.from_address}&gt;</p>
+                                <p style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 12 }}>{selected.sent_at}</p>
+                                <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", fontFamily: "inherit", fontSize: 13, lineHeight: 1.7, color: "var(--text-2)", margin: 0 }}>{selected.body}</pre>
                                 {/* Red flags for dangerous selected email */}
                                 {currentDetail?.isDangerous && currentDetail.redFlags.length > 0 && (
-                                    <div style={{ marginTop: 14, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: "12px 14px" }}>
-                                        <p style={{ color: "#f87171", fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Éléments suspects dans cet email :</p>
+                                    <div style={{ marginTop: 14, background: "var(--danger-subtle)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: "12px 14px" }}>
+                                        <p style={{ color: "var(--danger-t)", fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Éléments suspects dans cet email :</p>
                                         <ul style={{ padding: 0, margin: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
                                             {currentDetail.redFlags.map((f, i) => (
-                                                <li key={i} style={{ fontSize: 12, color: "#991B1B", display: "flex", gap: 6 }}>
+                                                <li key={i} style={{ fontSize: 12, color: "var(--danger-t)", display: "flex", gap: 6 }}>
                                                     <span>•</span><span>{f}</span>
                                                 </li>
                                             ))}
@@ -196,7 +196,7 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                                 )}
                             </>
                         ) : (
-                            <p style={{ color: "#64748B", fontSize: 13, textAlign: "center", marginTop: 40 }}>Sélectionnez un email pour le lire</p>
+                            <p style={{ color: "var(--text-2)", fontSize: 13, textAlign: "center", marginTop: 40 }}>Sélectionnez un email pour le lire</p>
                         )}
                     </div>
                     )}
@@ -221,12 +221,12 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
     return (
         <div className="space-y-4">
             {/* 2-column email client (single column on mobile with list/email switch) */}
-            <div style={{ display: "flex", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 10, overflow: "hidden", minHeight: 380 }}>
+            <div style={{ display: "flex", border: "1px solid var(--accent-border)", borderRadius: 10, overflow: "hidden", minHeight: 380 }}>
                 {/* Left — list */}
                 {showList && (
-                <div style={{ width: isMobile ? "100%" : "40%", borderRight: isMobile ? "none" : "1px solid #E2E8F0", background: "var(--bg-card)", display: "flex", flexDirection: "column" }}>
-                    <div style={{ background: "var(--bg-surface)", padding: "10px 14px", borderBottom: "1px solid #E2E8F0" }}>
-                        <p style={{ color: "#64748B", fontSize: 11, fontWeight: 600 }}>
+                <div style={{ width: isMobile ? "100%" : "40%", borderRight: isMobile ? "none" : "1px solid var(--border)", background: "var(--bg-card)", display: "flex", flexDirection: "column" }}>
+                    <div style={{ background: "var(--bg-surface)", padding: "10px 14px", borderBottom: "1px solid var(--border)" }}>
+                        <p style={{ color: "var(--text-2)", fontSize: 11, fontWeight: 600 }}>
                             📬 Boîte de réception ({content.emails.length})
                         </p>
                     </div>
@@ -237,9 +237,9 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                                 onClick={() => openEmail(email)}
                                 style={{
                                     padding: "10px 12px", minHeight: 44,
-                                    borderLeft: selected?.id === email.id ? "3px solid #3B82F6" : "3px solid transparent",
-                                    borderBottom: "1px solid #E2E8F0",
-                                    background: selected?.id === email.id ? "rgba(59,130,246,0.08)" : "transparent",
+                                    borderLeft: selected?.id === email.id ? "3px solid var(--accent)" : "3px solid transparent",
+                                    borderBottom: "1px solid var(--border)",
+                                    background: selected?.id === email.id ? "var(--accent-subtle)" : "transparent",
                                     cursor: "pointer", display: "flex", alignItems: "flex-start", gap: 8,
                                 }}
                             >
@@ -252,7 +252,7 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                                     title="Marquer comme suspect"
                                     style={{
                                         display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                        width: 26, height: 26, borderRadius: 6, border: checked.has(email.id) ? "none" : "2px solid #4b5563",
+                                        width: 26, height: 26, borderRadius: 6, border: checked.has(email.id) ? "none" : "2px solid var(--text-3)",
                                         background: checked.has(email.id) ? "var(--pr)" : "transparent",
                                         flexShrink: 0, marginTop: 1, cursor: "pointer", padding: 9, boxSizing: "content-box",
                                     }}
@@ -260,16 +260,16 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                                     {checked.has(email.id) && <svg width="15" height="15" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>}
                                 </span>
                                 {/* Avatar */}
-                                <span style={{ width: 28, height: 28, borderRadius: "50%", background: avatarColor(email.from_name), display: "flex", alignItems: "center", justifyContent: "center", color: "#1E293B", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+                                <span style={{ width: 28, height: 28, borderRadius: "50%", background: avatarColor(email.from_name), display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text)", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
                                     {email.from_name.charAt(0).toUpperCase()}
                                 </span>
                                 <div style={{ minWidth: 0, flex: 1 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 4 }}>
-                                        <p style={{ fontSize: 12, fontWeight: 700, color: "#1E293B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.from_name}</p>
-                                        <p style={{ fontSize: 10, color: "#64748B", whiteSpace: "nowrap", flexShrink: 0 }}>{email.sent_at}</p>
+                                        <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.from_name}</p>
+                                        <p style={{ fontSize: 10, color: "var(--text-2)", whiteSpace: "nowrap", flexShrink: 0 }}>{email.sent_at}</p>
                                     </div>
-                                    <p style={{ fontSize: 11, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1 }}>{email.subject}</p>
-                                    <p style={{ fontSize: 10, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1 }}>{email.preview}</p>
+                                    <p style={{ fontSize: 11, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1 }}>{email.subject}</p>
+                                    <p style={{ fontSize: 10, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1 }}>{email.preview}</p>
                                 </div>
                             </div>
                         ))}
@@ -290,13 +290,13 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                     )}
                     {selected ? (
                         <>
-                            <p style={{ color: "#1E293B", fontWeight: 700, fontSize: 15, marginBottom: 10, overflowWrap: "break-word" }}>{selected.subject}</p>
-                            <div style={{ borderBottom: "1px solid #E2E8F0", paddingBottom: 10, marginBottom: 12 }}>
-                                <p style={{ fontSize: 12, color: "#64748B", overflowWrap: "break-word" }}>De : <span style={{ color: "#1E293B" }}>{selected.from_name}</span> <span style={{ fontFamily: "monospace", wordBreak: "break-all" }}>&lt;{selected.from_address}&gt;</span></p>
-                                <p style={{ fontSize: 12, color: "#64748B", marginTop: 3 }}>À : vous@email.fr</p>
-                                <p style={{ fontSize: 11, color: "#64748B", marginTop: 3 }}>{selected.sent_at}</p>
+                            <p style={{ color: "var(--text)", fontWeight: 700, fontSize: 15, marginBottom: 10, overflowWrap: "break-word" }}>{selected.subject}</p>
+                            <div style={{ borderBottom: "1px solid var(--border)", paddingBottom: 10, marginBottom: 12 }}>
+                                <p style={{ fontSize: 12, color: "var(--text-2)", overflowWrap: "break-word" }}>De : <span style={{ color: "var(--text)" }}>{selected.from_name}</span> <span style={{ fontFamily: "monospace", wordBreak: "break-all" }}>&lt;{selected.from_address}&gt;</span></p>
+                                <p style={{ fontSize: 12, color: "var(--text-2)", marginTop: 3 }}>À : vous@email.fr</p>
+                                <p style={{ fontSize: 11, color: "var(--text-2)", marginTop: 3 }}>{selected.sent_at}</p>
                             </div>
-                            <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "#334155", margin: 0 }}>
+                            <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "var(--text-2)", margin: 0 }}>
                                 {selected.body.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
                                     /^https?:\/\//.test(part)
                                         ? <span key={i} style={{ color: "var(--pr)", cursor: "default" }}>{part}</span>
@@ -305,7 +305,7 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                             </pre>
                         </>
                     ) : (
-                        <p style={{ color: "#64748B", fontSize: 13, textAlign: "center", marginTop: 60 }}>Sélectionnez un email pour le lire</p>
+                        <p style={{ color: "var(--text-2)", fontSize: 13, textAlign: "center", marginTop: 60 }}>Sélectionnez un email pour le lire</p>
                     )}
                 </div>
                 )}
@@ -313,15 +313,15 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
 
             {/* Footer */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                <p style={{ fontSize: 13, color: "#64748B" }}>
+                <p style={{ fontSize: 13, color: "var(--text-2)" }}>
                     <span style={{ color: "var(--pr)", fontWeight: 600 }}>{checked.size}</span> email(s) marqué(s) comme dangereux
                 </p>
-                {error && <p style={{ color: "#f87171", fontSize: 13 }}>{error}</p>}
+                {error && <p style={{ color: "var(--danger-t)", fontSize: 13 }}>{error}</p>}
                 <button
                     onClick={handleSubmit}
                     disabled={loading}
                     style={{
-                        background: loading ? "rgba(59,130,246,0.3)" : "var(--pr)",
+                        background: loading ? "var(--accent-subtle)" : "var(--pr)",
                         color: "#FFFFFF", border: "none", borderRadius: 8,
                         padding: "10px 22px", fontSize: 13, fontWeight: 600,
                         cursor: loading ? "not-allowed" : "pointer",
