@@ -8,7 +8,7 @@ import { STATUS_STYLES, type EmployeeCampaign, type EmployeeCampaignContent } fr
 export default function MyCampaignsPage() {
     const { data, isLoading, isError } = useMyCampaigns();
 
-    if (isLoading) return <div className="px-6 py-12 text-center text-[#94A3B8]">Chargement…</div>;
+    if (isLoading) return <div className="px-6 py-12 text-center text-fg-muted">Chargement…</div>;
     if (isError) {
         return (
             <div className="mx-auto max-w-3xl px-6 py-12 text-center text-sm text-[#EF4444]">
@@ -23,17 +23,17 @@ export default function MyCampaignsPage() {
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
                 <h1 className="text-2xl font-bold text-[#F1F5F9]">Mes campagnes</h1>
-                <p className="mt-1 text-sm text-[#94A3B8]">
+                <p className="mt-1 text-sm text-fg-muted">
                     Programmes de sensibilisation qui vous sont assignés et votre progression.
                 </p>
             </div>
 
             {items.length === 0 ? (
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-8 text-center text-[#1E293B] shadow-sm">
+                <div className="rounded-xl border border-[#E2E8F0] bg-surface p-8 text-center text-fg-heading shadow-sm">
                     <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#3B82F6]/10 text-[#3B82F6]">
                         <Calendar size={22} />
                     </div>
-                    <p className="text-sm text-[#475569]">Aucune campagne ne t&apos;est assignée pour le moment.</p>
+                    <p className="text-sm text-fg-body">Aucune campagne ne t&apos;est assignée pour le moment.</p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-4">
@@ -51,11 +51,11 @@ function EmployeeCampaignCard({ c }: { c: EmployeeCampaign }) {
     const remainingDays = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
 
     return (
-        <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 text-[#1E293B] shadow-sm">
+        <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 text-fg-heading shadow-sm">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                        <h2 className="truncate text-lg font-semibold text-[#1E293B]">{c.name}</h2>
+                        <h2 className="truncate text-lg font-semibold text-fg-heading">{c.name}</h2>
                         <span
                             className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
                             style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
@@ -63,8 +63,8 @@ function EmployeeCampaignCard({ c }: { c: EmployeeCampaign }) {
                             {s.label}
                         </span>
                     </div>
-                    {c.description && <p className="mt-1 text-sm text-[#475569]">{c.description}</p>}
-                    <div className="mt-2 flex flex-wrap items-center gap-x-4 text-xs text-[#64748B]">
+                    {c.description && <p className="mt-1 text-sm text-fg-body">{c.description}</p>}
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 text-xs text-fg-muted">
                         <span className="inline-flex items-center gap-1"><Calendar size={11} />Fin le {new Date(c.endDate).toLocaleDateString("fr-FR")}</span>
                         {c.status === "Active" && remainingDays > 0 && (
                             <span className="inline-flex items-center gap-1 text-[#92400E]">
@@ -79,7 +79,7 @@ function EmployeeCampaignCard({ c }: { c: EmployeeCampaign }) {
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#E2E8F0]">
                     <div className="h-full rounded-full bg-[#3B82F6] transition-all" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-sm font-semibold text-[#1E293B]">{pct}%</span>
+                <span className="text-sm font-semibold text-fg-heading">{pct}%</span>
             </div>
 
             <ul className="mt-4 flex flex-col gap-2">
@@ -107,8 +107,8 @@ function ContentRow({ c }: { c: EmployeeCampaignContent }) {
                 {isParcours ? <FolderOpen size={13} /> : <Mail size={13} />}
             </span>
             <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-[#1E293B]">{c.title}</div>
-                <div className="text-[11px] text-[#64748B]">
+                <div className="truncate text-sm font-medium text-fg-heading">{c.title}</div>
+                <div className="text-[11px] text-fg-muted">
                     {isParcours ? "Parcours" : "Scénario"} ·{" "}
                     {c.status === "NotStarted" && "Pas commencé"}
                     {c.status === "InProgress" && "En cours"}

@@ -26,7 +26,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     const [assignOpen, setAssignOpen] = useState(false);
 
     if (detailQ.isLoading) {
-        return <div className="px-6 py-12 text-center text-[#94A3B8]">Chargement…</div>;
+        return <div className="px-6 py-12 text-center text-fg-muted">Chargement…</div>;
     }
     if (detailQ.isError) {
         return (
@@ -44,14 +44,14 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     return (
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
-                <Link href="/admin/campaigns" className="inline-flex items-center gap-1 text-xs text-[#94A3B8] transition-colors duration-200 hover:text-[#F1F5F9]">
+                <Link href="/admin/campaigns" className="inline-flex items-center gap-1 text-xs text-fg-muted transition-colors duration-200 hover:text-[#F1F5F9]">
                     <ArrowLeft size={12} /> Toutes les campagnes
                 </Link>
                 <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-[#F1F5F9]">{detail.name}</h1>
-                        {detail.description && <p className="mt-1 text-sm text-[#94A3B8]">{detail.description}</p>}
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#94A3B8]">
+                        {detail.description && <p className="mt-1 text-sm text-fg-muted">{detail.description}</p>}
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                             <span
                                 className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
                                 style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
@@ -110,19 +110,19 @@ function DashboardStatsCards({ d }: { d: CampaignDashboard }) {
             <StatCard label="Terminé" value={d.completed} icon={<CheckCircle2 size={14} />} color="#10B981" />
             <StatCard label="En retard" value={d.lateEmployeesCount} icon={<AlertTriangle size={14} />} color="#EF4444" highlight={d.lateEmployeesCount > 0} />
 
-            <div className="col-span-2 rounded-xl border border-[#E2E8F0] bg-white p-4 text-[#1E293B] shadow-sm md:col-span-3">
-                <div className="text-xs font-medium uppercase tracking-wider text-[#475569]">Complétion globale</div>
+            <div className="col-span-2 rounded-xl border border-[#E2E8F0] bg-surface p-4 text-fg-heading shadow-sm md:col-span-3">
+                <div className="text-xs font-medium uppercase tracking-wider text-fg-body">Complétion globale</div>
                 <div className="mt-2 flex items-center gap-3">
                     <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#E2E8F0]">
                         <div className="h-full rounded-full bg-[#3B82F6] transition-all" style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-sm font-semibold text-[#1E293B]">{pct}%</span>
+                    <span className="text-sm font-semibold text-fg-heading">{pct}%</span>
                 </div>
             </div>
-            <div className="col-span-2 rounded-xl border border-[#E2E8F0] bg-white p-4 text-[#1E293B] shadow-sm">
-                <div className="text-xs font-medium uppercase tracking-wider text-[#475569]">Taux de réussite scénarios</div>
+            <div className="col-span-2 rounded-xl border border-[#E2E8F0] bg-surface p-4 text-fg-heading shadow-sm">
+                <div className="text-xs font-medium uppercase tracking-wider text-fg-body">Taux de réussite scénarios</div>
                 <div className="mt-2 text-2xl font-bold text-[#10B981]">{Math.round(d.averageSuccessRate)}%</div>
-                <div className="text-[11px] text-[#64748B]">moyenne sur les scénarios terminés</div>
+                <div className="text-[11px] text-fg-muted">moyenne sur les scénarios terminés</div>
             </div>
         </div>
     );
@@ -132,8 +132,8 @@ function StatCard({ label, value, icon, color, highlight = false }: {
     label: string; value: number; icon: React.ReactNode; color: string; highlight?: boolean;
 }) {
     return (
-        <div className={`rounded-xl border bg-white p-4 text-[#1E293B] shadow-sm ${highlight ? "border-[#EF4444]" : "border-[#E2E8F0]"}`}>
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[#475569]">
+        <div className={`rounded-xl border bg-surface p-4 text-fg-heading shadow-sm ${highlight ? "border-[#EF4444]" : "border-[#E2E8F0]"}`}>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-fg-body">
                 <span style={{ color }}>{icon}</span> {label}
             </div>
             <div className="mt-1 text-2xl font-bold" style={{ color: highlight ? "#EF4444" : "#1E293B" }}>{value}</div>
@@ -143,8 +143,8 @@ function StatCard({ label, value, icon, color, highlight = false }: {
 
 function ContentsSection({ detail }: { detail: CampaignDetail }) {
     return (
-        <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 text-[#1E293B] shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[#475569]">
+        <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 text-fg-heading shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-body">
                 Contenus inclus ({detail.contents.length})
             </h2>
             <ul className="mt-3 divide-y divide-[#E2E8F0]">
@@ -160,8 +160,8 @@ function ContentsSection({ detail }: { detail: CampaignDetail }) {
                             {c.contentType === "Parcours" ? <FolderOpen size={14} /> : <Mail size={14} />}
                         </span>
                         <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-medium text-[#1E293B]">{c.title}</div>
-                            <div className="text-[11px] text-[#64748B]">
+                            <div className="truncate text-sm font-medium text-fg-heading">{c.title}</div>
+                            <div className="text-[11px] text-fg-muted">
                                 {c.contentType === "Parcours" ? "Parcours" : "Scénario"}
                                 {c.category && ` · ${c.category}`}
                             </div>
@@ -169,7 +169,7 @@ function ContentsSection({ detail }: { detail: CampaignDetail }) {
                     </li>
                 ))}
                 {detail.contents.length === 0 && (
-                    <li className="py-6 text-center text-sm text-[#64748B]">Aucun contenu.</li>
+                    <li className="py-6 text-center text-sm text-fg-muted">Aucun contenu.</li>
                 )}
             </ul>
         </section>
@@ -178,14 +178,14 @@ function ContentsSection({ detail }: { detail: CampaignDetail }) {
 
 function EmployeeProgressTable({ d }: { d: CampaignDashboard }) {
     return (
-        <section className="rounded-xl border border-[#E2E8F0] bg-white text-[#1E293B] shadow-sm">
-            <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#475569] sm:px-6">
+        <section className="rounded-xl border border-[#E2E8F0] bg-surface text-fg-heading shadow-sm">
+            <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                 Employés assignés ({d.employeeProgress.length})
             </div>
             <div className="resp-scroll-x">
             <table className="w-full">
                 <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-wider text-[#64748B]">
+                    <tr className="text-left text-[11px] uppercase tracking-wider text-fg-muted">
                         <th className="px-6 py-2.5">Employé</th>
                         <th className="px-6 py-2.5">Statut</th>
                         <th className="px-6 py-2.5">Progression</th>
@@ -198,8 +198,8 @@ function EmployeeProgressTable({ d }: { d: CampaignDashboard }) {
                         return (
                             <tr key={e.userId} className="border-t border-[#E2E8F0] hover:bg-[#F8FAFC]">
                                 <td className="px-6 py-2.5">
-                                    <div className="text-sm font-medium text-[#1E293B]">{e.firstName} {e.lastName}</div>
-                                    <div className="text-[11px] text-[#64748B]">{e.email}</div>
+                                    <div className="text-sm font-medium text-fg-heading">{e.firstName} {e.lastName}</div>
+                                    <div className="text-[11px] text-fg-muted">{e.email}</div>
                                 </td>
                                 <td className="px-6 py-2.5">
                                     <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: statusColor }}>
@@ -219,14 +219,14 @@ function EmployeeProgressTable({ d }: { d: CampaignDashboard }) {
                                                 style={{ width: `${Math.round(e.completionPercentage)}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs text-[#475569]">{Math.round(e.completionPercentage)}%</span>
+                                        <span className="text-xs text-fg-body">{Math.round(e.completionPercentage)}%</span>
                                     </div>
                                 </td>
                             </tr>
                         );
                     })}
                     {d.employeeProgress.length === 0 && (
-                        <tr><td colSpan={3} className="px-6 py-8 text-center text-sm text-[#64748B]">Aucun employé assigné.</td></tr>
+                        <tr><td colSpan={3} className="px-6 py-8 text-center text-sm text-fg-muted">Aucun employé assigné.</td></tr>
                     )}
                 </tbody>
             </table>
@@ -294,12 +294,12 @@ function AssignModal({
                 </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-[#1E293B]">
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-fg-heading">
                         <input type="radio" name="assign-mode" checked={wholeTenant} onChange={() => setWholeTenant(true)} />
                         <span className="font-medium">Toute l&apos;entreprise</span>
-                        <span className="text-xs text-[#64748B]">— tous les employés actifs du tenant</span>
+                        <span className="text-xs text-fg-muted">— tous les employés actifs du tenant</span>
                     </label>
-                    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-[#1E293B]">
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-fg-heading">
                         <input type="radio" name="assign-mode" checked={!wholeTenant} onChange={() => setWholeTenant(false)} />
                         <span className="font-medium">Sélectionner des employés</span>
                     </label>
@@ -310,15 +310,15 @@ function AssignModal({
                         <input
                             type="text"
                             placeholder="Rechercher un employé…"
-                            className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B] placeholder:text-[#64748B]"
+                            className="w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
                         <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-[#E2E8F0]">
                             {usersQ.isLoading ? (
-                                <div className="px-4 py-3 text-sm text-[#64748B]">Chargement…</div>
+                                <div className="px-4 py-3 text-sm text-fg-muted">Chargement…</div>
                             ) : filteredUsers.length === 0 ? (
-                                <div className="px-4 py-3 text-sm text-[#64748B]">Aucun employé trouvé.</div>
+                                <div className="px-4 py-3 text-sm text-fg-muted">Aucun employé trouvé.</div>
                             ) : (
                                 <ul className="divide-y divide-[#E2E8F0]">
                                     {filteredUsers.map(u => (
@@ -329,16 +329,16 @@ function AssignModal({
                                                 onChange={() => toggleUser(u.id)}
                                             />
                                             <div className="min-w-0 flex-1">
-                                                <div className="truncate text-sm text-[#1E293B]">{u.firstName} {u.lastName}</div>
-                                                <div className="text-[11px] text-[#64748B]">{u.email}</div>
+                                                <div className="truncate text-sm text-fg-heading">{u.firstName} {u.lastName}</div>
+                                                <div className="text-[11px] text-fg-muted">{u.email}</div>
                                             </div>
-                                            {!u.isActive && <span className="text-[10px] text-[#94A3B8]">Inactif</span>}
+                                            {!u.isActive && <span className="text-[10px] text-fg-muted">Inactif</span>}
                                         </li>
                                     ))}
                                 </ul>
                             )}
                         </div>
-                        <p className="mt-1 text-[11px] text-[#64748B]">{selected.size} employé{selected.size > 1 ? "s" : ""} sélectionné{selected.size > 1 ? "s" : ""}.</p>
+                        <p className="mt-1 text-[11px] text-fg-muted">{selected.size} employé{selected.size > 1 ? "s" : ""} sélectionné{selected.size > 1 ? "s" : ""}.</p>
                     </div>
                 )}
 

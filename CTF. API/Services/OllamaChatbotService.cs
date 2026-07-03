@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace CTF.Api.Services;
 
 /// <summary>
-/// Client Ollama pour ARIA. Supporte mode bloquant (legacy) et streaming.
+/// Client Ollama pour Sentys Bot. Supporte mode bloquant (legacy) et streaming.
 /// Options Ollama optimisées pour CPU inference :
 /// - num_ctx: 2048 (au lieu de 4096) — prompt-eval plus rapide
 /// - num_predict: 300 (au lieu de 512) — cap la durée max

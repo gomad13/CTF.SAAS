@@ -67,18 +67,18 @@ function RiskScoreCardImpl({ data, isLoading, isError }: Props) {
     return (
         <section
             aria-label="Cyber Resilience Index"
-            className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
+            className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
         >
             <header className="mb-4 flex items-start justify-between">
                 <div>
-                    <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+                    <p className="text-xs font-medium uppercase tracking-wider text-fg-muted">
                         Cyber Resilience Index
                     </p>
-                    <h2 className="mt-1 text-base font-semibold text-[#1E293B]">
+                    <h2 className="mt-1 text-base font-semibold text-fg-heading">
                         Votre score de résilience
                     </h2>
                 </div>
-                <ShieldCheck size={20} strokeWidth={1.5} className="text-[#94A3B8] opacity-60" />
+                <ShieldCheck size={20} strokeWidth={1.5} className="text-fg-muted opacity-60" />
             </header>
 
             <div className="flex flex-col items-center gap-4">
@@ -93,11 +93,11 @@ function RiskScoreCardImpl({ data, isLoading, isError }: Props) {
                 )}
 
                 <div className="text-center">
-                    <p className="text-sm font-semibold text-[#334155]">
+                    <p className="text-sm font-semibold text-fg-body">
                         {RISK_LEVEL_LABELS[level]}
                     </p>
                     {data?.computedAt && (
-                        <p className="mt-1 text-xs text-[#64748B]">
+                        <p className="mt-1 text-xs text-fg-muted">
                             Mis à jour le {formatDate(data.computedAt)}
                         </p>
                     )}
@@ -140,8 +140,8 @@ function Gauge({ score, color, dashOffset }: { score: number; color: string; das
                 />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-5xl font-bold leading-none text-[#1E293B]">{score}</span>
-                <span className="mt-1 text-xs font-medium text-[#64748B]">/ 100</span>
+                <span className="text-5xl font-bold leading-none text-fg-heading">{score}</span>
+                <span className="mt-1 text-xs font-medium text-fg-muted">/ 100</span>
             </div>
         </div>
     );
@@ -160,7 +160,7 @@ function Skeleton() {
 function ErrorState() {
     return (
         <div
-            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-[#E2E8F0] text-center text-[#64748B]"
+            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-[#E2E8F0] text-center text-fg-muted"
             style={{ width: SIZE, height: SIZE }}
         >
             <p className="px-6 text-sm">Score temporairement indisponible</p>
@@ -171,7 +171,7 @@ function ErrorState() {
 function InsufficientState() {
     return (
         <div
-            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-[#E2E8F0] px-6 text-center text-[#64748B]"
+            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-[#E2E8F0] px-6 text-center text-fg-muted"
             style={{ width: SIZE, height: SIZE }}
         >
             <p className="text-sm font-medium">

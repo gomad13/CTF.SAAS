@@ -45,7 +45,7 @@ public class ChatbotController : ControllerBase
     /// Règle : "available" = Ollama joignable ET modèle attendu installé (présent dans /api/tags).
     /// Le fait que le modèle soit ou non chargé en RAM (/api/ps) n'impacte PAS "available" :
     /// Ollama recharge le modèle à la volée sur le premier call /api/chat (keep_alive expire
-    /// après inactivité et c'est normal). Confondre les deux a causé le bug ARIA offline récidivant.
+    /// après inactivité et c'est normal). Confondre les deux a causé le bug Sentys Bot offline récidivant.
     /// </summary>
     [HttpGet("status")]
     public async Task<IActionResult> GetStatus()

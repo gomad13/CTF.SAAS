@@ -66,9 +66,9 @@ export default function CompliancePage() {
     if (!statusQ.data?.isEnabled) {
         return (
             <div className="mx-auto max-w-3xl px-6 py-12 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-[#94A3B8]"><CheckCircle2 size={22} /></div>
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface/10 text-fg-muted"><CheckCircle2 size={22} /></div>
                 <h1 className="mt-4 text-xl font-bold text-[#F1F5F9]">Compliance désactivé</h1>
-                <p className="mt-2 text-sm text-[#94A3B8]">Activez le mode « Formation obligatoire » depuis les paramètres.</p>
+                <p className="mt-2 text-sm text-fg-muted">Activez le mode « Formation obligatoire » depuis les paramètres.</p>
             </div>
         );
     }
@@ -79,21 +79,21 @@ export default function CompliancePage() {
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
                 <h1 className="text-2xl font-bold text-[#F1F5F9]">Compliance</h1>
-                <p className="mt-1 text-sm text-[#94A3B8]">Rendez des parcours obligatoires avec deadline et suivi.</p>
+                <p className="mt-1 text-sm text-fg-muted">Rendez des parcours obligatoires avec deadline et suivi.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-                    <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Assignations</div>
-                    <div className="mt-2 text-2xl font-bold text-[#1E293B]">{o?.totalAssignments ?? 0}</div>
+                <div className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+                    <div className="text-xs font-medium uppercase tracking-wider text-fg-muted">Assignations</div>
+                    <div className="mt-2 text-2xl font-bold text-fg-heading">{o?.totalAssignments ?? 0}</div>
                 </div>
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-                    <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Compliance globale</div>
+                <div className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+                    <div className="text-xs font-medium uppercase tracking-wider text-fg-muted">Compliance globale</div>
                     <div className="mt-2 text-2xl font-bold" style={{ color: (o?.overallCompliancePercent ?? 0) >= 80 ? "#047857" : (o?.overallCompliancePercent ?? 0) >= 50 ? "#B45309" : "#B91C1C" }}>
                         {o?.overallCompliancePercent ?? 0}%
                     </div>
                 </div>
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
                     <button
                         type="button"
                         onClick={() => runM.mutate()}
@@ -106,14 +106,14 @@ export default function CompliancePage() {
                 </div>
             </div>
 
-            <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-[#64748B]">Nouvelle assignation (tous users)</h2>
+            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">Nouvelle assignation (tous users)</h2>
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_220px_auto]">
-                    <select value={pathId} onChange={e => setPathId(e.target.value)} className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm">
+                    <select value={pathId} onChange={e => setPathId(e.target.value)} className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm">
                         <option value="">— Parcours —</option>
                         {(pathsQ.data ?? []).map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                     </select>
-                    <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm" />
+                    <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm" />
                     <button
                         type="button"
                         disabled={!pathId || !deadline || createM.isPending}
@@ -125,16 +125,16 @@ export default function CompliancePage() {
                 </div>
             </section>
 
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#475569] sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
+                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Assignations actives
                 </div>
                 <ul className="divide-y divide-[#E2E8F0]">
                     {(o?.assignments ?? []).map(a => (
                         <li key={a.id} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
                             <div className="min-w-0">
-                                <div className="truncate text-sm font-medium text-[#1E293B]">{a.pathTitle}</div>
-                                <div className="mt-0.5 text-xs text-[#64748B]">
+                                <div className="truncate text-sm font-medium text-fg-heading">{a.pathTitle}</div>
+                                <div className="mt-0.5 text-xs text-fg-muted">
                                     Deadline : {new Date(a.deadline).toLocaleDateString("fr-FR")} · {a.assignedToType}
                                 </div>
                             </div>
@@ -149,7 +149,7 @@ export default function CompliancePage() {
                         </li>
                     ))}
                     {(o?.assignments?.length ?? 0) === 0 && (
-                        <li className="px-6 py-8 text-center text-sm text-[#64748B]">Aucune assignation obligatoire.</li>
+                        <li className="px-6 py-8 text-center text-sm text-fg-muted">Aucune assignation obligatoire.</li>
                     )}
                 </ul>
             </section>

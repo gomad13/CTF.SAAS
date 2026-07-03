@@ -68,7 +68,7 @@ export default function TeamEditModal({
             footer={
                 <>
                     <button type="button" onClick={onClose}
-                        className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#334155] transition-colors duration-200 hover:bg-[#F1F5F9]">
+                        className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
                         Annuler
                     </button>
                     <button type="button" disabled={!canSave} onClick={() => saveM.mutate()}
@@ -79,43 +79,43 @@ export default function TeamEditModal({
             }>
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#475569]">Nom de l&apos;équipe</label>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Nom de l&apos;équipe</label>
                     <input value={name} onChange={e => setName(e.target.value)} maxLength={120}
-                        className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1E293B] outline-none focus:border-primary"
+                        className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
                         placeholder="Nom de l'équipe" />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#475569]">Description</label>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Description</label>
                     <input value={description} onChange={e => setDescription(e.target.value)} maxLength={500}
-                        className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1E293B] outline-none focus:border-primary"
+                        className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
                         placeholder="Description (optionnel)" />
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-[#475569]">Nombre max de membres</label>
+                        <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Nombre max de membres</label>
                         <input type="number" min={1} value={maxMembers} onChange={e => setMaxMembers(e.target.value)}
-                            className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1E293B] outline-none focus:border-primary"
+                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
                             placeholder="Illimité" />
-                        <span className="text-[11px] text-[#64748B]">
+                        <span className="text-[11px] text-fg-muted">
                             {currentMembers} membre{currentMembers > 1 ? "s" : ""} actuellement · vide = illimité
                         </span>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-[#475569]">Couleur</label>
+                        <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Couleur</label>
                         <input type="color" value={color} onChange={e => setColor(e.target.value)}
-                            className="h-[38px] w-16 cursor-pointer rounded-lg border border-[#E2E8F0] bg-white p-1" />
+                            className="h-[38px] w-16 cursor-pointer rounded-lg border border-[#E2E8F0] bg-surface p-1" />
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#475569]">Icône</label>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Icône</label>
                     <div className="flex flex-wrap gap-1.5">
                         {TEAM_ICON_NAMES.map(k => (
                             <button key={k} type="button" onClick={() => setIcon(k)} title={k}
                                 className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors duration-200 ${
-                                    icon === k ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-white text-[#475569] hover:border-[#CBD5E1]"
+                                    icon === k ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:border-[#CBD5E1]"
                                 }`}>
                                 {renderTeamIcon(k, 16)}
                             </button>
@@ -124,17 +124,17 @@ export default function TeamEditModal({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#475569]">Accès à l&apos;équipe</label>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Accès à l&apos;équipe</label>
                     <div className="flex gap-2">
                         <button type="button" onClick={() => setIsOpen(false)}
                             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-                                !isOpen ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-white text-[#334155] hover:bg-[#F1F5F9]"
+                                !isOpen ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
                             }`}>
                             🔒 Fermée — affectation par l&apos;admin
                         </button>
                         <button type="button" onClick={() => setIsOpen(true)}
                             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-                                isOpen ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-white text-[#334155] hover:bg-[#F1F5F9]"
+                                isOpen ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
                             }`}>
                             🔓 Ouverte — les membres peuvent la rejoindre
                         </button>

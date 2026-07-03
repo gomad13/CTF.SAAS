@@ -172,9 +172,9 @@ export default function ChallengePage({ params }: { params: Promise<{ id: string
 
 // ── Step 1: Brief ─────────────────────────────────────────────────────────────
 function BriefStep({ challenge: c, onStart }: { challenge: ChallengeItem; onStart: () => void }) {
-    const typeInfo = TYPE_INFO[c.type] ?? { label: c.type, icon: "🎯", color: "from-neutral-800 to-neutral-900", accent: "text-black" };
+    const typeInfo = TYPE_INFO[c.type] ?? { label: c.type, icon: "🎯", color: "from-neutral-800 to-neutral-900", accent: "text-fg-heading" };
     return (
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             {/* Hero banner */}
             <div className={`bg-gradient-to-br ${typeInfo.color} px-6 py-10 text-center`}>
                 <div className="text-5xl">{typeInfo.icon}</div>
@@ -183,15 +183,15 @@ function BriefStep({ challenge: c, onStart }: { challenge: ChallengeItem; onStar
             </div>
 
             {/* Meta */}
-            <div className="flex items-center gap-4 border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center gap-4 border-b border-border px-6 py-4">
                 {c.difficulty && <DifficultyBadge difficulty={c.difficulty} />}
-                <span className="text-sm text-black">{c.points} points</span>
-                <span className="ml-auto text-xs text-black uppercase tracking-wider">{typeInfo.label}</span>
+                <span className="text-sm text-fg-heading">{c.points} points</span>
+                <span className="ml-auto text-xs text-fg-heading uppercase tracking-wider">{typeInfo.label}</span>
             </div>
 
             {/* Description */}
             <div className="px-6 py-5">
-                <p className="text-sm leading-relaxed text-black">
+                <p className="text-sm leading-relaxed text-fg-heading">
                     {BRIEF_TEXT[c.type] ?? "Une nouvelle mission t'attend. Analyse la situation et réponds avec précision."}
                 </p>
             </div>
@@ -291,7 +291,7 @@ function ResultStep({ challenge: c, result: r, onRetry, onNext }: {
                                 ? "Partiellement correct"
                                 : "Réponse incorrecte"}
                         </div>
-                        <div className="text-sm text-black">
+                        <div className="text-sm text-fg-heading">
                             {r.scoreAwarded > 0 ? `+${r.scoreAwarded} points` : "0 point gagné"}
                             {" · "}Tentative #{r.attemptNo}
                         </div>
@@ -301,8 +301,8 @@ function ResultStep({ challenge: c, result: r, onRetry, onNext }: {
 
             {/* Correct answer */}
             {r.correctAnswer && (
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
-                    <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-black">Bonne réponse</div>
+                <div className="rounded-xl border border-border bg-surface px-4 py-4">
+                    <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-fg-heading">Bonne réponse</div>
                     <div className="text-sm font-mono text-emerald-400">{r.correctAnswer}</div>
                 </div>
             )}
@@ -314,7 +314,7 @@ function ResultStep({ challenge: c, result: r, onRetry, onNext }: {
                         <span className="text-base">💡</span>
                         <span className="text-xs font-semibold uppercase tracking-wider text-primary/80">Explication</span>
                     </div>
-                    <p className="text-sm leading-relaxed text-black">{r.explanation}</p>
+                    <p className="text-sm leading-relaxed text-fg-heading">{r.explanation}</p>
                 </div>
             )}
 
@@ -323,7 +323,7 @@ function ResultStep({ challenge: c, result: r, onRetry, onNext }: {
                 {!r.isCorrect && (
                     <button
                         onClick={onRetry}
-                        className="flex-1 rounded-xl border border-gray-200 bg-gray-100 py-2.5 text-sm font-semibold text-white hover:bg-gray-200 transition-colors"
+                        className="flex-1 rounded-xl border border-border bg-surface-2 py-2.5 text-sm font-semibold text-white hover:bg-surface-2 transition-colors"
                     >
                         Réessayer
                     </button>
@@ -371,8 +371,8 @@ function InteractiveMission({ challengeId, onComplete }: { challengeId: string; 
 
     if (error) return <p className="text-sm text-red-400 py-6 text-center">{error}</p>;
     if (!data)  return (
-        <div className="flex items-center justify-center gap-3 py-12 text-black">
-            <span className="h-5 w-5 rounded-full border-2 border-gray-300 border-t-[#3B82F6] animate-spin" />
+        <div className="flex items-center justify-center gap-3 py-12 text-fg-heading">
+            <span className="h-5 w-5 rounded-full border-2 border-border border-t-[#3B82F6] animate-spin" />
             <span className="text-sm">Chargement de la mission…</span>
         </div>
     );
@@ -391,7 +391,7 @@ function InteractiveMission({ challengeId, onComplete }: { challengeId: string; 
     if (data.contentType === "free_text")
         return <FreeTextChallenge challengeId={data.id} content={data.content as Parameters<typeof FreeTextChallenge>[0]["content"]} onComplete={handleComplete} />;
 
-    return <p className="text-sm text-black py-6 text-center">Type interactif inconnu : {data.contentType}</p>;
+    return <p className="text-sm text-fg-heading py-6 text-center">Type interactif inconnu : {data.contentType}</p>;
 }
 
 // ── Quiz / Scenario Mission ───────────────────────────────────────────────────
@@ -411,8 +411,8 @@ function QuizMission({ instructions, isPending, onSubmit }: {
     return (
         <div className="space-y-4">
             {/* Narrative */}
-            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-5">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed text-black">{narrative}</div>
+            <div className="rounded-2xl border border-border bg-surface px-5 py-5">
+                <div className="whitespace-pre-wrap text-sm leading-relaxed text-fg-heading">{narrative}</div>
             </div>
 
             {/* Clickable options */}
@@ -431,10 +431,10 @@ function QuizMission({ instructions, isPending, onSubmit }: {
                                     "w-full rounded-xl border px-4 py-3 text-left text-sm transition-all",
                                     isSelected
                                         ? "border-primary bg-primary text-white"
-                                        : "border-gray-200 bg-white text-black hover:border-gray-300 hover:bg-gray-100",
+                                        : "border-border bg-surface text-fg-heading hover:border-border hover:bg-surface-2",
                                 ].join(" ")}
                             >
-                                <span className={`mr-3 font-bold ${isSelected ? "text-white" : "text-black"}`}>{letter}</span>
+                                <span className={`mr-3 font-bold ${isSelected ? "text-white" : "text-fg-heading"}`}>{letter}</span>
                                 {text}
                             </button>
                         );
@@ -446,7 +446,7 @@ function QuizMission({ instructions, isPending, onSubmit }: {
                     placeholder="Votre réponse…"
                     value={selected ?? ""}
                     onChange={e => setSelected(e.target.value)}
-                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
+                    className="w-full resize-none rounded-xl border border-border bg-surface/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
                 />
             )}
 
@@ -466,27 +466,27 @@ function EmailMission({ data, isPending, onSubmit }: { data: EmailData; isPendin
     const [answer, setAnswer] = useState("");
     return (
         <div className="space-y-4">
-            <p className="text-sm text-black">{data.context}</p>
+            <p className="text-sm text-fg-heading">{data.context}</p>
 
             {/* Simulated email client */}
-            <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-                <div className="border-b border-gray-200 bg-gray-50/60 px-4 py-3">
-                    <div className="flex items-center gap-2 text-xs text-black">
-                        <span className="font-medium text-black">De :</span>
+            <div className="rounded-2xl border border-border bg-surface overflow-hidden">
+                <div className="border-b border-border bg-surface/60 px-4 py-3">
+                    <div className="flex items-center gap-2 text-xs text-fg-heading">
+                        <span className="font-medium text-fg-heading">De :</span>
                         <span className="text-red-400">{data.from}</span>
                     </div>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-black">
-                        <span className="font-medium text-black">Objet :</span>
-                        <span className="text-black">{data.subject}</span>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-fg-heading">
+                        <span className="font-medium text-fg-heading">Objet :</span>
+                        <span className="text-fg-heading">{data.subject}</span>
                     </div>
                 </div>
                 <div className="px-4 py-4">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-black">{data.body}</div>
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-fg-heading">{data.body}</div>
                 </div>
             </div>
 
             <div>
-                <label className="mb-1.5 block text-xs font-medium text-black">
+                <label className="mb-1.5 block text-xs font-medium text-fg-heading">
                     Identifie les indices suspects et décris la bonne réaction
                 </label>
                 <textarea
@@ -494,7 +494,7 @@ function EmailMission({ data, isPending, onSubmit }: { data: EmailData; isPendin
                     value={answer}
                     onChange={e => setAnswer(e.target.value)}
                     placeholder="Ex: domaine suspect, urgence artificielle, lien externe…"
-                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
+                    className="w-full resize-none rounded-xl border border-border bg-surface/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
                 />
             </div>
 
@@ -533,8 +533,8 @@ function EmailSortMission({ data, isPending, onSubmit }: { data: EmailSortData; 
 
     return (
         <div className="space-y-4">
-            <p className="text-sm text-black">{data.context}</p>
-            <div className="flex items-center gap-2 text-xs text-black rounded-lg border border-gray-200 bg-white px-3 py-2">
+            <p className="text-sm text-fg-heading">{data.context}</p>
+            <div className="flex items-center gap-2 text-xs text-fg-heading rounded-lg border border-border bg-surface px-3 py-2">
                 <span>⬆️</span>
                 <span>Glisse les emails — le plus suspect en haut, le moins suspect en bas</span>
             </div>
@@ -576,17 +576,17 @@ function SortableEmailRow({ email, rank }: { email: EmailEntry; rank: number }) 
             style={style}
             {...attributes}
             {...listeners}
-            className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 cursor-grab active:cursor-grabbing select-none"
+            className="flex items-start gap-3 rounded-xl border border-border bg-surface px-4 py-3 cursor-grab active:cursor-grabbing select-none"
         >
-            <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-black">
+            <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-bold text-fg-heading">
                 {rank}
             </div>
             <div className="min-w-0 flex-1">
-                <div className="truncate text-xs text-black">{email.from}</div>
-                <div className="mt-0.5 truncate text-sm font-medium text-black">{email.subject}</div>
-                <div className="mt-0.5 truncate text-xs text-black">{email.preview}</div>
+                <div className="truncate text-xs text-fg-heading">{email.from}</div>
+                <div className="mt-0.5 truncate text-sm font-medium text-fg-heading">{email.subject}</div>
+                <div className="mt-0.5 truncate text-xs text-fg-heading">{email.preview}</div>
             </div>
-            <div className="mt-1 flex-shrink-0 text-black">⣿</div>
+            <div className="mt-1 flex-shrink-0 text-fg-heading">⣿</div>
         </div>
     );
 }
@@ -604,22 +604,22 @@ function ChatMission({ data, isPending, onSubmit }: { data: ChatData; isPending:
 
     return (
         <div className="space-y-4">
-            <p className="text-sm text-black">{data.context}</p>
+            <p className="text-sm text-fg-heading">{data.context}</p>
 
             {/* Teams-style chat */}
-            <div className="rounded-2xl border border-gray-200 bg-gray-50/80 overflow-hidden">
+            <div className="rounded-2xl border border-border bg-surface/80 overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/80 text-sm font-bold text-white">
                         {data.contact.avatar}
                     </div>
                     <div>
-                        <div className="text-sm font-semibold text-black">{data.contact.name}</div>
-                        <div className="text-xs text-black">{data.contact.title}</div>
+                        <div className="text-sm font-semibold text-fg-heading">{data.contact.name}</div>
+                        <div className="text-xs text-fg-heading">{data.contact.title}</div>
                     </div>
                     <div className="ml-auto flex items-center gap-1.5">
                         <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                        <span className="text-xs text-black">en ligne</span>
+                        <span className="text-xs text-fg-heading">en ligne</span>
                     </div>
                 </div>
 
@@ -635,7 +635,7 @@ function ChatMission({ data, isPending, onSubmit }: { data: ChatData; isPending:
                             <div className={[
                                 "max-w-xs rounded-2xl px-3 py-2 text-sm",
                                 msg.from === "other"
-                                    ? "rounded-tl-none bg-gray-100 text-black"
+                                    ? "rounded-tl-none bg-surface-2 text-fg-heading"
                                     : "rounded-tr-none bg-primary/80 text-white",
                             ].join(" ")}>
                                 {msg.text}
@@ -653,7 +653,7 @@ function ChatMission({ data, isPending, onSubmit }: { data: ChatData; isPending:
             </div>
 
             <div>
-                <label className="mb-1.5 block text-xs font-medium text-black">
+                <label className="mb-1.5 block text-xs font-medium text-fg-heading">
                     Identifie les signaux suspects et décris ta réaction
                 </label>
                 <textarea
@@ -661,7 +661,7 @@ function ChatMission({ data, isPending, onSubmit }: { data: ChatData; isPending:
                     value={answer}
                     onChange={e => setAnswer(e.target.value)}
                     placeholder="Ex: vérifier l'identité via les RH, ne pas transmettre d'accès…"
-                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
+                    className="w-full resize-none rounded-xl border border-border bg-surface/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
                 />
             </div>
 
@@ -683,19 +683,19 @@ function TerminalMission({ data, isPending, onSubmit }: { data: TerminalData; is
 
     return (
         <div className="space-y-4">
-            <p className="text-sm text-black">{data.context}</p>
+            <p className="text-sm text-fg-heading">{data.context}</p>
 
             {/* Desktop simulation */}
-            <div className="relative rounded-2xl border border-gray-200 bg-gray-50/80 overflow-hidden" style={{ minHeight: "260px" }}>
+            <div className="relative rounded-2xl border border-border bg-surface/80 overflow-hidden" style={{ minHeight: "260px" }}>
                 {/* Fake desktop */}
-                <div className="h-full px-6 py-8 text-center text-black text-xs">
+                <div className="h-full px-6 py-8 text-center text-fg-heading text-xs">
                     [Bureau — dossier\_projet\_Q4.xlsx en cours d&apos;édition]
                 </div>
 
                 {/* Popup overlay */}
                 {showPopup && (
                     <div className="absolute inset-0 flex items-center justify-center bg-sidebar/60 backdrop-blur-sm">
-                        <div className="w-full max-w-sm rounded-xl border border-red-500/60 bg-gray-50 shadow-2xl shadow-red-900/40 overflow-hidden">
+                        <div className="w-full max-w-sm rounded-xl border border-red-500/60 bg-surface shadow-2xl shadow-red-900/40 overflow-hidden">
                             {/* Window title bar */}
                             <div className="flex items-center gap-2 bg-red-900/80 px-3 py-2">
                                 <div className="h-3 w-3 rounded-full bg-red-500" />
@@ -705,7 +705,7 @@ function TerminalMission({ data, isPending, onSubmit }: { data: TerminalData; is
                             </div>
                             <div className="px-4 py-4">
                                 <div className="mb-2 text-base font-bold text-red-400">{data.popup.title}</div>
-                                <div className="whitespace-pre-wrap text-xs leading-relaxed text-black">{data.popup.message}</div>
+                                <div className="whitespace-pre-wrap text-xs leading-relaxed text-fg-heading">{data.popup.message}</div>
                                 <div className="mt-4 flex flex-col gap-2">
                                     {data.popup.buttons.map((btn, i) => (
                                         <button
@@ -716,7 +716,7 @@ function TerminalMission({ data, isPending, onSubmit }: { data: TerminalData; is
                                                 i === 0
                                                     ? "bg-red-600 text-white hover:bg-red-700"
                                                     : i === data.popup.buttons.length - 1
-                                                    ? "border border-gray-300 bg-gray-100 text-black hover:bg-gray-200"
+                                                    ? "border border-border bg-surface-2 text-fg-heading hover:bg-surface-2"
                                                     : "bg-orange-600 text-white hover:bg-orange-700",
                                             ].join(" ")}
                                         >
@@ -737,7 +737,7 @@ function TerminalMission({ data, isPending, onSubmit }: { data: TerminalData; is
             )}
 
             <div>
-                <label className="mb-1.5 block text-xs font-medium text-black">
+                <label className="mb-1.5 block text-xs font-medium text-fg-heading">
                     Que fais-tu face à cette alerte et pourquoi ?
                 </label>
                 <textarea
@@ -745,7 +745,7 @@ function TerminalMission({ data, isPending, onSubmit }: { data: TerminalData; is
                     value={answer}
                     onChange={e => setAnswer(e.target.value)}
                     placeholder="Ex: fermer la fenêtre, c'est un scareware…"
-                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
+                    className="w-full resize-none rounded-xl border border-border bg-surface/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
                 />
             </div>
 
@@ -767,15 +767,15 @@ function FallbackMission({ instructions, isPending, onSubmit, answer, setAnswer 
 }) {
     return (
         <div className="space-y-4">
-            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-5">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed text-black">{instructions}</div>
+            <div className="rounded-2xl border border-border bg-surface px-5 py-5">
+                <div className="whitespace-pre-wrap text-sm leading-relaxed text-fg-heading">{instructions}</div>
             </div>
             <textarea
                 rows={4}
                 value={answer}
                 onChange={e => setAnswer(e.target.value)}
                 placeholder="Rédigez votre réponse…"
-                className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
+                className="w-full resize-none rounded-xl border border-border bg-surface/40 px-3 py-2 text-sm text-white placeholder-black focus:border-primary focus:outline-none"
             />
             <button
                 onClick={() => onSubmit(answer.trim())}
@@ -792,7 +792,7 @@ function FallbackMission({ instructions, isPending, onSubmit, answer, setAnswer 
 function TypeBadge({ type }: { type: string }) {
     const info = TYPE_INFO[type];
     return (
-        <span className="rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs text-black">
+        <span className="rounded-md border border-border bg-surface-2 px-2 py-0.5 text-xs text-fg-heading">
             {info?.icon} {info?.label ?? type}
         </span>
     );
@@ -806,7 +806,7 @@ function DifficultyBadge({ difficulty }: { difficulty: number }) {
         4: { label: "Expert",    color: "text-red-400 bg-red-400/10 border-red-400/20" },
         5: { label: "Maître",    color: "text-purple-400 bg-purple-400/10 border-purple-400/20" },
     };
-    const d = map[difficulty] ?? { label: String(difficulty), color: "text-black border-gray-200" };
+    const d = map[difficulty] ?? { label: String(difficulty), color: "text-fg-heading border-border" };
     return (
         <span className={`rounded-md border px-2 py-0.5 text-xs ${d.color}`}>{d.label}</span>
     );
@@ -815,8 +815,8 @@ function DifficultyBadge({ difficulty }: { difficulty: number }) {
 function LoadingSkeleton() {
     return (
         <div className="mx-auto max-w-3xl space-y-4 px-4 py-8">
-            <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-100" />
-            <div className="h-48 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+            <div className="h-8 w-48 animate-pulse rounded-lg bg-surface-2" />
+            <div className="h-48 animate-pulse rounded-2xl border border-border bg-surface" />
         </div>
     );
 }
@@ -839,8 +839,8 @@ const TYPE_INFO: Record<string, { label: string; icon: string; color: string; ac
     "email-sort":{ label: "Tri d'emails",  icon: "📬", color: "from-orange-900/60 to-neutral-900", accent: "text-orange-300" },
     chat:        { label: "Chat",          icon: "💬", color: "from-teal-900/60 to-neutral-900",   accent: "text-teal-300" },
     terminal:    { label: "Fausse alerte", icon: "🚨", color: "from-red-900/60 to-neutral-900",    accent: "text-red-300" },
-    flag:        { label: "Flag",          icon: "🚩", color: "from-neutral-800 to-neutral-900",   accent: "text-black" },
-    code:        { label: "Code",          icon: "💻", color: "from-neutral-800 to-neutral-900",   accent: "text-black" },
+    flag:        { label: "Flag",          icon: "🚩", color: "from-neutral-800 to-neutral-900",   accent: "text-fg-heading" },
+    code:        { label: "Code",          icon: "💻", color: "from-neutral-800 to-neutral-900",   accent: "text-fg-heading" },
 };
 
 const BRIEF_TEXT: Record<string, string> = {

@@ -13,7 +13,7 @@ export default function EntreprisePage() {
     const { data, isLoading, isError } = useTenantSettings();
 
     if (isLoading) {
-        return <div className="px-6 py-12 text-center text-sm text-[#94A3B8]">Chargement…</div>;
+        return <div className="px-6 py-12 text-center text-sm text-fg-muted">Chargement…</div>;
     }
     if (isError || !data) {
         return <div className="px-6 py-12 text-center text-sm text-danger">Impossible de charger les paramètres.</div>;
@@ -64,7 +64,7 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
         <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
                 <h1 className="text-2xl font-bold text-[#F1F5F9]">Paramètres entreprise</h1>
-                <p className="mt-1 text-sm text-[#94A3B8]">
+                <p className="mt-1 text-sm text-fg-muted">
                     Configuration générale de votre organisation. Réservé aux administrateurs ; chaque admin
                     ne gère que sa propre entreprise.
                 </p>
@@ -89,11 +89,11 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                         <input readOnly value={initial.tenantId} onFocus={e => e.currentTarget.select()}
                             className={`${inputCls} flex-1 font-mono text-xs`} />
                         <button type="button" onClick={copyTenantId}
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-xs font-medium text-[#334155] transition-colors duration-200 hover:bg-[#F1F5F9]">
+                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
                             {copied ? <><Check size={13} className="text-success" /> Copié</> : <><Copy size={13} /> Copier</>}
                         </button>
                     </div>
-                    <p className="mt-1 text-xs text-[#64748B]">À partager pour rattacher manuellement un membre (alternative au QR code).</p>
+                    <p className="mt-1 text-xs text-fg-muted">À partager pour rattacher manuellement un membre (alternative au QR code).</p>
                 </Field>
             </Section>
 
@@ -122,12 +122,12 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
 
             {/* 4. SÉCURITÉ */}
             <Section icon={<ShieldCheck size={15} />} title="Sécurité">
-                <p className="text-sm text-[#334155]">
+                <p className="text-sm text-fg-body">
                     La <strong>double authentification par email (2FA)</strong> est disponible et activable par
                     chaque membre depuis ses paramètres personnels (Profil → Sécurité). Encouragez vos équipes
                     à l’activer.
                 </p>
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-[#64748B]">
+                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
                     <li>Mots de passe forts (8+ caractères, majuscule, chiffre, caractère spécial) — déjà imposé.</li>
                     <li>2FA email recommandée pour les comptes admin.</li>
                     <li>Révoquez les invitations QR inutilisées et limitez leur durée de validité.</li>
@@ -154,16 +154,16 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                         </Link>
                     </>
                 ) : (
-                    <p className="text-sm text-[#64748B]">
+                    <p className="text-sm text-fg-muted">
                         Le mode Équipes est désactivé pour votre entreprise. Activez-le dans Administration → Paramètres (modes).
                     </p>
                 )}
             </Section>
 
             {/* Barre d'enregistrement */}
-            <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-[#E2E8F0] bg-white/90 p-3 shadow-sm backdrop-blur-md">
+            <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-[#E2E8F0] bg-surface/90 p-3 shadow-sm backdrop-blur-md">
                 {toast && (
-                    <span className="flex items-center gap-1.5 text-sm text-[#334155]">
+                    <span className="flex items-center gap-1.5 text-sm text-fg-body">
                         {update.isError ? <AlertCircle size={14} className="text-danger" /> : <Check size={14} className="text-success" />}
                         {toast}
                     </span>
@@ -178,17 +178,17 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
 }
 
 // ── UI helpers (charte admin claire) ───────────────────────────────────────────
-const inputCls = "w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1E293B]";
+const inputCls = "w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading";
 
 function Section({ icon, title, desc, children }: {
     icon: React.ReactNode; title: string; desc?: string; children: React.ReactNode;
 }) {
     return (
-        <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-[#475569]">
+        <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-fg-body">
                 {icon} {title}
             </h2>
-            {desc && <p className="mt-1 text-sm text-[#64748B]">{desc}</p>}
+            {desc && <p className="mt-1 text-sm text-fg-muted">{desc}</p>}
             <div className="mt-4 flex flex-col gap-4">{children}</div>
         </section>
     );
@@ -197,7 +197,7 @@ function Section({ icon, title, desc, children }: {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-[#475569]">{label}</span>
+            <span className="text-xs font-medium text-fg-body">{label}</span>
             {children}
         </label>
     );
@@ -209,19 +209,19 @@ function ToggleRow({ label, desc, on, onChange, configured = true }: {
     return (
         <div className="flex items-center justify-between gap-4 border-b border-[#E2E8F0] pb-3 last:border-0 last:pb-0">
             <div className="min-w-0">
-                <div className="flex items-center gap-2 text-sm font-medium text-[#1E293B]">
+                <div className="flex items-center gap-2 text-sm font-medium text-fg-heading">
                     {label}
                     {!configured && (
-                        <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#64748B]">
+                        <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fg-muted">
                             non configuré
                         </span>
                     )}
                 </div>
-                {desc && <div className="mt-0.5 text-xs text-[#64748B]">{desc}</div>}
+                {desc && <div className="mt-0.5 text-xs text-fg-muted">{desc}</div>}
             </div>
             <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)}
                 className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${on ? "bg-primary" : "bg-[#CBD5E1]"}`}>
-                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all duration-200 ${on ? "left-[22px]" : "left-0.5"}`} />
+                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface transition-all duration-200 ${on ? "left-[22px]" : "left-0.5"}`} />
             </button>
         </div>
     );

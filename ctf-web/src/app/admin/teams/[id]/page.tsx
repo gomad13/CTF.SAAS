@@ -46,7 +46,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
         queryKey: ["team", id], queryFn: () => apiFetch<Team>(`/api/admin/teams/${id}`),
     });
 
-    if (teamQ.isLoading) return <div className="mx-auto max-w-5xl px-6 py-8 text-[#94A3B8]">Chargement…</div>;
+    if (teamQ.isLoading) return <div className="mx-auto max-w-5xl px-6 py-8 text-fg-muted">Chargement…</div>;
     if (teamQ.isError || !teamQ.data) return <div className="mx-auto max-w-5xl px-6 py-8 text-[#B91C1C]">Équipe introuvable.</div>;
 
     const team = teamQ.data;
@@ -54,7 +54,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
     return (
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
-                <Link href="/admin/teams" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#94A3B8] transition-colors duration-200 hover:text-[#60A5FA]">
+                <Link href="/admin/teams" className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted transition-colors duration-200 hover:text-[#60A5FA]">
                     <ArrowLeft size={14} /> Équipes
                 </Link>
                 <div className="mt-3 flex items-start gap-3">
@@ -66,26 +66,26 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
                         <div className="flex items-center gap-2">
                             <h1 className="truncate text-2xl font-bold text-[#F1F5F9]">{team.name}</h1>
                             <button type="button" onClick={() => setEditing(true)}
-                                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[#334155] px-2.5 py-1 text-xs font-medium text-[#94A3B8] transition-colors duration-200 hover:border-[#60A5FA] hover:text-[#60A5FA]"
+                                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[#334155] px-2.5 py-1 text-xs font-medium text-fg-muted transition-colors duration-200 hover:border-[#60A5FA] hover:text-[#60A5FA]"
                                 title="Modifier l'équipe (nom, capacité, couleur, icône)">
                                 <Pencil size={13} /> Modifier
                             </button>
                         </div>
-                        {team.description && <p className="text-sm text-[#94A3B8]">{team.description}</p>}
+                        {team.description && <p className="text-sm text-fg-muted">{team.description}</p>}
                     </div>
                 </div>
 
                 <TeamEditModal team={team} open={editing} onClose={() => setEditing(false)}
                     onSaved={() => { setEditing(false); qc.invalidateQueries({ queryKey: ["team", id] }); qc.invalidateQueries({ queryKey: ["admin-teams"] }); qc.invalidateQueries({ queryKey: ["teams", "list"] }); }} />
 
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#94A3B8]">
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-fg-muted">
                     <span>{team.maxMembers != null ? `${team.memberCount} / ${team.maxMembers} membres` : `${team.memberCount} membre${team.memberCount > 1 ? "s" : ""}`}</span>
                     <span>·</span>
                     <span>{team.parcoursCount} parcours</span>
                     <span>·</span>
                     <span>Compliance <strong style={{ color: complianceColor(team.compliancePercent) }}>{team.compliancePercent}%</strong></span>
                     <span>·</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${team.isOpen ? "bg-success/15 text-success" : "bg-[#334155] text-[#94A3B8]"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${team.isOpen ? "bg-success/15 text-success" : "bg-[#334155] text-fg-muted"}`}>
                         {team.isOpen ? "🔓 Ouverte" : "🔒 Fermée"}
                     </span>
                 </div>
@@ -99,7 +99,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
                 ] as [TabKey, string, React.ReactNode][]).map(([key, label, icon]) => (
                     <button key={key} type="button" onClick={() => setTab(key)}
                         className={`inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                            tab === key ? "border-primary text-[#F1F5F9]" : "border-transparent text-[#94A3B8] hover:text-[#CBD5E1]"
+                            tab === key ? "border-primary text-[#F1F5F9]" : "border-transparent text-fg-muted hover:text-[#CBD5E1]"
                         }`}>
                         {icon}{label}
                     </button>
@@ -176,8 +176,8 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
             </div>
 
             {showAdd && (
-                <section className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm text-[#334155]">Sélectionne les collaborateurs à intégrer dans cette équipe.</p>
+                <section className="rounded-xl border border-[#E2E8F0] bg-surface p-4 shadow-sm">
+                    <p className="mb-3 text-sm text-fg-body">Sélectionne les collaborateurs à intégrer dans cette équipe.</p>
                     <div className="grid max-h-64 grid-cols-1 gap-1 overflow-y-auto md:grid-cols-2">
                         {candidateUsers.map(u => {
                             const ok = selected.has(u.userId);
@@ -188,17 +188,17 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                                     setSelected(next);
                                 }}
                                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors duration-200 ${
-                                        ok ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-white text-[#334155] hover:bg-[#F1F5F9]"
+                                        ok ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
                                     }`}>
                                     <div>
                                         <div className="font-medium">{u.firstName} {u.lastName}</div>
-                                        <div className={`text-xs ${ok ? "text-white/80" : "text-[#64748B]"}`}>{u.email}</div>
+                                        <div className={`text-xs ${ok ? "text-white/80" : "text-fg-muted"}`}>{u.email}</div>
                                     </div>
                                     {ok && <span className="text-xs">✓</span>}
                                 </button>
                             );
                         })}
-                        {candidateUsers.length === 0 && <p className="text-sm text-[#64748B]">Aucun utilisateur disponible.</p>}
+                        {candidateUsers.length === 0 && <p className="text-sm text-fg-muted">Aucun utilisateur disponible.</p>}
                     </div>
                     <div className="mt-4 flex gap-2">
                         <button type="button" disabled={selected.size === 0 || addM.isPending}
@@ -207,33 +207,33 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                             Ajouter ({selected.size})
                         </button>
                         <button type="button" onClick={() => { setShowAdd(false); setSelected(new Set()); }}
-                            className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#334155] transition-colors duration-200 hover:bg-[#F1F5F9]">
+                            className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
                             Annuler
                         </button>
                     </div>
                 </section>
             )}
 
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#475569] sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
+                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Membres ({membersQ.data?.length ?? 0})
                 </div>
                 <ul className="divide-y divide-[#E2E8F0]">
                     {(membersQ.data ?? []).map(m => (
                         <li key={m.userId} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
                             <div className="min-w-0">
-                                <div className="text-sm font-medium text-[#0A0A0B]">{m.firstName} {m.lastName}</div>
-                                <div className="text-xs text-[#475569]">{m.email}</div>
+                                <div className="text-sm font-medium text-fg-heading">{m.firstName} {m.lastName}</div>
+                                <div className="text-xs text-fg-body">{m.email}</div>
                             </div>
                             <div className="flex items-center gap-2">
                                 {otherTeams.length > 0 && (
-                                    <div className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white pl-2 text-[#475569]">
+                                    <div className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-surface pl-2 text-fg-body">
                                         <ArrowRightLeft size={13} className="flex-shrink-0" />
                                         <select
                                             value=""
                                             disabled={moveM.isPending}
                                             onChange={e => { const t = e.target.value; if (t) moveM.mutate({ userId: m.userId, targetTeamId: t }); }}
-                                            className="max-w-[150px] cursor-pointer rounded-lg bg-white py-1.5 pr-2 text-xs text-[#334155] outline-none"
+                                            className="max-w-[150px] cursor-pointer rounded-lg bg-surface py-1.5 pr-2 text-xs text-fg-body outline-none"
                                             title="Ajouter ce membre à une autre équipe (multi-équipes)">
                                             <option value="">Ajouter à…</option>
                                             {otherTeams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -242,14 +242,14 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                                 )}
                                 <button type="button"
                                     onClick={() => { if (confirm(`Retirer ${m.firstName} ${m.lastName} de l'équipe ?`)) removeM.mutate(m.userId); }}
-                                    className="rounded-lg border border-[#FCA5A5] bg-white p-1.5 text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2]" title="Retirer">
+                                    className="rounded-lg border border-[#FCA5A5] bg-surface p-1.5 text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2]" title="Retirer">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
                         </li>
                     ))}
                     {(membersQ.data?.length ?? 0) === 0 && (
-                        <li className="px-6 py-8 text-center text-sm text-[#64748B]">Aucun membre pour l&apos;instant.</li>
+                        <li className="px-6 py-8 text-center text-sm text-fg-muted">Aucun membre pour l&apos;instant.</li>
                     )}
                 </ul>
             </section>
@@ -302,16 +302,16 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
             </div>
 
             {showAssign && (
-                <section className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                <section className="rounded-xl border border-[#E2E8F0] bg-surface p-4 shadow-sm">
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_180px_auto]">
                         <select value={selectedPath} onChange={e => setSelectedPath(e.target.value)}
-                            className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1E293B]">
+                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading">
                             <option value="">— Choisir un parcours —</option>
                             {candidatePaths.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                         </select>
                         <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)}
-                            className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#1E293B]" />
-                        <label className="flex items-center gap-2 px-3 text-sm text-[#334155]">
+                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading" />
+                        <label className="flex items-center gap-2 px-3 text-sm text-fg-body">
                             <input type="checkbox" checked={isMandatory} onChange={e => setIsMandatory(e.target.checked)} />
                             Obligatoire
                         </label>
@@ -323,15 +323,15 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
                             Assigner
                         </button>
                         <button type="button" onClick={() => setShowAssign(false)}
-                            className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#334155] transition-colors duration-200 hover:bg-[#F1F5F9]">
+                            className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
                             Annuler
                         </button>
                     </div>
                 </section>
             )}
 
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#475569] sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
+                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Parcours assignés ({parcoursQ.data?.length ?? 0})
                 </div>
                 <ul className="divide-y divide-[#E2E8F0]">
@@ -339,14 +339,14 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
                         <li key={p.pathId} className="flex flex-col gap-3 px-4 py-3 sm:grid sm:grid-cols-[1fr_auto_auto_auto] sm:items-center sm:gap-4 sm:px-6">
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-[#0A0A0B]">{p.title}</span>
+                                    <span className="text-sm font-medium text-fg-heading">{p.title}</span>
                                     {p.isMandatory && (
                                         <span className="rounded-full bg-[#FEE2E2] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#B91C1C]">
                                             Obligatoire
                                         </span>
                                     )}
                                 </div>
-                                <div className="text-xs text-[#475569]">
+                                <div className="text-xs text-fg-body">
                                     {p.moduleCount} module{p.moduleCount > 1 ? "s" : ""} · {p.challengeCount} challenges
                                     {p.deadline && ` · deadline ${new Date(p.deadline).toLocaleDateString("fr-FR")}`}
                                 </div>
@@ -359,14 +359,14 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
                                     {p.avgCompletionPercent}%
                                 </span>
                                 <button type="button" onClick={() => { if (confirm(`Retirer l'assignation ?`)) removeM.mutate(p.pathId); }}
-                                    className="shrink-0 rounded-lg border border-[#FCA5A5] bg-white p-1.5 text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2]" title="Retirer">
+                                    className="shrink-0 rounded-lg border border-[#FCA5A5] bg-surface p-1.5 text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2]" title="Retirer">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
                         </li>
                     ))}
                     {(parcoursQ.data?.length ?? 0) === 0 && (
-                        <li className="px-6 py-8 text-center text-sm text-[#64748B]">
+                        <li className="px-6 py-8 text-center text-sm text-fg-muted">
                             Aucun parcours assigné. Cliquez sur « Assigner un parcours » pour commencer.
                         </li>
                     )}
@@ -380,39 +380,39 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
 function StatsTab({ teamId }: { teamId: string }) {
     const statsQ = useQuery<Stats>({ queryKey: ["team-stats", teamId], queryFn: () => apiFetch(`/api/admin/teams/${teamId}/stats`) });
 
-    if (!statsQ.data) return <div className="text-sm text-[#94A3B8]">Chargement…</div>;
+    if (!statsQ.data) return <div className="text-sm text-fg-muted">Chargement…</div>;
     const s = statsQ.data;
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#475569]">Compliance globale</h3>
+            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Compliance globale</h3>
                 <div className="mt-2 text-3xl font-bold" style={{ color: complianceColor(s.overallCompletionPercent) }}>
                     {s.overallCompletionPercent}%
                 </div>
-                <p className="mt-1 text-xs text-[#64748B]">
+                <p className="mt-1 text-xs text-fg-muted">
                     {s.memberCount} membre{s.memberCount > 1 ? "s" : ""} · {s.parcoursCount} parcours
                 </p>
             </section>
 
-            <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#475569]">Top collaborateurs</h3>
+            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Top collaborateurs</h3>
                 <ul className="mt-3 flex flex-col gap-2">
                     {s.topMembers.map((m, i) => (
                         <li key={m.userId} className="flex items-center justify-between text-sm">
-                            <span className="text-[#1E293B]">#{i + 1} {m.firstName} {m.lastName}</span>
+                            <span className="text-fg-heading">#{i + 1} {m.firstName} {m.lastName}</span>
                             <span className="font-semibold text-primary">{m.challengesCompleted} complétés · {m.avgScore}%</span>
                         </li>
                     ))}
-                    {s.topMembers.length === 0 && <li className="text-sm text-[#64748B]">Aucune activité pour l&apos;instant.</li>}
+                    {s.topMembers.length === 0 && <li className="text-sm text-fg-muted">Aucune activité pour l&apos;instant.</li>}
                 </ul>
             </section>
 
-            <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm md:col-span-2">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[#475569]">Progression par parcours</h3>
+            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm md:col-span-2">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Progression par parcours</h3>
                 <ul className="mt-3 flex flex-col gap-3">
                     {s.parcoursProgress.map(p => (
                         <li key={p.pathId} className="flex flex-col gap-2 text-sm sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-4">
-                            <span className="text-[#1E293B]">{p.title}</span>
+                            <span className="text-fg-heading">{p.title}</span>
                             <div className="flex items-center gap-3 sm:contents">
                                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E2E8F0] sm:w-48 sm:flex-none">
                                     <div className="h-full rounded-full bg-primary" style={{ width: `${p.avgCompletionPercent}%` }} />
@@ -423,7 +423,7 @@ function StatsTab({ teamId }: { teamId: string }) {
                             </div>
                         </li>
                     ))}
-                    {s.parcoursProgress.length === 0 && <li className="text-sm text-[#64748B]">Aucun parcours assigné.</li>}
+                    {s.parcoursProgress.length === 0 && <li className="text-sm text-fg-muted">Aucun parcours assigné.</li>}
                 </ul>
             </section>
         </div>

@@ -95,7 +95,7 @@ export default function MesEquipesPage() {
                                     </ul>
                                 </div>
                                 <button type="button" onClick={() => leaveM.mutate(t.teamId)} disabled={leaveM.isPending}
-                                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#FCA5A5] bg-white px-3 py-1.5 text-xs font-medium text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2] disabled:opacity-50">
+                                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#FCA5A5] bg-surface px-3 py-1.5 text-xs font-medium text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2] disabled:opacity-50">
                                     <LogOut size={13} /> Quitter
                                 </button>
                             </div>

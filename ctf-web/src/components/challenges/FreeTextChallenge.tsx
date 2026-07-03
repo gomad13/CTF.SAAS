@@ -42,7 +42,7 @@ export default function FreeTextChallenge({
     const [allDone, setAllDone] = useState(false);
 
     const question = questions[currentQ];
-    const minChars = question?.min_chars ?? 80;
+    const minChars = question?.min_chars ?? 15;
     const charCount = (answers[question?.id] ?? "").length;
     const canSubmit = charCount >= minChars && !loading;
 

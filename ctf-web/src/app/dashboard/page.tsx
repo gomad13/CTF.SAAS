@@ -1,4 +1,5 @@
 "use client";
+import CountUp from "@/components/CountUp";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -235,7 +236,7 @@ function StatCard({ value, label }: { value: string | number; label: string }) {
                 fontFamily: "'JetBrains Mono', monospace",
                 color: "var(--primary)",
             }}>
-                {value}
+                {(() => { const m = String(value).match(/^(\d+)(.*)$/); return m ? <CountUp value={Number(m[1])} suffix={m[2]} /> : value; })()}
             </div>
             <div style={{
                 fontSize: 11,

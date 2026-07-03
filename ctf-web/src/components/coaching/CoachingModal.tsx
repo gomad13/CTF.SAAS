@@ -62,7 +62,7 @@ function CoachingModalImpl({ attemptId, onClose }: Props) {
                     type="button"
                     onClick={onClose}
                     aria-label="Fermer le coaching"
-                    className="absolute right-3 top-3 rounded p-2 transition-colors duration-200 hover:bg-white/10"
+                    className="absolute right-3 top-3 rounded p-2 transition-colors duration-200 hover:bg-surface/10"
                     style={{ color: "rgba(255,255,255,0.75)" }}
                 >
                     <X size={18} strokeWidth={1.75} />

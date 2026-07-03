@@ -171,10 +171,10 @@ export default function ParcoursDetail({ params }: { params: Promise<{ id: strin
                     return (
                         <section key={m.id} className="flex flex-col gap-3">
                             <div className="flex items-baseline justify-between">
-                                <h2 className="text-sm font-semibold uppercase tracking-wider text-[#94A3B8]">
+                                <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">
                                     Module {index + 1}
                                 </h2>
-                                <span className="text-xs text-[#94A3B8]">
+                                <span className="text-xs text-fg-muted">
                                     {m.challenges.length} challenge{m.challenges.length > 1 ? "s" : ""}
                                 </span>
                             </div>

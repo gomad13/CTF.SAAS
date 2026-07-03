@@ -195,7 +195,7 @@ export default function ChatWidget({
                     justifyContent: "center",
                     boxShadow: isAvailable ? "0 4px 20px rgba(59,130,246,0.4)" : "0 4px 12px rgba(0,0,0,0.3)",
                 }}
-                title={isAvailable ? "ARIA — Assistante IA" : "IA indisponible"}
+                title={isAvailable ? "Sentys Bot — Assistante IA" : "IA indisponible"}
             >
                 {isOpen ? (
                     <span style={{ color: "#fff", fontSize: 22 }}>×</span>
@@ -246,7 +246,7 @@ export default function ChatWidget({
                                 fontSize: 16,
                             }}>🤖</div>
                             <div>
-                                <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: 14 }}>ARIA</div>
+                                <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: 14 }}>Sentys Bot</div>
                                 <div style={{
                                     fontSize: 11,
                                     color: isAvailable ? "#4ade80" : "#f87171",
@@ -302,7 +302,7 @@ export default function ChatWidget({
                                     marginBottom: 16,
                                 }}>
                                     <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-                                        👋 Bonjour ! Je suis <strong style={{ color: "var(--pr-l)" }}>ARIA</strong>, votre assistante IA.
+                                        👋 Bonjour ! Je suis <strong style={{ color: "var(--pr-l)" }}>Sentys Bot</strong>, votre assistant IA.
                                         <br /><br />
                                         Je peux vous aider avec la plateforme ou vous guider sur les challenges.
                                         {challengeTitle && (

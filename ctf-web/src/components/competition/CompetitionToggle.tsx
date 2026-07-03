@@ -58,7 +58,7 @@ export default function CompetitionToggle() {
                         onChange={e => setShowConfirm(e.target.checked)}
                     />
                     <span className="relative h-6 w-11 rounded-full bg-border transition-colors duration-200 peer-checked:bg-primary peer-disabled:opacity-50">
-                        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
+                        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
                     </span>
                 </label>
             </div>

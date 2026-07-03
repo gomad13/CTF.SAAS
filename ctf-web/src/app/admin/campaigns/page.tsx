@@ -92,17 +92,17 @@ export default function CampaignsPage() {
     }
 
     if (statusQ.isLoading) {
-        return <div className="px-6 py-12 text-center text-[#94A3B8]">Chargement…</div>;
+        return <div className="px-6 py-12 text-center text-fg-muted">Chargement…</div>;
     }
 
     if (!enabled) {
         return (
             <div className="mx-auto max-w-3xl px-6 py-12 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-[#94A3B8]">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface/10 text-fg-muted">
                     <Target size={22} />
                 </div>
                 <h1 className="mt-4 text-xl font-bold text-[#F1F5F9]">Campagnes désactivées</h1>
-                <p className="mt-2 text-sm text-[#94A3B8]">
+                <p className="mt-2 text-sm text-fg-muted">
                     Activez le mode « Campagnes » depuis les paramètres pour orchestrer parcours
                     et scénarios sur une période donnée.
                 </p>
@@ -119,19 +119,19 @@ export default function CampaignsPage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
                 <h1 className="text-2xl font-bold text-[#F1F5F9]">Campagnes</h1>
-                <p className="mt-1 text-sm text-[#94A3B8]">
+                <p className="mt-1 text-sm text-fg-muted">
                     Programmes de sensibilisation time-boxed qui combinent parcours et scénarios.
                 </p>
             </div>
 
             {/* ── Formulaire ───────────────────────────────────────────────── */}
-            <section className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm text-[#1E293B]">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-[#475569]">Nouvelle campagne</h2>
+            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm text-fg-heading">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Nouvelle campagne</h2>
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                     <div>
-                        <label className="text-xs font-medium text-[#334155]">Nom</label>
+                        <label className="text-xs font-medium text-fg-body">Nom</label>
                         <input
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B] placeholder:text-[#64748B]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
                             placeholder="Sensibilisation T2 2026"
                             value={name}
                             onChange={e => setName(e.target.value)}
@@ -139,9 +139,9 @@ export default function CampaignsPage() {
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[#334155]">Description</label>
+                        <label className="text-xs font-medium text-fg-body">Description</label>
                         <input
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B] placeholder:text-[#64748B]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
                             placeholder="Optionnel — contexte / objectifs"
                             value={description}
                             onChange={e => setDescription(e.target.value)}
@@ -149,19 +149,19 @@ export default function CampaignsPage() {
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[#334155]">Date de début</label>
+                        <label className="text-xs font-medium text-fg-body">Date de début</label>
                         <input
                             type="date"
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading"
                             value={startDate}
                             onChange={e => setStartDate(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[#334155]">Date de fin</label>
+                        <label className="text-xs font-medium text-fg-body">Date de fin</label>
                         <input
                             type="date"
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0A0A0B]"
+                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading"
                             value={endDate}
                             onChange={e => setEndDate(e.target.value)}
                         />
@@ -170,9 +170,9 @@ export default function CampaignsPage() {
 
                 {/* Contenus inclus — parcours + scénarios */}
                 <div className="mt-4">
-                    <label className="text-xs font-medium text-[#334155]">Parcours inclus</label>
+                    <label className="text-xs font-medium text-fg-body">Parcours inclus</label>
                     <div className="mt-2 flex flex-wrap gap-2">
-                        {paths.length === 0 && <span className="text-xs text-[#64748B]">Aucun parcours disponible.</span>}
+                        {paths.length === 0 && <span className="text-xs text-fg-muted">Aucun parcours disponible.</span>}
                         {paths.map(p => {
                             const active = selectedContents.some(c => c.contentId === p.contentId);
                             return (
@@ -183,7 +183,7 @@ export default function CampaignsPage() {
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors duration-200 ${
                                         active
                                             ? "border-[#3B82F6] bg-[#3B82F6] text-white"
-                                            : "border-[#E2E8F0] bg-white text-[#334155] hover:bg-[#F1F5F9]"
+                                            : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
                                     }`}
                                 >
                                     <FolderOpen size={12} />
@@ -195,9 +195,9 @@ export default function CampaignsPage() {
                 </div>
 
                 <div className="mt-3">
-                    <label className="text-xs font-medium text-[#334155]">Scénarios inclus</label>
+                    <label className="text-xs font-medium text-fg-body">Scénarios inclus</label>
                     <div className="mt-2 flex flex-wrap gap-2">
-                        {scenarios.length === 0 && <span className="text-xs text-[#64748B]">Aucun scénario disponible.</span>}
+                        {scenarios.length === 0 && <span className="text-xs text-fg-muted">Aucun scénario disponible.</span>}
                         {scenarios.map(s => {
                             const active = selectedContents.some(c => c.contentId === s.contentId);
                             return (
@@ -208,7 +208,7 @@ export default function CampaignsPage() {
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors duration-200 ${
                                         active
                                             ? "border-[#10B981] bg-[#10B981] text-white"
-                                            : "border-[#E2E8F0] bg-white text-[#334155] hover:bg-[#F1F5F9]"
+                                            : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
                                     }`}
                                 >
                                     <Mail size={12} />
@@ -220,7 +220,7 @@ export default function CampaignsPage() {
                 </div>
 
                 {/* Cible : toute l'entreprise ou assignation différée */}
-                <div className="mt-4 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-[#1E293B]">
+                <div className="mt-4 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-fg-heading">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
                         <input
                             type="checkbox"
@@ -229,7 +229,7 @@ export default function CampaignsPage() {
                         />
                         <span className="font-medium">Assigner à toute l&apos;entreprise</span>
                     </label>
-                    <p className="mt-1 text-xs text-[#64748B]">
+                    <p className="mt-1 text-xs text-fg-muted">
                         {assignToWholeTenant
                             ? "Tous les employés actifs du tenant seront automatiquement assignés à la création."
                             : "Vous pourrez assigner des employés spécifiques depuis la page détail."}
@@ -261,7 +261,7 @@ export default function CampaignsPage() {
                         className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200 ${
                             filter === f
                                 ? "bg-[#3B82F6] text-white"
-                                : "bg-white text-[#475569] hover:bg-[#F1F5F9]"
+                                : "bg-surface text-fg-body hover:bg-[#F1F5F9]"
                         }`}
                     >
                         {f === "All" ? "Toutes" : STATUS_STYLES[f].label}
@@ -270,8 +270,8 @@ export default function CampaignsPage() {
             </div>
 
             {/* ── Liste ────────────────────────────────────────────────────── */}
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm text-[#1E293B]">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#475569] sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm text-fg-heading">
+                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Campagnes ({list.length})
                 </div>
                 <ul className="divide-y divide-[#E2E8F0]">
@@ -285,7 +285,7 @@ export default function CampaignsPage() {
                                         <div className="flex items-center gap-2">
                                             <Link
                                                 href={`/admin/campaigns/${c.id}`}
-                                                className="truncate text-sm font-semibold text-[#1E293B] hover:text-[#2563EB]"
+                                                className="truncate text-sm font-semibold text-fg-heading hover:text-[#2563EB]"
                                             >
                                                 {c.name}
                                             </Link>
@@ -297,9 +297,9 @@ export default function CampaignsPage() {
                                             </span>
                                         </div>
                                         {c.description && (
-                                            <div className="mt-0.5 truncate text-xs text-[#475569]">{c.description}</div>
+                                            <div className="mt-0.5 truncate text-xs text-fg-body">{c.description}</div>
                                         )}
-                                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#64748B]">
+                                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-muted">
                                             <span className="inline-flex items-center gap-1">
                                                 <Calendar size={11} />
                                                 {new Date(c.startDate).toLocaleDateString("fr-FR")} → {new Date(c.endDate).toLocaleDateString("fr-FR")}
@@ -317,7 +317,7 @@ export default function CampaignsPage() {
                                                     style={{ width: `${pct}%` }}
                                                 />
                                             </div>
-                                            <span className="text-xs font-medium text-[#475569]">{pct}%</span>
+                                            <span className="text-xs font-medium text-fg-body">{pct}%</span>
                                         </div>
                                     </div>
                                     <button
@@ -333,7 +333,7 @@ export default function CampaignsPage() {
                         );
                     })}
                     {list.length === 0 && (
-                        <li className="px-6 py-12 text-center text-sm text-[#64748B]">
+                        <li className="px-6 py-12 text-center text-sm text-fg-muted">
                             Aucune campagne pour l&apos;instant.
                         </li>
                     )}

@@ -847,7 +847,7 @@ function HealthSection() {
     );
 }
 
-// ── ARIA / Ollama diagnostic card ─────────────────────────────────────────────
+// ── Sentys Bot / Ollama diagnostic card ─────────────────────────────────────────────
 type AriaStatus = {
     available: boolean;
     status: string;
@@ -901,7 +901,7 @@ function AriaHealthCard() {
         <div style={{ ...card, marginTop: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <h2 style={{ fontSize: 14, fontWeight: 600, color: "#f87171", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>
-                    ARIA / OLLAMA
+                    Sentys Bot / OLLAMA
                 </h2>
                 <span style={{ fontSize: 11, color, fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase" }}>
                     {s?.status ?? "…"}

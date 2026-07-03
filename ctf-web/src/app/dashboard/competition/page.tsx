@@ -69,11 +69,11 @@ export default function CompetitionPage() {
     if (!enabled) {
         return (
             <div className="mx-auto max-w-3xl px-4 py-12 text-center sm:px-6">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-[#94A3B8]">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface/10 text-fg-muted">
                     <Trophy size={22} />
                 </div>
                 <h1 className="mt-4 text-xl font-bold text-[#F1F5F9]">Mode Compétition désactivé</h1>
-                <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
+                <p className="mt-2 text-sm leading-relaxed text-fg-muted">
                     Le mode compétition n&apos;est pas actif pour votre organisation. Demandez à un
                     administrateur de l&apos;activer pour accéder au classement.
                 </p>
@@ -95,7 +95,7 @@ export default function CompetitionPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-[#F1F5F9]">Classement</h1>
-                    <p className="mt-1 text-sm text-[#94A3B8]">
+                    <p className="mt-1 text-sm text-fg-muted">
                         Compétition par équipes et classement individuel.
                     </p>
                 </div>

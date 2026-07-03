@@ -61,9 +61,9 @@ function CustomTooltip({ active, payload }: RechartsTooltipProps) {
     const point = inner as ChartPoint;
     if (typeof point.score !== "number" || typeof point.rawDate !== "string") return null;
     return (
-        <div className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 shadow-sm">
-            <p className="text-xs font-medium text-[#64748B]">{formatLong(point.rawDate)}</p>
-            <p className="mt-1 text-sm font-semibold text-[#1E293B]">Score : {point.score} / 100</p>
+        <div className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 shadow-sm">
+            <p className="text-xs font-medium text-fg-muted">{formatLong(point.rawDate)}</p>
+            <p className="mt-1 text-sm font-semibold text-fg-heading">Score : {point.score} / 100</p>
         </div>
     );
 }
@@ -85,18 +85,18 @@ function RiskScoreEvolutionChartImpl({ data, isLoading, isError }: Props) {
     return (
         <section
             aria-label="Évolution du Cyber Resilience Index"
-            className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
+            className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
         >
             <header className="mb-4 flex items-start justify-between">
                 <div>
-                    <p className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+                    <p className="text-xs font-medium uppercase tracking-wider text-fg-muted">
                         Évolution
                     </p>
-                    <h2 className="mt-1 text-base font-semibold text-[#1E293B]">
+                    <h2 className="mt-1 text-base font-semibold text-fg-heading">
                         Votre score sur les 6 derniers mois
                     </h2>
                 </div>
-                <TrendingUp size={20} strokeWidth={1.5} className="text-[#94A3B8] opacity-60" />
+                <TrendingUp size={20} strokeWidth={1.5} className="text-fg-muted opacity-60" />
             </header>
 
             {isLoading ? (
@@ -152,7 +152,7 @@ function ChartSkeleton() {
 
 function ChartEmpty({ label }: { label: string }) {
     return (
-        <div className="flex h-64 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] text-center text-[#64748B]">
+        <div className="flex h-64 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] text-center text-fg-muted">
             <p className="px-6 text-sm">{label}</p>
         </div>
     );

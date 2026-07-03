@@ -134,7 +134,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
                             <div className="text-xs text-neutral-400">Progress</div>
                             <div className="text-lg font-semibold">{progressPct}%</div>
                             <div className="mt-2 h-2 w-full rounded-full bg-neutral-800">
-                                <div className="h-2 rounded-full bg-white" style={{ width: `${progressPct}%` }} />
+                                <div className="h-2 rounded-full bg-surface" style={{ width: `${progressPct}%` }} />
                             </div>
                         </div>
 
@@ -149,7 +149,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
                             </button>
 
                             <button
-                                className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-neutral-950 hover:opacity-90 disabled:opacity-60"
+                                className="rounded-xl bg-surface px-3 py-2 text-sm font-semibold text-neutral-950 hover:opacity-90 disabled:opacity-60"
                                 onClick={() => completeM.mutate()}
                                 disabled={completeM.isPending || progressPct < 100 || my?.status === "completed"}
                                 title="Termine si progress = 100%"
@@ -223,7 +223,7 @@ export default function PathPage({ params }: { params: { id: string } }) {
 
                                     <div className="mt-5 flex flex-wrap gap-2">
                                         <button
-                                            className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-neutral-950 hover:opacity-90 disabled:opacity-60"
+                                            className="rounded-xl bg-surface px-4 py-2 text-sm font-semibold text-neutral-950 hover:opacity-90 disabled:opacity-60"
                                             disabled={submitM.isPending}
                                             onClick={() => submitM.mutate({ challengeId: active.id, isCorrect: true })}
                                             title="Démo: envoie une réponse correcte"

@@ -102,8 +102,8 @@ export default function ModesSettings() {
 
     return (
         <div className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[#94A3B8]">Modes entreprise</h2>
-            <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">Modes entreprise</h2>
+            <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
                 {MODES.map((m, idx) => {
                     const enabled = isEnabled(m.key);
                     const Icon = m.icon;
@@ -120,8 +120,8 @@ export default function ModesSettings() {
                                     <Icon size={18} strokeWidth={2} />
                                 </div>
                                 <div>
-                                    <h3 className="text-base font-semibold text-[#1E293B]">{m.title}</h3>
-                                    <p className="mt-1 text-sm text-[#334155]">{m.description}</p>
+                                    <h3 className="text-base font-semibold text-fg-heading">{m.title}</h3>
+                                    <p className="mt-1 text-sm text-fg-body">{m.description}</p>
                                 </div>
                             </div>
                             <label className="inline-flex shrink-0 items-center">
@@ -133,7 +133,7 @@ export default function ModesSettings() {
                                     onChange={e => setPending({ mode: m, nextValue: e.target.checked })}
                                 />
                                 <span className="relative h-6 w-11 rounded-full bg-[#E2E8F0] transition-colors duration-200 peer-checked:bg-[#3B82F6] peer-disabled:opacity-50">
-                                    <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
+                                    <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
                                 </span>
                             </label>
                         </div>
@@ -143,20 +143,20 @@ export default function ModesSettings() {
 
             {pending && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0B]/60 backdrop-blur-sm">
-                    <div className="mx-4 w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-lg">
+                    <div className="mx-4 w-full max-w-md rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-lg">
                         <div className="flex items-start justify-between gap-3">
-                            <h4 className="text-base font-semibold text-[#1E293B]">
+                            <h4 className="text-base font-semibold text-fg-heading">
                                 {pending.nextValue ? `Activer ${pending.mode.title} ?` : `Désactiver ${pending.mode.title} ?`}
                             </h4>
                             <button
                                 type="button"
                                 onClick={() => setPending(null)}
-                                className="text-[#64748B] transition-colors duration-200 hover:text-[#1E293B]"
+                                className="text-fg-muted transition-colors duration-200 hover:text-fg-heading"
                             >
                                 <X size={16} />
                             </button>
                         </div>
-                        <p className="mt-2 text-sm leading-relaxed text-[#334155]">
+                        <p className="mt-2 text-sm leading-relaxed text-fg-body">
                             {pending.nextValue
                                 ? "Tous les utilisateurs de votre organisation seront concernés immédiatement."
                                 : "Le mode sera désactivé pour tous les utilisateurs. Les données restent conservées en base."}
@@ -165,7 +165,7 @@ export default function ModesSettings() {
                             <button
                                 type="button"
                                 onClick={() => setPending(null)}
-                                className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#334155] transition-colors duration-200 hover:bg-[#F1F5F9]"
+                                className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]"
                             >
                                 Annuler
                             </button>
@@ -183,7 +183,7 @@ export default function ModesSettings() {
             )}
 
             {toast && (
-                <div className="fixed bottom-6 right-6 z-50 rounded-lg border border-[#E2E8F0] bg-white px-4 py-3 text-sm font-medium text-[#1E293B] shadow-lg">
+                <div className="fixed bottom-6 right-6 z-50 rounded-lg border border-[#E2E8F0] bg-surface px-4 py-3 text-sm font-medium text-fg-heading shadow-lg">
                     {toast}
                 </div>
             )}

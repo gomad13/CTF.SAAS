@@ -456,8 +456,8 @@ public class AdminController : ControllerBase
             Yellow: yellow,
             Green: green,
             Red: red,
-            AvgProgress: Math.Round(sumProgress / total, 2),
-            AvgScore: Math.Round(sumScore / total, 2)
+            AvgProgress: Math.Round(sumProgress / total),
+            AvgScore: Math.Round(sumScore / total)
         ));
     }
 

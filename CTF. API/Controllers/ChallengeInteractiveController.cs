@@ -70,7 +70,7 @@ public class ChallengeInteractiveController : ControllerBase
         var questionText = qd.TryGetProperty("question", out var qq) ? qq.GetString() ?? "" : "";
         var expected = qd.TryGetProperty("expected_elements", out var ee) ? ee.GetString() ?? "" : "";
         var ctx = qd.TryGetProperty("context", out var cc) ? cc.GetString() ?? "cybersécurité" : "cybersécurité";
-        var minChars = qd.TryGetProperty("min_chars", out var mc) ? mc.GetInt32() : 50;
+        var minChars = qd.TryGetProperty("min_chars", out var mc) ? mc.GetInt32() : 15;
 
         var answer = (dto.Answer ?? "").Trim();
         if (answer.Length < minChars)
@@ -113,7 +113,7 @@ public class ChallengeInteractiveController : ControllerBase
             .FirstOrDefaultAsync(c => c.Id == challengeId && (c.TenantId == tenantId || c.TenantId == Guid.Empty), ct);
         if (challenge is null) return NotFound();
 
-        var globalScore = dto.QuestionScores.Any() ? (int)dto.QuestionScores.Average() : 0;
+        var globalScore = dto.QuestionScores.Any() ? (int)Math.Round(dto.QuestionScores.Average()) : 0;
         var pointsEarned = (int)(challenge.Points * globalScore / 100.0);
 
         var existing = await _db.ChallengeCompletions
@@ -322,7 +322,7 @@ public class ChallengeInteractiveController : ControllerBase
         var tenantId = User.GetTenantId();
         var userId   = User.GetUserId();
 
-        if (string.IsNullOrWhiteSpace(req.UserAnalysis) || req.UserAnalysis.Length < 20)
+        if (string.IsNullOrWhiteSpace(req.UserAnalysis) || req.UserAnalysis.Length < 10)
             return BadRequest(new { error = "Votre analyse est trop courte. Décrivez les éléments suspects." });
         // [ROBUSTESSE IA] borne haute de l entree (anti-DoS / anti-saturation IA).
         if (req.UserAnalysis.Length > 5000)

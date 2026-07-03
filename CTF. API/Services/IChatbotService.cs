@@ -31,7 +31,7 @@ public static class ChatbotPrompt
     public static string BuildSystemPrompt(string userRole, ChatContext? ctx)
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append("Tu es ARIA, assistante pédagogique cybersécurité de la plateforme Sentys. ");
+        sb.Append("Tu es Sentys Bot, assistant pédagogique cybersécurité de la plateforme Sentys. ");
         sb.Append("Public : collaborateurs d'entreprises (santé, finance, SME). ");
         sb.Append("Réponds en français, concis, factuel, max 150 mots. Utilise \"tu\". ");
         sb.Append("Pas de markdown (ni gras, ni listes, ni titres). Phrases naturelles. ");

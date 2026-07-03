@@ -75,7 +75,7 @@ export default function PhishingAiChallenge({ challengeId, content, onComplete }
     const [error, setError]     = useState<string | null>(null);
 
     async function handleSubmit() {
-        if (text.trim().length < 50) {
+        if (text.trim().length < 15) {
             setError("Rédigez au moins 50 caractères pour une analyse valide.");
             return;
         }
@@ -244,17 +244,17 @@ export default function PhishingAiChallenge({ challengeId, content, onComplete }
                     placeholder="Ex: L'adresse email de l'expéditeur n'est pas le vrai domaine de la Société Générale, le lien pointe vers un site inconnu..."
                     style={{
                         width: "100%", background: "var(--bg-card)", color: "var(--text)",
-                        border: `1px solid ${text.length >= 50 ? "var(--pr)" : "var(--accent-border)"}`,
+                        border: `1px solid ${text.length >= 15 ? "var(--pr)" : "var(--accent-border)"}`,
                         borderRadius: 8, padding: "12px 14px", fontSize: 14, lineHeight: 1.6,
                         minHeight: 160, resize: "vertical", outline: "none",
                         fontFamily: "inherit", boxSizing: "border-box",
                         transition: "border-color 0.15s",
                     }}
                     onFocus={e => { e.target.style.borderColor = "var(--pr)"; }}
-                    onBlur={e => { e.target.style.borderColor = text.length >= 50 ? "var(--pr)" : "var(--accent-border)"; }}
+                    onBlur={e => { e.target.style.borderColor = text.length >= 15 ? "var(--pr)" : "var(--accent-border)"; }}
                 />
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
-                    <span style={{ fontSize: 11, color: text.length >= 50 ? "var(--pr)" : "var(--text-2)" }}>
+                    <span style={{ fontSize: 11, color: text.length >= 15 ? "var(--pr)" : "var(--text-2)" }}>
                         {text.length} / 50 min
                     </span>
                 </div>
@@ -264,17 +264,17 @@ export default function PhishingAiChallenge({ challengeId, content, onComplete }
 
             <button
                 onClick={handleSubmit}
-                disabled={text.trim().length < 50}
+                disabled={text.trim().length < 15}
                 style={{
                     width: "100%",
-                    background: text.trim().length < 50 ? "var(--accent-subtle)" : "var(--pr)",
+                    background: text.trim().length < 15 ? "var(--accent-subtle)" : "var(--pr)",
                     color: "#FFFFFF", border: "none", borderRadius: 8,
                     padding: "13px 0", fontSize: 14, fontWeight: 600,
-                    cursor: text.trim().length < 50 ? "not-allowed" : "pointer",
+                    cursor: text.trim().length < 15 ? "not-allowed" : "pointer",
                     transition: "background 0.15s",
                 }}
-                onMouseOver={e => { if (text.trim().length >= 50) e.currentTarget.style.background = "var(--pr-h)"; }}
-                onMouseOut={e => { if (text.trim().length >= 50) e.currentTarget.style.background = "var(--pr)"; }}
+                onMouseOver={e => { if (text.trim().length >= 15) e.currentTarget.style.background = "var(--pr-h)"; }}
+                onMouseOut={e => { if (text.trim().length >= 15) e.currentTarget.style.background = "var(--pr)"; }}
             >
                 Soumettre à l&apos;analyse IA
             </button>
