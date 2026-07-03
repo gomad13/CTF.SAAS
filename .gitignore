@@ -161,3 +161,7 @@ appsettings.*.json
 .env.local
 secrets.json
 SUPERADMIN_PROCEDURE.md
+
+# Skills tiers installés via `npx skills add` (réinstallables — voir UIUX_PROMAX_LOG.md)
+.agents/
+.claude/skills/ui-ux-pro-max
