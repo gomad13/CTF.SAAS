@@ -13,6 +13,7 @@ import PhishingAiChallenge from "@/components/challenges/PhishingAiChallenge";
 import MultichoiceChallenge from "@/components/challenges/MultichoiceChallenge";
 import PasswordQuizChallenge from "@/components/challenges/PasswordQuizChallenge";
 import FreeTextChallenge from "@/components/challenges/FreeTextChallenge";
+import FlashCardsChallenge from "@/components/challenges/FlashCardsChallenge";
 import ChallengeHeader from "@/components/challenges/ChallengeHeader";
 import ChallengeIntro from "@/components/challenges/ChallengeIntro";
 import ChallengeReminderBar from "@/components/challenges/ChallengeReminderBar";
@@ -390,6 +391,9 @@ function InteractiveMission({ challengeId, onComplete }: { challengeId: string; 
         return <PasswordQuizChallenge challengeId={data.id} variantIndex={variantIndex} content={data.content as Parameters<typeof PasswordQuizChallenge>[0]["content"]} onComplete={handleComplete} />;
     if (data.contentType === "free_text")
         return <FreeTextChallenge challengeId={data.id} content={data.content as Parameters<typeof FreeTextChallenge>[0]["content"]} onComplete={handleComplete} />;
+
+    if (data.contentType === "flash_cards")
+        return <FlashCardsChallenge challengeId={data.id} content={data.content as Parameters<typeof FlashCardsChallenge>[0]["content"]} onComplete={handleComplete} />;
 
     return <p className="text-sm text-fg-heading py-6 text-center">Type interactif inconnu : {data.contentType}</p>;
 }

@@ -20,7 +20,7 @@ public class ChallengeInteractiveController : ControllerBase
 
     private static readonly HashSet<string> SensitiveKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        "is_correct", "is_dangerous", "red_flags", "ai_system_prompt", "expected_elements"
+        "is_correct", "is_dangerous", "red_flags", "ai_system_prompt", "expected_elements", "correct_right_id"
     };
 
     private static readonly Guid DemoTenantId = Guid.Parse("00000000-0000-0000-0000-000000000000");
@@ -480,6 +480,67 @@ public class ChallengeInteractiveController : ControllerBase
     }
 
     // ── POST .../submit-multichoice ───────────────────────────────────────────
+    // ── POST .../submit-flash-cards (T7 — Flash Cards) ────────────────────
+    // Sous-type "match" : scoring 100% serveur via correct_right_id (masqué au client).
+    // Sous-type "flip"  : mode révision, auto-évaluation su/pas-su.
+    [HttpPost("{challengeId:guid}/submit-flash-cards")]
+    public async Task<IActionResult> SubmitFlashCards(
+        Guid challengeId,
+        [FromBody] FlashCardsRequest req,
+        CancellationToken ct)
+    {
+        var tenantId = User.GetTenantId();
+        var userId   = User.GetUserId();
+
+        var challenge = await _db.Challenges
+            .FirstOrDefaultAsync(c => c.Id == challengeId && (c.TenantId == tenantId || c.TenantId == Guid.Empty), ct);
+        if (challenge is null || challenge.ContentType != "flash_cards")
+            return NotFound(new { error = "Challenge introuvable." });
+        if (string.IsNullOrWhiteSpace(challenge.ContentJson))
+            return BadRequest(new { error = "Contenu non disponible." });
+
+        using var doc = JsonDocument.Parse(ResolveContentJson(challenge, req.VariantIndex));
+        var root = doc.RootElement;
+        var subtype = root.TryGetProperty("subtype", out var st) ? st.GetString() : "flip";
+
+        int scorePct;
+        var results = new List<object>();
+
+        if (subtype == "match")
+        {
+            var pairs = req.Pairs ?? new Dictionary<string, string>();
+            int total = 0, correct = 0;
+            if (root.TryGetProperty("left", out var lefts))
+            {
+                foreach (var left in lefts.EnumerateArray())
+                {
+                    var lid = left.GetProperty("id").GetString()!;
+                    var expected = left.TryGetProperty("correct_right_id", out var cr) ? cr.GetString() : null;
+                    total++;
+                    var given = pairs.TryGetValue(lid, out var g) ? g : null;
+                    var ok = expected != null && given == expected;
+                    if (ok) correct++;
+                    results.Add(new { leftId = lid, correctRightId = expected, givenRightId = given, isCorrect = ok });
+                }
+            }
+            scorePct = total > 0 ? (int)Math.Round(100.0 * correct / total) : 0;
+        }
+        else
+        {
+            var known = Math.Max(0, req.KnownCount ?? 0);
+            var total = Math.Max(1, req.Total ?? 1);
+            scorePct = (int)Math.Clamp(Math.Round(100.0 * known / total), 0, 100);
+        }
+
+        var pointsEarned = (int)Math.Round(challenge.Points * scorePct / 100.0);
+        await UpsertCompletionAsync(userId, tenantId, challenge, pointsEarned, scorePct, ct);
+
+        _logger.LogInformation("FlashCards submit: user={UserId} challenge={Id} subtype={Sub} score={Score}%/{Points}pts",
+            userId, challengeId, subtype, scorePct, pointsEarned);
+
+        return Ok(new { subtype, scorePercent = scorePct, pointsEarned, maxPoints = challenge.Points, results });
+    }
+
     [HttpPost("{challengeId:guid}/submit-multichoice")]
     public async Task<IActionResult> SubmitMultichoice(
         Guid challengeId,
@@ -806,4 +867,5 @@ public record CeoFraudRequest(List<string>? SelectedChoices, int? VariantIndex =
 public record MailboxRequest(List<string>? CheckedEmailIds, int? VariantIndex = null);
 public record PhishingAiRequest(string UserAnalysis);
 public record MultichoiceRequest(List<string>? SelectedChoices, int? VariantIndex = null);
+public record FlashCardsRequest(Dictionary<string, string>? Pairs, int? KnownCount, int? Total, int? VariantIndex = null);
 public record PasswordQuizRequest(Dictionary<string, string>? Answers, int? VariantIndex = null);

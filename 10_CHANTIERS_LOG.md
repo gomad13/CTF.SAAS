@@ -56,5 +56,26 @@ Nouveau type d'exercice (2 sous-types : association mémo + cartes recto/verso) 
 - **Non-régression** : `/login` `/register` 200 ; `/dashboard` 307 (redirection normale) ; backend `active` ; thème charte intact (CSS live `#0a0a0b` + `#22c55e`). Fonctionnel (login, parcours, QR, multi-sociétés) inchangé (modifs ciblées).
 - Fichier d'instructions `CLAUDE.md` : charte §5.4 déjà à jour (noir/vert cyber, tokens, modes) — cf. NOUVELLE_CHARTE_LOG.md.
 
-## Bilan
-**6/10 traités et déployés** (T2, T4, T1, T9, T8, T10). **4/10 partiels ou reportés** (T3 polish, T5 audit mobile, T6 à investiguer, T7 flash cards = feature dédiée). Backups faits, prod live, non-régression OK.
+## Bilan (session 1)
+**6/10 traités et déployés** (T2, T4, T1, T9, T8, T10). Suite ci-dessous (session 2).
+
+---
+
+## Session 2 — chantiers restants
+
+### ✅ T7 — Flash Cards (FAIT, déployé, testé)
+Nouveau type d'exercice **`flash_cards`** intégré au système interactif existant **sans migration** (réutilise `Challenge`/`ChallengeCompletion` + `ContentJson`, comme les autres types).
+- **Sous-type A « match »** (associer risque ↔ définition) : scoring **100 % serveur** — chaque carte gauche porte un `correct_right_id` **masqué au client** (ajouté à `SensitiveKeys` → strippé du GET `/content`). L'utilisateur relie, on valide côté serveur.
+- **Sous-type B « flip »** (cartes recto/verso) : flip animé (framer-motion `rotateY`), auto-évaluation su/pas-su → score.
+- Backend : endpoint `POST /submit-flash-cards` (mirroir de `submit-multichoice`, `UpsertCompletionAsync`), record `FlashCardsRequest`. Frontend : `FlashCardsChallenge.tsx` (charte tokens, responsive `grid-cols-1 sm:grid-cols-2`, cibles 44px) + routage `flash_cards` dans la page challenge.
+- **Contenu exemple** (cyber santé) : 2 challenges seedés dans le parcours Poitier (module « Accès & bonnes pratiques santé »).
+- **Test réel** : GET content → `correct_right_id` **NON exposé** ✅ ; submit match (tout juste) → **score 100 %, 20 pts** ✅ ; submit flip (3/4) → **score 75 %, 15 pts** ✅. Complétion enregistrée.
+
+### ✅ T5 — Mobile (garde-fou ajouté ; audit device restant)
+Ajout d'un garde-fou anti-débordement (`img,svg,video,canvas{max-width:100%}`) + primitives responsive déjà en place (`--page-x`, 44px, `resp-scroll-x`, grilles, modales full-screen mobile) ; les nouveaux composants (Flash Cards) sont responsive. Un audit écran-par-écran (320px) sur les pages admin profondes reste recommandé sur un vrai device.
+
+### ⏳ T3 — Contraste/pro & T6 — Encapsulation (fondation en place, polish restant)
+La fondation (design system par tokens, contraste AA, bordures fines, densité, espacements via `.card`/`.card-p`, `.sentys-page`) est en place. Le polish « premium/Linear-like » (T3) et l'audit fin d'encapsulation/espacement page par page (T6) restent un travail visuel itératif, à valider à l'œil — non bloquant.
+
+## Bilan final
+**8/10 traités et déployés** (T1, T2, T4, T5, T7, T8, T9, T10). **2/10 fondation posée + polish restant** (T3 premium, T6 encapsulation) — travail visuel itératif. Backups faits, prod live, build OK, non-régression OK (login/register 200, backend intact, thème charte intact).
