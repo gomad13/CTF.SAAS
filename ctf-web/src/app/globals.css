@@ -317,3 +317,13 @@ select.input{cursor:pointer;padding-right:32px}
 
 /* T5 — garde-fou mobile : media jamais plus large que leur conteneur (media responsive guard T5) */
 img,svg,video,canvas{max-width:100%;height:auto}
+
+/* ============ Phase 2 — micro-interactions premium ============ */
+.btn:active:not(:disabled){transform:translateY(0) scale(0.98)}
+.card,.stat,.card-hover{transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease}
+.input:hover:not(:focus):not(:disabled){border-color:var(--text-3)}
+.tab{transition:color .15s ease,background .15s ease}
+/* Accessibilité : couper les animations si l utilisateur le demande */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+}

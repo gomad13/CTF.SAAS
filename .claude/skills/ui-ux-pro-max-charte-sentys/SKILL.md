@@ -1,6 +1,6 @@
 ---
 name: ui-ux-pro-max-charte-sentys
-description: À appliquer chaque fois qu'on utilise le skill ui-ux-pro-max sur le projet Sentys. Le skill guide la STRUCTURE / layout / UX / accessibilité / dataviz, mais la PALETTE DE COULEURS reste TOUJOURS la charte Sentys (teal). Ne jamais adopter les couleurs suggérées par ui-ux-pro-max.
+description: À appliquer chaque fois qu'on utilise le skill ui-ux-pro-max sur le projet Sentys. Le skill guide la STRUCTURE / layout / UX / accessibilité / dataviz, mais la PALETTE DE COULEURS reste TOUJOURS la charte Sentys (vert cyber). Ne jamais adopter les couleurs suggérées par ui-ux-pro-max.
 ---
 
 # ui-ux-pro-max × charte Sentys (règle d'articulation)
@@ -10,16 +10,16 @@ Le skill **`ui-ux-pro-max`** (installé dans `.agents/skills/ui-ux-pro-max`, sym
 ## Règle (non négociable)
 > **Utiliser ui-ux-pro-max pour le « comment » : structure, layout, hiérarchie d'information, patterns de composants, interactions, animations, accessibilité, choix de graphiques.**
 > **NE PAS adopter la palette de couleurs qu'il propose.** La palette reste la charte Sentys :
-> `primary #03b5aa` · `primary-dark #037971` · `background-dark #023436` · `accent #00bfb3`, contraste WCAG AA.
+> `primary #22C55E` · `primary-dark #15803D` · `background-dark #0A0A0B` · `accent #16A34A`, contraste WCAG AA.
 
-Exemple : pour « healthcare SaaS dashboard », le skill propose souvent un primary cyan (`#0891B2`) / vert. **On ignore ces couleurs** et on mappe sur la charte : `primary → #03b5aa` (`bg-sentys`), `accent → #00bfb3` (`bg-sentys-accent`), fond sombre → `#023436` (`bg-sentys-bg`). Voir [[charte-graphique-sentys]].
+Exemple : pour « healthcare SaaS dashboard », le skill propose souvent un primary cyan (`#0891B2`) / vert. **On ignore ces couleurs** et on mappe sur la charte : `primary → #22C55E` (`bg-primary`), `accent → #16A34A` (`bg-primary`), fond sombre → `#0A0A0B` (`bg-primary-bg`). Voir [[charte-graphique-sentys]].
 
 ## Ce qu'on GARDE du skill
 - **Pattern / structure de page** (hero, sections, hiérarchie, placement des CTA).
 - **Style & UX** (ex. « Accessible & Ethical » : haut contraste, 16px+, focus states, semantic).
 - **Typographies** suggérées (si cohérentes ; sinon garder Inter, cf. charte).
 - **Effets & checklist a11y** : focus rings 3-4px, ARIA, skip links, cibles tactiles **44×44px**, `prefers-reduced-motion`, transitions 150-300ms → alignés avec [[responsive-mobile-sentys]] et [[animations-sentys]].
-- **Dataviz** : types de graphiques recommandés → mais couleurs de séries = palette teal, cf. [[dataviz-sentys]].
+- **Dataviz** : types de graphiques recommandés → mais couleurs de séries = palette vert cyber, cf. [[dataviz-sentys]].
 
 ## Ce qu'on IGNORE / REMPLACE
 - **Couleurs primaires/secondaires/accent/background/border/ring** proposées → **remplacées par les tokens `sentys*`**.

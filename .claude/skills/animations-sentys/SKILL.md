@@ -13,7 +13,7 @@ Librairies : `framer-motion` (installée) pour les animations JS ; `tw-animate-c
 - **Déplacements discrets** : `y: 8→0`, `opacity: 0→1`. Pas de gros translates, bounce, rotation gratuite.
 - **Respecter `prefers-reduced-motion`** : désactiver/réduire si l'utilisateur le demande (`useReducedMotion`).
 - **Ne pas animer** : listes très longues, chaque ligne de tableau, éléments critiques (formulaires en cours de saisie).
-- Hover d'un bouton = **changement de teinte** (`hover:bg-sentys-dark`), pas un scale animé.
+- Hover d'un bouton = **changement de teinte** (`hover:bg-primary-dark`), pas un scale animé.
 
 ## Presets réutilisables
 ```ts
