@@ -1,5 +1,7 @@
 "use client";
 import CountUp from "@/components/CountUp";
+import KPICard from "@/components/premium/KPICard";
+import { ListChecks, CircleCheckBig, TrendingUp } from "lucide-react";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -98,9 +100,9 @@ export default function DashboardHome() {
                     </>
                 ) : (
                     <>
-                        <StatCard value={stats.total} label="PARCOURS EN COURS" />
-                        <StatCard value={stats.completed} label="CHALLENGES COMPLÉTÉS" />
-                        <StatCard value={`${stats.avgPct}%`} label="PROGRESSION MOY." />
+                        <KPICard value={stats.total} label="Parcours en cours" icon={ListChecks} />
+                        <KPICard value={stats.completed} label="Challenges complétés" icon={CircleCheckBig} />
+                        <KPICard value={stats.avgPct} suffix="%" label="Progression moyenne" icon={TrendingUp} />
                     </>
                 )}
             </div>

@@ -140,9 +140,9 @@ Aucune tâche n'est clôturée sans vérification réelle :
 
 ---
 
-### 5.4 Charte graphique — Design System Viper (obligatoire)
+### 5.4 Charte graphique Sentys — noir/gris/blanc + vert cyber (obligatoire)
 
-**Philosophie** : interface Cyber-SaaS pro. Couleurs froides pour la structure, couleurs vibrantes pour l'action. Sobre, épuré, professionnel — inspiration Apple / Stripe / Linear. Chaque écran doit être beau, propre, pro.
+**Philosophie** : interface cyber-sécurité pro. Base neutre monochrome (noir/gris/blanc), **accent vert cyber** pour l'action. Sobre, épuré, sérieux — inspiration Linear / Stripe. **Mode sombre par défaut + mode clair**, lisible (WCAG AA) dans les 2 modes. Chaque écran doit être beau, propre, pro.
 
 > **CHARTE ACTUELLE (2026-07) : noir / gris / blanc + accent vert cyber, mode SOMBRE et CLAIR.**
 > Remplace l'ancienne charte bleue/teal. Système de **tokens CSS** (`globals.css`) : mode clair = `:root`, mode sombre = `html.dark` (défaut). Toggle sombre/clair persistant (`useTheme` / `ThemeToggle`, cookie/localStorage `ctf_theme`). Contraste **WCAG AA** garanti dans les 2 modes. **Ne jamais réintroduire le bleu #3B82F6 (sauf état « info ») ni le teal #03b5aa.**
@@ -185,56 +185,49 @@ Aucune tâche n'est clôturée sans vérification réelle :
 
 #### Typographie
 
-- **Police principale** : Inter (chargée via `next/font/google`). Fallback : Plus Jakarta Sans puis system-ui.
-- **Titres H1** : `font-bold` (700), `text-[#1E293B]`.
-- **Sous-titres / labels** : `font-medium` (500), `text-[#64748B]`.
-- **Corps** : 14px ou 16px, `leading-relaxed` (line-height 1.5).
-- **Header de tableau** : `uppercase`, `text-xs` (12px), `tracking-wider`.
+- **Police principale** : Inter (via `next/font/google`). Fallback : Plus Jakarta Sans puis system-ui.
+- **Titres H1** : `font-bold` (700), `text-fg-heading` (= `--text`).
+- **Sous-titres / labels** : `font-medium` (500), `text-fg-muted` (= `--text-3`).
+- **Corps** : 14px ou 16px, `leading-relaxed`.
+- **Header de tableau** : `uppercase`, `text-xs`, `tracking-wider`, `text-fg-muted`.
 
-#### Composants — règles standards
+#### Composants — règles standards (TOKENS uniquement, jamais de hex en dur)
 
 **Cartes KPI (dashboards)**
-- Fond `bg-surface` (#FFFFFF).
-- Coins `rounded-xl` (12px).
-- Ombre : `shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]`.
-- Padding interne minimum `p-6` (24px).
-- Icône Lucide filaire en haut à droite, `opacity-20`.
+- `bg-surface border border-border rounded-xl p-6` (padding ≥ 24px), `shadow-sm`.
+- Icône Lucide filaire en haut à droite, `opacity-20`. Valeur animée en **`CountUp`**.
 
 **Cartes de parcours (listes horizontales)**
-- Fond `bg-surface`, bordure fine `border border-[#E2E8F0]`.
-- Coins `rounded-xl`, padding `p-6`.
-- Titre à gauche, bouton d'action à droite (`flex items-center justify-between`).
-- Barre de progression : hauteur `h-1.5` (6px), fond `bg-[#E2E8F0]`, remplissage `bg-primary`, **coins `rounded-full` (pill-shape obligatoire, jamais de coins carrés)**.
+- `bg-surface border border-border rounded-xl p-6`, titre à gauche + action à droite.
+- Barre de progression : `h-1.5 bg-surface-2` remplie `bg-primary`, **coins `rounded-full`**.
 
 **Tableaux d'administration**
-- Header : `bg-[#F1F5F9]`, texte `uppercase text-xs tracking-wider text-[#64748B]`.
-- Lignes : bordures **horizontales uniquement** (`divide-y divide-[#E2E8F0]`). **Jamais de bordures verticales.**
-- Lignes au survol : `hover:bg-[#F8FAFC]`.
+- Header : `bg-table-head` (= `--surface-2`), `uppercase text-xs tracking-wider text-fg-muted`.
+- Lignes : bordures **horizontales seules** (`divide-y divide-border`), survol `hover:bg-surface-2`.
+- Envelopper dans `overflow-x-auto` (responsive). Cascade d'apparition via `<Stagger>`.
 
-**Pills de statut (style Apple/Stripe)**
-- Actif / succès : `bg-success/10 text-success` → fond vert 10 %, texte vert foncé.
-- Inactif / danger : `bg-danger/10 text-danger`.
-- En cours / alerte : `bg-warning/10 text-warning`.
-- Forme : `rounded-full px-2.5 py-0.5 text-xs font-medium`.
+**Pills de statut**
+- Succès `bg-success/10 text-success` · Danger `bg-danger/10 text-danger` · Alerte `bg-warning/10 text-warning`.
+- `rounded-full px-2.5 py-0.5 text-xs font-medium`.
 
 **Boutons primaires**
-- `bg-primary text-white hover:bg-primary-hover`.
-- `rounded-lg px-4 py-2 font-medium`.
-- Transition obligatoire : `transition-colors duration-200`.
+- `bg-primary text-white hover:bg-primary-hover rounded-lg px-4 py-2 font-medium transition-colors duration-200`. Feedback d'appui `:active`.
 
 #### Détails UX/UI non négociables
 
-1. **Glassmorphism léger** sur sidebar et menus déroulants : `backdrop-blur-md` (8px) + `bg-white/80` (blanc 80 % d'opacité) — ou `bg-sidebar/80` pour la sidebar sombre.
-2. **Espacement (white space)** : minimum **24px de padding interne** (`p-6`) sur toute carte, container ou section. **Jamais de texte collé au bord.**
-3. **Micro-interactions** : tout élément interactif (bouton, lien, item de nav) a `transition-colors duration-200` (ou `transition-all` si plusieurs propriétés changent). Hover = nuance plus foncée de la même teinte.
-4. **Icônes** : **Lucide React uniquement**, **toujours en outline/filaire**. Jamais mélanger avec des icônes pleines. Jamais importer une autre lib (Heroicons, FontAwesome, etc.) dans le même projet.
-5. **Aucune ombre lourde** : rester sur `shadow-sm` ou l'ombre custom définie pour les cartes KPI. Pas de `shadow-2xl`.
+1. **Aucun hex en dur** dans les composants → toujours un token (`bg-surface`, `text-fg-*`, `bg-primary`, `border-border`, `var(--...)`) sinon casse le mode sombre/clair.
+2. **Glassmorphism léger** : `backdrop-blur-md` + `bg-surface/80` (jamais `bg-white/80`).
+3. **Espacement** : ≥ 24px de padding interne (`p-6`) sur toute carte/section. Jamais de texte collé au bord.
+4. **Micro-interactions** : `transition-colors duration-200` sur tout interactif ; hover = teinte plus foncée (`--accent-hover`). Animations sobres (framer-motion, cf. skill `animations-sentys`), respect `prefers-reduced-motion`.
+5. **Icônes** : **Lucide React filaires uniquement**. Jamais d'autre lib.
+6. **Aucune ombre lourde** (`shadow-2xl`).
 
 #### Déclaration centrale
 
-- **`tailwind.config.js`** → `theme.extend.colors` avec tous les tokens de la palette.
-- **`src/app/globals.css`** → `:root` avec les mêmes tokens en CSS variables (`--color-primary`, etc.) pour interop hors Tailwind.
-- **`src/app/layout.tsx`** → import de la font Inter via `next/font/google` et application sur `<html>` ou `<body>`.
+- **`src/app/globals.css`** = source de vérité des tokens (Tailwind v4 `@theme` + `:root`/`html.dark`). Mode clair `:root`, sombre `html.dark` (défaut).
+- **`tailwind.config.ts`** : `darkMode: 'class'` + tokens de référence.
+- **`src/app/layout.tsx`** : font Inter + classe `dark` par défaut + script no-FOUC (thème appliqué avant le paint).
+- **Toggle** : `useTheme` / `ThemeToggle`, persistance `ctf_theme`.
 
 ---
 
