@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
   --canvas:#F8FAFC; --card:#FFFFFF;
@@ -79,6 +80,16 @@
   --color-primary-dark:#2563EB;
   --color-background-dark:#0F172A;
   --color-accent:#10B981;
+
+  /* === Charte Sentys (teal) — cf. skill charte-graphique-sentys ===
+     Tokens officiels de la charte : bg-sentys / text-sentys / border-sentys /
+     bg-sentys-dark / bg-sentys-bg / bg-sentys-accent (+ variantes /opacity).
+     Additifs : n'écrasent pas le token `primary` bleu hérité de l'app existante.
+     Primary de la charte = #03b5aa (utiliser `bg-sentys` pour le go-forward). */
+  --color-sentys:#03b5aa;
+  --color-sentys-dark:#037971;
+  --color-sentys-bg:#023436;
+  --color-sentys-accent:#00bfb3;
   --color-success:#10B981;
   --color-danger:#EF4444;
   --color-error:#EF4444;
