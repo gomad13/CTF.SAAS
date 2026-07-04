@@ -1,12 +1,14 @@
-// Palette dataviz Sentys (charte vert cyber, theme-aware via var()).
-// recharts accepte var(--x) en fill/stroke sur les navigateurs modernes.
+// FICHIER DE TOKENS DATAVIZ Sentys (charte noir + vert cyber).
+// NB : les `fill`/`stroke` recharts sont des ATTRIBUTS SVG qui ne résolvent pas var(),
+// d où des hex ici (ce fichier EST le fichier de tokens graphiques). Les props CSS
+// (grid/axis/tooltip) utilisent var() et suivent le thème.
 export const CHART = {
-    accent: "var(--accent)",
-    accent2: "var(--accent-hover)",
-    grid: "var(--border)",
+    accent: "#22C55E",       // série principale (attribut SVG -> hex)
+    accent2: "#2DD4BF",      // cyan (dégradé vert→cyan)
+    grid: "var(--border)",   // props CSS -> var OK
     axis: "var(--text-3)",
     text: "var(--text-2)",
     surface: "var(--surface)",
 };
-// Séries distinctes (donut/barres multi-séries) : dégradé de verts + neutres.
-export const SERIES = ["var(--accent)", "#4ADE80", "#15803D", "var(--text-3)", "#F59E0B", "#3B82F6"];
+// Séries distinctes (donut/barres) — mappées sur la charte : vert / ambre / gris / cyan…
+export const SERIES = ["#22C55E", "#F59E0B", "#6B6B70", "#2DD4BF", "#4ADE80", "#3B82F6"];

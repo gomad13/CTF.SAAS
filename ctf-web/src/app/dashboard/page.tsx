@@ -187,12 +187,12 @@ function PathRow({ assignment: a }: { assignment: AssignmentMine }) {
                             <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text)" }}>{pct}%</span>
                         </div>
                         <div style={{ height: 6, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #22C55E, #2DD4BF)", borderRadius: 999, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)" }} />
+                            <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, var(--accent), var(--accent-2))", borderRadius: 999, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)" }} />
                         </div>
                     </div>
                     {a.dueAt && <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Échéance : {new Date(a.dueAt).toLocaleDateString("fr-FR")}</div>}
                 </div>
-                <Link href={`/dashboard/parcours/${a.pathId}`} className="transition-colors" style={{ flexShrink: 0, background: "var(--accent)", color: "#FFFFFF", fontWeight: 600, fontSize: 12, padding: "9px 16px", borderRadius: 8, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center" }}
+                <Link href={`/dashboard/parcours/${a.pathId}`} className="transition-colors" style={{ flexShrink: 0, background: "var(--accent)", color: "var(--on-accent)", fontWeight: 600, fontSize: 12, padding: "9px 16px", borderRadius: 8, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center" }}
                     onMouseOver={e => (e.currentTarget.style.background = "var(--accent-hover)")}
                     onMouseOut={e => (e.currentTarget.style.background = "var(--accent)")}>
                     Continuer
@@ -228,7 +228,7 @@ function FirstStepsBanner({ assignments }: { assignments?: AssignmentMine[] }) {
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", margin: 0 }}>Prêt à commencer votre formation ?</h2>
                 <p style={{ fontSize: 13, color: "var(--text-2)", margin: "4px 0 0", lineHeight: 1.5 }}>Vous avez {assignments.length} parcours assigné{assignments.length > 1 ? "s" : ""}. Démarrez avec le premier.</p>
             </div>
-            <Link href={`/dashboard/parcours/${first.pathId}`} style={{ background: "var(--accent)", color: "#FFFFFF", textDecoration: "none", padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>Commencer ma formation →</Link>
+            <Link href={`/dashboard/parcours/${first.pathId}`} style={{ background: "var(--accent)", color: "var(--on-accent)", textDecoration: "none", padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>Commencer ma formation →</Link>
             <button type="button" onClick={close} aria-label="Masquer cet encart" style={{ position: "absolute", top: 8, right: 10, background: "transparent", border: "none", color: "var(--text-3)", cursor: "pointer", fontSize: 16, padding: 4 }}>×</button>
         </div>
     );
