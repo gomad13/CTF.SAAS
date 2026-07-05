@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api";
 import type { Me } from "@/lib/types";
 import { useSenderConsent, useUpdateSenderConsent } from "@/lib/hooks/useScenarios";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import Reveal from "@/components/Reveal";
 
 type TabKey = "profil" | "notifications" | "apparence" | "securite";
 type ToastType = "success" | "error" | "warning";
@@ -36,19 +37,19 @@ export default function ParametresPage() {
 
     return (
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px var(--page-x) 80px" }}>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: "#F1F5F9", marginBottom: 24 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", marginBottom: 24 }}>
                 Paramètres
             </h1>
 
             {/* Tabs */}
-            <div style={{ display: "flex", gap: 6, marginBottom: 32, borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: 0 }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 32, borderBottom: "1px solid var(--border)", paddingBottom: 0 }}>
                 {tabs.map(t => (
                     <button
                         key={t.key}
                         onClick={() => setTab(t.key)}
                         style={{
-                            background: tab === t.key ? "#3B82F6" : "transparent",
-                            color: tab === t.key ? "#ffffff" : "#94A3B8",
+                            background: tab === t.key ? "var(--pr)" : "transparent",
+                            color: tab === t.key ? "var(--on-accent)" : "var(--text-muted)",
                             border: "none",
                             padding: "8px 16px",
                             fontSize: 13,
@@ -58,18 +59,18 @@ export default function ParametresPage() {
                             transition: "all 0.15s",
                             marginBottom: 8,
                         }}
-                        onMouseOver={e => { if (tab !== t.key) e.currentTarget.style.color = "#E2E8F0"; }}
-                        onMouseOut={e => { if (tab !== t.key) e.currentTarget.style.color = "#000000"; }}
+                        onMouseOver={e => { if (tab !== t.key) e.currentTarget.style.color = "var(--text-secondary)"; }}
+                        onMouseOut={e => { if (tab !== t.key) e.currentTarget.style.color = "var(--text-muted)"; }}
                     >
                         {t.label}
                     </button>
                 ))}
             </div>
 
-            {tab === "profil" && <ProfilTab me={meQ.data} showToast={showToast} />}
-            {tab === "notifications" && <NotificationsTab showToast={showToast} />}
-            {tab === "apparence" && <ApparenceTab showToast={showToast} />}
-            {tab === "securite" && <SecuriteTab me={meQ.data} showToast={showToast} />}
+            {tab === "profil" && <Reveal><ProfilTab me={meQ.data} showToast={showToast} /></Reveal>}
+            {tab === "notifications" && <Reveal><NotificationsTab showToast={showToast} /></Reveal>}
+            {tab === "apparence" && <Reveal><ApparenceTab showToast={showToast} /></Reveal>}
+            {tab === "securite" && <Reveal><SecuriteTab me={meQ.data} showToast={showToast} /></Reveal>}
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>
@@ -96,13 +97,13 @@ function ProfilTab({ me, showToast }: { me: Me | undefined; showToast: (m: strin
 
     const pwdStrength = (() => {
         if (!newPwd) return null;
-        if (newPwd.length < 8) return { label: "FAIBLE", color: "#f87171" };
+        if (newPwd.length < 8) return { label: "FAIBLE", color: "var(--danger-t)" };
         const hasUpper = /[A-Z]/.test(newPwd);
         const hasNum = /[0-9]/.test(newPwd);
         const hasSpecial = /[^A-Za-z0-9]/.test(newPwd);
-        if (newPwd.length >= 12 && hasUpper && hasNum && hasSpecial) return { label: "FORT", color: "#4ade80" };
-        if (hasUpper && hasNum) return { label: "MOYEN", color: "#fbbf24" };
-        return { label: "FAIBLE", color: "#f87171" };
+        if (newPwd.length >= 12 && hasUpper && hasNum && hasSpecial) return { label: "FORT", color: "var(--success-t)" };
+        if (hasUpper && hasNum) return { label: "MOYEN", color: "var(--warning-t)" };
+        return { label: "FAIBLE", color: "var(--danger-t)" };
     })();
 
     async function handleChangePassword() {
@@ -150,8 +151,8 @@ function ProfilTab({ me, showToast }: { me: Me | undefined; showToast: (m: strin
                                 fontSize: 11,
                                 padding: "3px 10px",
                                 borderRadius: 4,
-                                background: "rgba(59,130,246,0.12)",
-                                border: "1px solid rgba(59,130,246,0.3)",
+                                background: "var(--accent-subtle)",
+                                border: "1px solid var(--accent-border)",
                                 color: "var(--pr)",
                                 fontFamily: "'JetBrains Mono', monospace",
                                 textTransform: "uppercase",
@@ -198,7 +199,7 @@ function ProfilTab({ me, showToast }: { me: Me | undefined; showToast: (m: strin
                         autoComplete="new-password"
                     />
                     {pwdError && (
-                        <div style={{ fontSize: 12, color: "#f87171" }}>⚠ {pwdError}</div>
+                        <div style={{ fontSize: 12, color: "var(--danger-t)" }}>⚠ {pwdError}</div>
                     )}
                 </div>
                 <div style={{ marginTop: 20 }}>
@@ -368,15 +369,15 @@ function ApparenceTab({ showToast }: { showToast: (m: string, t?: ToastType) => 
                         }}
                     >
                         <div style={{
-                            background: "#f8fafc",
+                            background: "var(--surface)",
                             borderRadius: 8,
                             padding: 10,
                             marginBottom: 12,
                             height: 80,
                         }}>
-                            <div style={{ background: "#e2e8f0", borderRadius: 4, height: 12, width: "60%", marginBottom: 6 }} />
+                            <div style={{ background: "var(--surface-2)", borderRadius: 4, height: 12, width: "60%", marginBottom: 6 }} />
                             <div style={{ background: "var(--pr)", borderRadius: 4, height: 8, width: "40%", marginBottom: 6 }} />
-                            <div style={{ background: "#ffffff", borderRadius: 4, height: 24, width: "80%", border: "1px solid #e2e8f0" }} />
+                            <div style={{ background: "var(--surface)", borderRadius: 4, height: 24, width: "80%", border: "1px solid var(--border)" }} />
                         </div>
                         <div style={{ fontWeight: 500, fontSize: 13 }}>☀️ Clair</div>
                         <div style={{ color: "var(--text-muted)", fontSize: 11, marginTop: 2 }}>Mode jour</div>
@@ -434,10 +435,10 @@ function ApparenceTab({ showToast }: { showToast: (m: string, t?: ToastType) => 
                             <button key={s} onClick={() => setSize(s)} style={{
                                 flex: 1,
                                 padding: "10px 14px",
-                                background: active ? "rgba(59,130,246,0.12)" : "var(--bg-card)",
-                                border: active ? "1px solid #3B82F6" : "1px solid var(--border)",
+                                background: active ? "var(--accent-subtle)" : "var(--bg-card)",
+                                border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
                                 borderRadius: 8,
-                                color: active ? "var(--pr)" : "#a3a3a3",
+                                color: active ? "var(--pr)" : "var(--text-muted)",
                                 fontSize: 13,
                                 cursor: "pointer",
                             }}>{labels[s]}</button>
@@ -495,9 +496,9 @@ function SecuriteTab({ me, showToast }: { me: Me | undefined; showToast: (m: str
                         fontSize: 10,
                         padding: "2px 8px",
                         borderRadius: 4,
-                        background: "rgba(34,197,94,0.10)",
-                        border: "1px solid rgba(34,197,94,0.35)",
-                        color: "#4ade80",
+                        background: "var(--success-subtle)",
+                        border: "1px solid var(--success)",
+                        color: "var(--success-t)",
                         fontFamily: "'JetBrains Mono', monospace",
                         textTransform: "uppercase",
                     }}>Session actuelle</span>
@@ -527,7 +528,7 @@ function SecuriteTab({ me, showToast }: { me: Me | undefined; showToast: (m: str
                         }}>
                             <span style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}>{h.date}</span>
                             <span style={{ color: "var(--text-primary)" }}>{h.device}</span>
-                            <span style={{ color: "#4ade80", textAlign: "right" }}>✓ {h.status}</span>
+                            <span style={{ color: "var(--success-t)", textAlign: "right" }}>✓ {h.status}</span>
                         </div>
                     ))}
                 </div>
@@ -551,7 +552,7 @@ function SecuriteTab({ me, showToast }: { me: Me | undefined; showToast: (m: str
                 }} onClick={() => setShowDelete(false)}>
                     <div onClick={e => e.stopPropagation()} style={{
                         background: "var(--bg-card)",
-                        border: "1px solid rgba(239,68,68,0.4)",
+                        border: "1px solid var(--danger)",
                         borderRadius: 12,
                         padding: 24,
                         maxWidth: 440,
@@ -586,9 +587,9 @@ function SecuriteTab({ me, showToast }: { me: Me | undefined; showToast: (m: str
                                 disabled={confirmEmail !== me?.email}
                                 onClick={() => { showToast("Suppression non implémentée", "warning"); setShowDelete(false); }}
                                 style={{
-                                    background: confirmEmail === me?.email ? "#ef4444" : "rgba(239,68,68,0.3)",
+                                    background: confirmEmail === me?.email ? "var(--danger)" : "var(--danger-subtle)",
                                     border: "none",
-                                    color: "var(--text-primary)",
+                                    color: "var(--on-accent)",
                                     padding: "10px 18px",
                                     borderRadius: 7,
                                     fontSize: 13,
@@ -694,8 +695,8 @@ function TwoFactorCard({ showToast }: { showToast: (m: string, t?: ToastType) =>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                     <span style={{
                         display: "inline-block", fontSize: 10, padding: "2px 8px", borderRadius: 4,
-                        background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.35)",
-                        color: "#4ade80", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
+                        background: "var(--success-subtle)", border: "1px solid var(--success)",
+                        color: "var(--success-t)", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
                     }}>Activée</span>
                     <button style={ghostBtnStyle()} onClick={disable} disabled={busy}>Désactiver</button>
                 </div>
@@ -765,7 +766,7 @@ function Field({ label, value, onChange, type = "text", disabled = false, autoCo
                 onFocus={e => {
                     if (!disabled) {
                         e.currentTarget.style.borderColor = "var(--border-focus)";
-                        e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.1)";
+                        e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-border)";
                     }
                 }}
                 onBlur={e => {
@@ -779,7 +780,9 @@ function Field({ label, value, onChange, type = "text", disabled = false, autoCo
 
 function Toggle({ label, desc, on, onChange }: { label: string; desc?: string; on: boolean; onChange: (v: boolean) => void }) {
     return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+        <div className="transition-colors duration-200" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 8px", borderRadius: 8, borderBottom: "1px solid var(--border)" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "var(--surface-2)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
             <div style={{ flex: 1, marginRight: 16 }}>
                 <div style={{ fontSize: 14, color: "var(--text-primary)", fontWeight: 500 }}>{label}</div>
                 {desc && <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{desc}</div>}
@@ -793,7 +796,7 @@ function Toggle({ label, desc, on, onChange }: { label: string; desc?: string; o
                     height: 24,
                     borderRadius: 12,
                     background: on ? "var(--pr)" : "var(--bg-elevated)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid var(--border)",
                     position: "relative",
                     cursor: "pointer",
                     transition: "background 0.2s",
@@ -807,7 +810,7 @@ function Toggle({ label, desc, on, onChange }: { label: string; desc?: string; o
                     width: 18,
                     height: 18,
                     borderRadius: "50%",
-                    background: "#ffffff",
+                    background: "var(--on-accent)",
                     transition: "left 0.2s",
                 }} />
             </button>
@@ -817,9 +820,9 @@ function Toggle({ label, desc, on, onChange }: { label: string; desc?: string; o
 
 function Toast({ message, type, onClose }: { message: string; type: ToastType; onClose: () => void }) {
     const colors = {
-        success: { border: "#10B981", icon: "✓", iconColor: "#4ade80" },
-        error:   { border: "#ef4444", icon: "✗", iconColor: "#f87171" },
-        warning: { border: "#f59e0b", icon: "⚠", iconColor: "#fbbf24" },
+        success: { border: "var(--success)", icon: "✓", iconColor: "var(--success-t)" },
+        error:   { border: "var(--danger)", icon: "✗", iconColor: "var(--danger-t)" },
+        warning: { border: "var(--warning)", icon: "⚠", iconColor: "var(--warning-t)" },
     }[type];
 
     return (
@@ -855,8 +858,8 @@ function Toast({ message, type, onClose }: { message: string; type: ToastType; o
 
 function primaryBtnStyle(): React.CSSProperties {
     return {
-        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-        color: "var(--text-primary)",
+        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
+        color: "var(--on-accent)",
         border: "none",
         padding: "11px 20px",
         borderRadius: 8,
