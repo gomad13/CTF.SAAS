@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Reveal from "@/components/Reveal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
@@ -128,7 +129,7 @@ function JoinFlow() {
 
     if (phase === "error") {
         return <Shell><Title>Invitation refusée</Title>
-            <p style={{ ...msg, color: "#f87171" }}>{error}</p>
+            <p style={{ ...msg, color: "var(--danger)" }}>{error}</p>
             <Link href="/dashboard" style={primaryBtn}>Retour à mon espace</Link>
         </Shell>;
     }
@@ -146,6 +147,7 @@ function JoinFlow() {
 function Shell({ children }: { children: React.ReactNode }) {
     return (
         <div style={{ minHeight: "100svh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}>
+            <Reveal>
             <div style={{
                 width: "100%", maxWidth: 440, background: "var(--bg-card)",
                 border: "1px solid var(--border)", borderRadius: 14,
@@ -153,6 +155,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             }}>
                 {children}
             </div>
+            </Reveal>
         </div>
     );
 }
@@ -162,13 +165,13 @@ function Title({ children }: { children: React.ReactNode }) {
 }
 
 const msg: React.CSSProperties = {
-    fontSize: 14, lineHeight: 1.6, color: "var(--text-secondary, #94A3B8)", margin: "0 0 20px",
+    fontSize: 14, lineHeight: 1.6, color: "var(--text-secondary, var(--text-3))", margin: "0 0 20px",
 };
 
 const primaryBtn: React.CSSProperties = {
     display: "inline-flex", alignItems: "center", justifyContent: "center",
     width: "100%", minHeight: 44, padding: "12px 20px",
-    background: "linear-gradient(135deg, #3B82F6, #2563EB)", color: "#fff",
+    background: "linear-gradient(135deg, var(--accent), var(--accent-hover))", color: "var(--on-accent)",
     fontWeight: 600, fontSize: 14, borderRadius: 8, border: "none",
     textDecoration: "none", transition: "all 0.2s",
 };
