@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
     title: "Mentions légales — Sentys",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 export default function MentionsPage() {
     return (
         <article>
+            <Reveal>
             <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 32 }}>Mentions légales</h1>
 
             <h2>Éditeur</h2>
@@ -45,6 +47,7 @@ export default function MentionsPage() {
                 Pour toute question relative à la Plateforme :{" "}
                 <a href="mailto:contact@sentys.local">contact@sentys.local</a>.
             </p>
+            </Reveal>
         </article>
     );
 }
