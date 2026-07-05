@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
     title: "Conditions générales d'utilisation — Sentys",
@@ -10,8 +11,9 @@ const LAST_UPDATE = "27 avril 2026";
 export default function CguPage() {
     return (
         <article>
+            <Reveal>
             <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Conditions générales d&apos;utilisation</h1>
-            <p style={{ color: "var(--text-muted, #94A3B8)", marginBottom: 32, fontSize: 13 }}>
+            <p style={{ color: "var(--text-3)", marginBottom: 32, fontSize: 13 }}>
                 Dernière mise à jour : {LAST_UPDATE} — version bêta privée
             </p>
 
@@ -90,10 +92,11 @@ export default function CguPage() {
                 Les modifications substantielles seront notifiées aux utilisateurs.
             </p>
 
-            <p style={{ fontSize: 13, color: "var(--text-muted, #94A3B8)", marginTop: 32, fontStyle: "italic" }}>
+            <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 32, fontStyle: "italic" }}>
                 Document à valeur indicative — bêta privée. Une version V1 publique sera revue par un conseil juridique
                 avant le passage en commercialisation.
             </p>
+            </Reveal>
         </article>
     );
 }
