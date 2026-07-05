@@ -1,0 +1,32 @@
+"use client";
+
+// Route de TEST ISOLÉE — non branchée sur les parcours réels, données démo en dur.
+// Aucune BDD, aucun scoring réel, aucune auth. Charte tokens uniquement.
+
+import { useState } from "react";
+import { DEMO_FLASHCARDS } from "@/lib/flashcards-demo";
+import FlashcardsMenu from "@/components/flashcards/FlashcardsMenu";
+import RevisionMode from "@/components/flashcards/RevisionMode";
+import EpreuveMode from "@/components/flashcards/EpreuveMode";
+
+type Screen = "menu" | "revision" | "epreuve";
+
+export default function FlashcardsTestPage() {
+    const [screen, setScreen] = useState<Screen>("menu");
+    const backToMenu = () => setScreen("menu");
+
+    return (
+        <main className="min-h-screen bg-[var(--bg)] px-4 py-10 text-[var(--text)] sm:px-6">
+            <div className="mx-auto w-full max-w-3xl">
+                {screen === "menu" && (
+                    <FlashcardsMenu total={DEMO_FLASHCARDS.length} onPick={setScreen} />
+                )}
+                {screen === "revision" && <RevisionMode cards={DEMO_FLASHCARDS} onExit={backToMenu} />}
+                {/* key force le remount → chrono/score réinitialisés à chaque nouvelle épreuve */}
+                {screen === "epreuve" && (
+                    <EpreuveMode key="epreuve-run" cards={DEMO_FLASHCARDS} onExit={backToMenu} />
+                )}
+            </div>
+        </main>
+    );
+}
