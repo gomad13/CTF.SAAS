@@ -14,17 +14,22 @@ export type MemoryPair = {
 
 // Libellés volontairement courts (lisibilité en grille 6×2).
 export const MEMORY_POOL: MemoryPair[] = [
-    // Risque ↔ Contre-mesure
-    { id: "mdp", kind: "risque-parade", left: "Mot de passe faible", right: "Gestionnaire + 2FA" },
+    // Risque ↔ Contre-mesure — associations UNIVOQUES (chaque risque appelle une seule parade,
+    // et réciproquement ; pas deux parades interchangeables ni deux risques vers la même parade).
     { id: "phishing-rp", kind: "risque-parade", left: "Email de phishing", right: "Ne pas cliquer, signaler" },
-    { id: "wifi", kind: "risque-parade", left: "Wi-Fi public ouvert", right: "Utiliser un VPN" },
-    { id: "ransomware", kind: "risque-parade", left: "Ransomware", right: "Sauvegardes hors-ligne" },
+    { id: "usb", kind: "risque-parade", left: "Clé USB inconnue", right: "Ne pas la brancher" },
+    { id: "virement", kind: "risque-parade", left: "Fraude au virement", right: "Valider par appel interne" },
     { id: "vol", kind: "risque-parade", left: "Vol d'appareil", right: "Chiffrement du disque" },
     { id: "compte", kind: "risque-parade", left: "Compte compromis", right: "Activer la 2FA" },
-    { id: "maj", kind: "risque-parade", left: "Logiciel obsolète", right: "Mises à jour régulières" },
-    { id: "usb", kind: "risque-parade", left: "Clé USB inconnue", right: "Ne pas la brancher" },
-    { id: "president", kind: "risque-parade", left: "Fraude au virement", right: "Valider par appel interne" },
-    { id: "fuite", kind: "risque-parade", left: "Fuite de données", right: "Accès au strict besoin" },
+    { id: "mdp", kind: "risque-parade", left: "Mot de passe faible", right: "Gestionnaire de mots de passe" },
+    { id: "wifi", kind: "risque-parade", left: "Wi-Fi public ouvert", right: "Utiliser un VPN" },
+    { id: "ransomware", kind: "risque-parade", left: "Rançongiciel", right: "Sauvegardes régulières" },
+    { id: "ecran", kind: "risque-parade", left: "Écran non verrouillé", right: "Verrouillage automatique" },
+    { id: "pj", kind: "risque-parade", left: "Pièce jointe suspecte", right: "Analyser avant d'ouvrir" },
+    { id: "maj", kind: "risque-parade", left: "Logiciel obsolète", right: "Installer les mises à jour" },
+    { id: "http", kind: "risque-parade", left: "Site en HTTP", right: "Vérifier le HTTPS" },
+    { id: "support", kind: "risque-parade", left: "Faux support technique", right: "Raccrocher, ne rien installer" },
+    { id: "bureau", kind: "risque-parade", left: "Documents sensibles visibles", right: "Politique du bureau propre" },
     // Terme ↔ Définition
     { id: "phishing-td", kind: "terme-def", left: "Phishing", right: "Usurpation par email piégé" },
     { id: "2fa", kind: "terme-def", left: "2FA", right: "Double preuve d'identité" },

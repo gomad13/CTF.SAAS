@@ -195,3 +195,38 @@ Flip 3D, animations JUSTE/FAUX, re-retournement, `useSessionTimer`, compteur de 
 
 ### Note utile pour les autres modes
 L'avertissement « Fast Refresh full reload » n'est pas un bug applicatif : c'est le comportement normal de Next quand un module modifié exporte autre chose qu'un composant (hook, constante) — le hot-reload ne peut pas préserver l'état et recharge. Sur une longue session d'édition, un redémarrage du `npm run dev` remet tout au propre.
+
+---
+
+# PASSE 2d — CONTENU RISQUE/PARADE UNIVOQUE
+
+> Périmètre : uniquement le pool Risque/Parade (`flashcards-memory-demo.ts`, données). Aucun autre fichier, aucune logique modifiée. Backup `backups/flashcards-memory-content-20260705/`.
+
+## Problème
+Certaines paires n'étaient pas devinables par logique : l'association n'était pas univoque. Ex. **« Fuite de données » ↔ « Accès au strict besoin »** — cette parade répond à plusieurs risques et ce risque appelle plusieurs parades → le joueur devine au lieu de raisonner. Autre ambiguïté : « Gestionnaire + 2FA » réutilisait « 2FA », déjà la parade de « Compte compromis ».
+
+## Correction
+Pool Risque/Parade révisé en **14 paires univoques** — chaque risque appelle **une seule** parade évidente, sans croisement possible dans le pool (donc dans n'importe quel tirage de 6) :
+1. Email de phishing ↔ Ne pas cliquer, signaler
+2. Clé USB inconnue ↔ Ne pas la brancher
+3. Fraude au virement ↔ Valider par appel interne
+4. Vol d'appareil ↔ Chiffrement du disque
+5. Compte compromis ↔ Activer la 2FA
+6. Mot de passe faible ↔ Gestionnaire de mots de passe
+7. Wi-Fi public ouvert ↔ Utiliser un VPN
+8. Rançongiciel ↔ Sauvegardes régulières
+9. Écran non verrouillé ↔ Verrouillage automatique
+10. Pièce jointe suspecte ↔ Analyser avant d'ouvrir
+11. Logiciel obsolète ↔ Installer les mises à jour
+12. Site en HTTP ↔ Vérifier le HTTPS
+13. Faux support technique ↔ Raccrocher, ne rien installer
+14. Documents sensibles visibles ↔ Politique du bureau propre
+
+- **Retirées** : « Fuite de données / Accès au strict besoin » (ambiguë). « Gestionnaire + 2FA » → « Gestionnaire de mots de passe » (retrait du 2FA en double). « Ransomware/Sauvegardes hors-ligne » → « Rançongiciel/Sauvegardes régulières ».
+- **Anti-croisement** : « Faux support » utilise « Raccrocher, ne rien installer » (et non un rappel téléphonique) pour ne pas croiser avec « Fraude au virement ↔ Valider par appel interne ».
+- Pool ≥ 12 paires (**14**) → aléatoire préservé (6 tirées par partie). Variante Terme/Définition inchangée (11 paires).
+
+## Vérifications
+- [x] `npm run build` (local) → **✓ Compiled successfully**. Route `/flashcards-test` HTTP 200.
+- [x] Aucune couleur touchée (fichier de données) ; 0 hex ; charte respectée.
+- [x] Reste du mode Memory inchangé (12 cartes, 6×2, flip, juste/faux, timer, coups, récap). Révision/Épreuve non touchés.
