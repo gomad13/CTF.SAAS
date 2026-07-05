@@ -14,11 +14,12 @@ import {
 import type { RiskScoreHistoryPoint } from "@/lib/types/riskScore";
 
 // Recharts est déjà installé dans le projet (cf. package.json). Pas de
-// nouvelle dépendance ajoutée. Couleurs alignées sur la palette CLAUDE.md.
-
-const COLOR_PRIMARY = "#3B82F6";
-const COLOR_GRID = "#E2E8F0";
-const COLOR_TEXT_MUTED = "#64748B";
+// nouvelle dépendance ajoutée. Ces littéraux hex sont passés en attributs SVG
+// (stroke/fill/tick) de recharts qui NE résolvent PAS var(--x) : on garde donc
+// des hex reflétant les tokens de la charte (accent vert cyber, grille/texte neutres).
+const COLOR_PRIMARY = "#22C55E"; // accent vert cyber (ex-#3B82F6 bleu, interdit par la charte)
+const COLOR_GRID = "#E2E8F0"; // grille SVG neutre (ne suit pas le thème)
+const COLOR_TEXT_MUTED = "#64748B"; // texte des axes SVG (ne suit pas le thème)
 
 type Props = {
     data: RiskScoreHistoryPoint[] | undefined;
@@ -61,7 +62,7 @@ function CustomTooltip({ active, payload }: RechartsTooltipProps) {
     const point = inner as ChartPoint;
     if (typeof point.score !== "number" || typeof point.rawDate !== "string") return null;
     return (
-        <div className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 shadow-sm">
+        <div className="rounded-lg border border-border bg-surface px-3 py-2 shadow-sm">
             <p className="text-xs font-medium text-fg-muted">{formatLong(point.rawDate)}</p>
             <p className="mt-1 text-sm font-semibold text-fg-heading">Score : {point.score} / 100</p>
         </div>
@@ -85,7 +86,7 @@ function RiskScoreEvolutionChartImpl({ data, isLoading, isError }: Props) {
     return (
         <section
             aria-label="Évolution du Cyber Resilience Index"
-            className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
+            className="rounded-xl border border-border bg-surface p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
         >
             <header className="mb-4 flex items-start justify-between">
                 <div>
@@ -147,12 +148,12 @@ function RiskScoreEvolutionChartImpl({ data, isLoading, isError }: Props) {
 }
 
 function ChartSkeleton() {
-    return <div className="h-64 w-full animate-pulse rounded-lg bg-[#F1F5F9]" />;
+    return <div className="h-64 w-full animate-pulse rounded-lg bg-surface-2" />;
 }
 
 function ChartEmpty({ label }: { label: string }) {
     return (
-        <div className="flex h-64 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] text-center text-fg-muted">
+        <div className="flex h-64 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-center text-fg-muted">
             <p className="px-6 text-sm">{label}</p>
         </div>
     );

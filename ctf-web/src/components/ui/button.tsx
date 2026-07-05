@@ -16,12 +16,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-sentys text-white hover:bg-sentys-dark",
+        default: "bg-sentys text-[var(--on-accent)] hover:bg-sentys-dark",
         accent: "bg-sentys-accent text-[var(--surface-2)] hover:bg-sentys",
         outline: "border border-sentys text-sentys bg-transparent hover:bg-sentys/10",
         ghost: "text-sentys hover:bg-sentys/10",
-        secondary: "bg-[#F1F5F9] text-fg-body hover:bg-[#E2E8F0]",
-        destructive: "bg-danger text-white hover:bg-[#DC2626]",
+        secondary: "bg-surface-2 text-fg-body hover:bg-[var(--border)]",
+        destructive: "bg-danger text-white hover:bg-danger/90",
         link: "text-sentys underline-offset-4 hover:underline",
       },
       size: {

@@ -4,7 +4,10 @@ import { Users, Crown } from "lucide-react";
 import type { TeamLeaderboardEntry } from "./types";
 import { renderTeamIcon } from "@/components/teams/teamIcons";
 
+// Couleurs de médailles (or / argent / bronze) : couleurs IDENTITAIRES du classement,
+// conservées en hex (elles ne suivent pas le thème). Texte foncé fixe posé dessus.
 const MEDAL = ["#FACC15", "#CBD5E1", "#D97706"]; // or, argent, bronze
+const MEDAL_TEXT = "#1E293B"; // texte foncé lisible sur une médaille claire (fixe)
 
 export default function TeamLeaderboard({
     teams,
@@ -35,11 +38,11 @@ export default function TeamLeaderboard({
         <div className="flex flex-col gap-2.5">
             {teams.map(t => {
                 const isPodium = t.rank <= 3;
-                const accent = t.color || "#3B82F6";
+                const accent = t.color || "#22C55E";
                 return (
                     <div
                         key={t.teamId}
-                        className="flex items-center gap-3 rounded-xl border bg-surface p-3.5 shadow-sm transition-colors"
+                        className="flex items-center gap-3 rounded-xl border bg-surface p-3.5 shadow-sm transition-colors duration-200"
                         style={{
                             borderColor: t.isCurrentUserTeam ? accent : "var(--border)",
                             background: t.isCurrentUserTeam ? `${accent}14` : "var(--bg-surface)",
@@ -51,7 +54,7 @@ export default function TeamLeaderboard({
                             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold"
                             style={{
                                 background: isPodium ? MEDAL[t.rank - 1] : "var(--bg-muted)",
-                                color: isPodium ? "#1E293B" : "var(--fg-body)",
+                                color: isPodium ? MEDAL_TEXT : "var(--fg-body)",
                             }}
                         >
                             {isPodium ? <Crown size={16} /> : t.rank}

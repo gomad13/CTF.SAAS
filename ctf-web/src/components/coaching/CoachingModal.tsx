@@ -54,7 +54,7 @@ function CoachingModalImpl({ attemptId, onClose }: Props) {
                 style={{
                     background: C_BG,
                     border: `1px solid ${C_PRIMARY_DARK}`,
-                    color: "#FFFFFF",
+                    color: "var(--text)",
                     animation: "coachingFadeIn 220ms ease-out",
                 }}
             >
@@ -63,7 +63,7 @@ function CoachingModalImpl({ attemptId, onClose }: Props) {
                     onClick={onClose}
                     aria-label="Fermer le coaching"
                     className="absolute right-3 top-3 rounded p-2 transition-colors duration-200 hover:bg-surface/10"
-                    style={{ color: "rgba(255,255,255,0.75)" }}
+                    style={{ color: "var(--text-2)" }}
                 >
                     <X size={18} strokeWidth={1.75} />
                 </button>
@@ -71,7 +71,7 @@ function CoachingModalImpl({ attemptId, onClose }: Props) {
                 <header className="mb-5 flex items-center gap-3">
                     <span
                         className="flex h-9 w-9 items-center justify-center rounded-full"
-                        style={{ background: `${C_ACCENT}33`, color: C_ACCENT }}
+                        style={{ background: "color-mix(in srgb, var(--accent) 20%, transparent)", color: C_ACCENT }}
                     >
                         <Sparkles size={18} strokeWidth={1.75} />
                     </span>
@@ -121,10 +121,10 @@ function LoadingState() {
     return (
         <div className="flex h-[200px] flex-col items-center justify-center gap-3 text-center">
             <Loader2 size={32} strokeWidth={1.5} className="animate-spin" style={{ color: C_PRIMARY }} />
-            <p className="text-base font-medium" style={{ color: "rgba(255,255,255,0.92)" }}>
+            <p className="text-base font-medium" style={{ color: "var(--text)" }}>
                 Analyse de ton parcours en cours...
             </p>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <p className="text-sm" style={{ color: "var(--text-3)" }}>
                 Le coaching peut prendre quelques secondes — c&apos;est généré sur ta machine.
             </p>
         </div>
@@ -134,8 +134,8 @@ function LoadingState() {
 function ErrorState({ message }: { message: string }) {
     return (
         <div className="flex h-[200px] flex-col items-center justify-center gap-2 text-center">
-            <p className="text-base font-medium text-white">Coaching temporairement indisponible</p>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{message}</p>
+            <p className="text-base font-medium text-fg-heading">Coaching temporairement indisponible</p>
+            <p className="text-sm" style={{ color: "var(--text-3)" }}>{message}</p>
         </div>
     );
 }
@@ -144,13 +144,13 @@ function CoachingContent({ content, status }: { content: string; status: string 
     return (
         <div>
             {status === "Fallback" && (
-                <p className="mb-3 text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <p className="mb-3 text-xs" style={{ color: "var(--text-3)" }}>
                     Coaching basé sur un modèle générique — l&apos;IA locale était indisponible.
                 </p>
             )}
             <div
                 className="whitespace-pre-line text-base leading-relaxed"
-                style={{ color: "rgba(255,255,255,0.92)" }}
+                style={{ color: "var(--text)" }}
             >
                 {content}
             </div>

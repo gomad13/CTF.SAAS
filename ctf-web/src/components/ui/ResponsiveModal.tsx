@@ -48,14 +48,14 @@ export function ResponsiveModal({
                         justifyContent: "space-between",
                         gap: 12,
                         padding: "18px 20px",
-                        borderBottom: "1px solid #E2E8F0",
+                        borderBottom: "1px solid var(--border)",
                         position: "sticky",
                         top: 0,
-                        background: "#fff",
+                        background: "var(--surface)",
                         zIndex: 1,
                     }}
                 >
-                    <div style={{ fontSize: 16, fontWeight: 700, color: "#1E293B", minWidth: 0 }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", minWidth: 0 }}>
                         {title}
                     </div>
                     <button
@@ -70,7 +70,7 @@ export function ResponsiveModal({
                             minWidth: 40,
                             border: "none",
                             background: "transparent",
-                            color: "#64748B",
+                            color: "var(--text-2)",
                             borderRadius: 8,
                             cursor: "pointer",
                             flexShrink: 0,
@@ -89,11 +89,11 @@ export function ResponsiveModal({
                             justifyContent: "flex-end",
                             gap: 8,
                             padding: "14px 20px",
-                            borderTop: "1px solid #E2E8F0",
+                            borderTop: "1px solid var(--border)",
                             flexWrap: "wrap",
                             position: "sticky",
                             bottom: 0,
-                            background: "#fff",
+                            background: "var(--surface)",
                         }}
                     >
                         {footer}

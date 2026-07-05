@@ -90,10 +90,10 @@ export default function FreeTextChallenge({
         : 0;
 
     function scoreColor(score: number) {
-        if (score >= 90) return "#4ade80";
-        if (score >= 70) return "#a3e635";
-        if (score >= 50) return "#fbbf24";
-        return "#f87171";
+        if (score >= 90) return "var(--success)";
+        if (score >= 70) return "var(--success-t)";
+        if (score >= 50) return "var(--warning)";
+        return "var(--danger-t)";
     }
     function appreciationLabel(score: number) {
         if (score >= 90) return "Excellent";
@@ -144,10 +144,10 @@ export default function FreeTextChallenge({
                     style={{
                         width: "100%",
                         padding: 14,
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                         border: "none",
                         borderRadius: 10,
-                        color: "#ffffff",
+                        color: "var(--on-accent)",
                         fontSize: 14,
                         fontWeight: 700,
                         cursor: "pointer",
@@ -184,13 +184,13 @@ export default function FreeTextChallenge({
 
                 {!result.aiAvailable && (
                     <div style={{
-                        background: "rgba(239,68,68,0.08)",
-                        border: "1px solid rgba(239,68,68,0.2)",
+                        background: "var(--danger-subtle)",
+                        border: "1px solid rgba(239,68,68,0.25)",
                         borderRadius: 8,
                         padding: "10px 14px",
                         marginBottom: 16,
                         fontSize: 12,
-                        color: "#f87171",
+                        color: "var(--danger-t)",
                     }}>
                         ⚠️ Évaluation simplifiée — Ollama hors ligne. Lancez `ollama serve` pour une analyse complète.
                     </div>
@@ -201,10 +201,10 @@ export default function FreeTextChallenge({
                     style={{
                         width: "100%",
                         padding: 14,
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
                         border: "none",
                         borderRadius: 10,
-                        color: "#ffffff",
+                        color: "var(--on-accent)",
                         fontSize: 14,
                         fontWeight: 700,
                         cursor: "pointer",
@@ -223,7 +223,7 @@ export default function FreeTextChallenge({
                 <div style={{
                     width: 56, height: 56,
                     border: "3px solid var(--bg-elevated)",
-                    borderTop: "3px solid #3B82F6",
+                    borderTop: "3px solid var(--accent)",
                     borderRadius: "50%",
                     animation: "spin 1s linear infinite",
                     margin: "0 auto 24px",
@@ -267,7 +267,7 @@ export default function FreeTextChallenge({
             <div style={{
                 background: "var(--bg-card)",
                 border: "1px solid var(--border)",
-                borderLeft: "3px solid #3B82F6",
+                borderLeft: "3px solid var(--accent)",
                 borderRadius: "0 10px 10px 0",
                 padding: "16px 20px",
                 marginBottom: 20,
@@ -312,8 +312,8 @@ export default function FreeTextChallenge({
                         boxSizing: "border-box",
                     }}
                     onFocus={e => {
-                        e.currentTarget.style.borderColor = "rgba(59,130,246,0.5)";
-                        e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.1)";
+                        e.currentTarget.style.borderColor = "var(--accent)";
+                        e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-subtle)";
                     }}
                     onBlur={e => {
                         e.currentTarget.style.borderColor = "var(--border)";
@@ -325,7 +325,7 @@ export default function FreeTextChallenge({
                     bottom: 10,
                     right: 12,
                     fontSize: 11,
-                    color: charCount >= minChars ? "#4ade80" : "var(--text-muted)",
+                    color: charCount >= minChars ? "var(--success-t)" : "var(--text-muted)",
                     fontFamily: "'JetBrains Mono', monospace",
                 }}>
                     {charCount} / {minChars} min
@@ -335,7 +335,7 @@ export default function FreeTextChallenge({
             <div style={{ height: 3, background: "var(--bg-elevated)", borderRadius: 2, margin: "8px 0 20px", overflow: "hidden" }}>
                 <div style={{
                     height: "100%",
-                    background: charCount >= minChars ? "#10B981" : "var(--pr)",
+                    background: charCount >= minChars ? "var(--success)" : "var(--pr)",
                     borderRadius: 2,
                     width: `${Math.min(charCount / minChars * 100, 100)}%`,
                     transition: "width 0.3s, background 0.3s",
@@ -349,16 +349,16 @@ export default function FreeTextChallenge({
                     width: "100%",
                     padding: 14,
                     background: canSubmit
-                        ? "linear-gradient(135deg, #3B82F6, #2563EB)"
+                        ? "linear-gradient(135deg, var(--accent), var(--accent-hover))"
                         : "var(--bg-elevated)",
                     border: "none",
                     borderRadius: 10,
-                    color: canSubmit ? "#ffffff" : "var(--text-muted)",
+                    color: canSubmit ? "var(--on-accent)" : "var(--text-muted)",
                     fontSize: 14,
                     fontWeight: 700,
                     cursor: canSubmit ? "pointer" : "not-allowed",
                     transition: "all 0.2s",
-                    boxShadow: canSubmit ? "0 4px 16px rgba(59,130,246,0.3)" : "none",
+                    boxShadow: canSubmit ? "0 4px 16px var(--accent-border)" : "none",
                 }}
             >
                 {charCount < minChars
@@ -371,8 +371,8 @@ export default function FreeTextChallenge({
 
 function PointsBlock({ title, items, color }: { title: string; items: string[]; color: "success" | "warning" }) {
     const colors = color === "success"
-        ? { bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.25)", left: "#10B981", title: "#4ade80", text: "#86efac" }
-        : { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)", left: "#f59e0b", title: "#fbbf24", text: "#fcd34d" };
+        ? { bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.25)", left: "var(--success)", title: "var(--success-t)", text: "var(--success-t)" }
+        : { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)", left: "var(--warning)", title: "var(--warning-t)", text: "var(--warning-t)" };
     return (
         <div style={{
             background: colors.bg,
@@ -395,9 +395,9 @@ function PointsBlock({ title, items, color }: { title: string; items: string[]; 
 function ConseilBlock({ text }: { text: string }) {
     return (
         <div style={{
-            background: "rgba(59,130,246,0.08)",
-            border: "1px solid rgba(59,130,246,0.2)",
-            borderLeft: "3px solid #3B82F6",
+            background: "var(--accent-subtle)",
+            border: "1px solid var(--accent-border)",
+            borderLeft: "3px solid var(--accent)",
             borderRadius: "0 8px 8px 0",
             padding: "12px 16px",
             marginBottom: 20,
@@ -412,10 +412,10 @@ function ConseilBlock({ text }: { text: string }) {
 
 function ResultBlock({ index, result }: { index: number; result: QuestionResult }) {
     function scoreColor(score: number) {
-        if (score >= 90) return "#4ade80";
-        if (score >= 70) return "#a3e635";
-        if (score >= 50) return "#fbbf24";
-        return "#f87171";
+        if (score >= 90) return "var(--success)";
+        if (score >= 70) return "var(--success-t)";
+        if (score >= 50) return "var(--warning)";
+        return "var(--danger-t)";
     }
     return (
         <div style={{

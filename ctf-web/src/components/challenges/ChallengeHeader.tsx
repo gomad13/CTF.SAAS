@@ -15,9 +15,9 @@ const DIFF_LABELS: Record<number, string> = {
 /**
  * En-tête de la page challenge : badges (difficulté, points, interactif) + titre.
  *
- * Corrige le bug de contraste : le titre était en `var(--text-primary)` (#1E293B,
- * gris foncé) sur le fond sombre du dashboard (#0A0A0B) → quasi invisible.
- * Il est désormais en blanc (`--text-on-dark`), grand format et bold.
+ * Corrige le bug de contraste : le titre était en gris foncé sur le fond sombre
+ * du dashboard → quasi invisible. Il est désormais en `--text-on-dark`, grand
+ * format et bold.
  */
 export default function ChallengeHeader({ challenge: c }: { challenge: ChallengeItem }) {
     const isMobile = useIsMobile();
@@ -29,7 +29,7 @@ export default function ChallengeHeader({ challenge: c }: { challenge: Challenge
             label,
             bg: isFacile ? "rgba(34,197,94,0.12)" : isMoyen ? "rgba(234,179,8,0.12)" : "rgba(239,68,68,0.12)",
             border: isFacile ? "rgba(34,197,94,0.35)" : isMoyen ? "rgba(234,179,8,0.35)" : "rgba(239,68,68,0.35)",
-            color: isFacile ? "#4ade80" : isMoyen ? "#facc15" : "#f87171",
+            color: isFacile ? "var(--success-t)" : isMoyen ? "var(--warning-t)" : "var(--danger-t)",
         };
     }, [c.difficulty]);
 
@@ -52,9 +52,9 @@ export default function ChallengeHeader({ challenge: c }: { challenge: Challenge
                     fontSize: 11,
                     padding: "3px 10px",
                     borderRadius: 5,
-                    background: "rgba(59,130,246,0.12)",
-                    border: "1px solid rgba(59,130,246,0.35)",
-                    color: "#60A5FA",
+                    background: "var(--accent-subtle)",
+                    border: "1px solid var(--accent-border)",
+                    color: "var(--pr-t)",
                     fontFamily: "'JetBrains Mono', monospace",
                     fontWeight: 600,
                 }}>
@@ -64,8 +64,8 @@ export default function ChallengeHeader({ challenge: c }: { challenge: Challenge
                     fontSize: 11,
                     padding: "3px 10px",
                     borderRadius: 5,
-                    background: "rgba(148,163,184,0.12)",
-                    border: "1px solid rgba(148,163,184,0.30)",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
                     color: "var(--text-on-dark-muted)",
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
@@ -75,7 +75,7 @@ export default function ChallengeHeader({ challenge: c }: { challenge: Challenge
                 </span>
             </div>
 
-            {/* Titre — règle de contraste : blanc grand format sur fond sombre */}
+            {/* Titre — règle de contraste : clair grand format sur fond sombre */}
             <h1 style={{
                 fontSize: isMobile ? 22 : 32,
                 fontWeight: 700,

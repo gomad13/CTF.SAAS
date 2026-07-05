@@ -32,7 +32,7 @@ export default function TeamEditModal({
 }) {
     const [name, setName] = useState(team.name);
     const [description, setDescription] = useState(team.description ?? "");
-    const [color, setColor] = useState(team.color ?? "#3B82F6");
+    const [color, setColor] = useState(team.color ?? "#22C55E");
     const [icon, setIcon] = useState(team.icon ?? "Users");
     const [maxMembers, setMaxMembers] = useState<string>(team.maxMembers != null ? String(team.maxMembers) : "");
     const [isOpen, setIsOpen] = useState<boolean>(team.isOpen ?? false);
@@ -68,7 +68,7 @@ export default function TeamEditModal({
             footer={
                 <>
                     <button type="button" onClick={onClose}
-                        className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
+                        className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2">
                         Annuler
                     </button>
                     <button type="button" disabled={!canSave} onClick={() => saveM.mutate()}
@@ -81,14 +81,14 @@ export default function TeamEditModal({
                 <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Nom de l&apos;équipe</label>
                     <input value={name} onChange={e => setName(e.target.value)} maxLength={120}
-                        className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
+                        className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
                         placeholder="Nom de l'équipe" />
                 </div>
 
                 <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Description</label>
                     <input value={description} onChange={e => setDescription(e.target.value)} maxLength={500}
-                        className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
+                        className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
                         placeholder="Description (optionnel)" />
                 </div>
 
@@ -96,7 +96,7 @@ export default function TeamEditModal({
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Nombre max de membres</label>
                         <input type="number" min={1} value={maxMembers} onChange={e => setMaxMembers(e.target.value)}
-                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
+                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading outline-none focus:border-primary"
                             placeholder="Illimité" />
                         <span className="text-[11px] text-fg-muted">
                             {currentMembers} membre{currentMembers > 1 ? "s" : ""} actuellement · vide = illimité
@@ -105,7 +105,7 @@ export default function TeamEditModal({
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold uppercase tracking-wider text-fg-body">Couleur</label>
                         <input type="color" value={color} onChange={e => setColor(e.target.value)}
-                            className="h-[38px] w-16 cursor-pointer rounded-lg border border-[#E2E8F0] bg-surface p-1" />
+                            className="h-[38px] w-16 cursor-pointer rounded-lg border border-border bg-surface p-1" />
                     </div>
                 </div>
 
@@ -115,7 +115,7 @@ export default function TeamEditModal({
                         {TEAM_ICON_NAMES.map(k => (
                             <button key={k} type="button" onClick={() => setIcon(k)} title={k}
                                 className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors duration-200 ${
-                                    icon === k ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:border-[#CBD5E1]"
+                                    icon === k ? "border-primary bg-primary text-white" : "border-border bg-surface text-fg-body hover:border-fg-muted"
                                 }`}>
                                 {renderTeamIcon(k, 16)}
                             </button>
@@ -128,13 +128,13 @@ export default function TeamEditModal({
                     <div className="flex gap-2">
                         <button type="button" onClick={() => setIsOpen(false)}
                             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-                                !isOpen ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
+                                !isOpen ? "border-primary bg-primary text-white" : "border-border bg-surface text-fg-body hover:bg-surface-2"
                             }`}>
                             🔒 Fermée — affectation par l&apos;admin
                         </button>
                         <button type="button" onClick={() => setIsOpen(true)}
                             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-                                isOpen ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
+                                isOpen ? "border-primary bg-primary text-white" : "border-border bg-surface text-fg-body hover:bg-surface-2"
                             }`}>
                             🔓 Ouverte — les membres peuvent la rejoindre
                         </button>
@@ -142,12 +142,12 @@ export default function TeamEditModal({
                 </div>
 
                 {maxBelowCurrent && (
-                    <p className="text-xs text-[#B91C1C]">
+                    <p className="text-xs text-danger">
                         Le nombre max ({maxNum}) ne peut pas être inférieur au nombre actuel de membres ({currentMembers}).
                     </p>
                 )}
-                {maxInvalid && <p className="text-xs text-[#B91C1C]">Le nombre max doit être un entier ≥ 1.</p>}
-                {error && <p className="text-xs text-[#B91C1C]">{error}</p>}
+                {maxInvalid && <p className="text-xs text-danger">Le nombre max doit être un entier ≥ 1.</p>}
+                {error && <p className="text-xs text-danger">{error}</p>}
             </div>
         </ResponsiveModal>
     );

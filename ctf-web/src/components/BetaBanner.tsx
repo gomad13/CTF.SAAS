@@ -29,8 +29,8 @@ export default function BetaBanner() {
             className="beta-banner"
             style={{
                 width: "100%",
-                background: "linear-gradient(90deg, #1E3A8A 0%, #2563EB 100%)",
-                color: "#FFFFFF",
+                background: "linear-gradient(90deg, var(--accent-hover) 0%, var(--accent) 100%)",
+                color: "var(--on-accent)",
                 display: "flex",
                 flexWrap: "wrap",
                 alignItems: "center",
@@ -47,7 +47,7 @@ export default function BetaBanner() {
                 Version <strong>bêta privée</strong> — vos retours nous aident à améliorer la plateforme.{" "}
                 <a
                     href="/feedback"
-                    style={{ color: "#FFFFFF", textDecoration: "underline", fontWeight: 600 }}
+                    style={{ color: "var(--on-accent)", textDecoration: "underline", fontWeight: 600 }}
                 >
                     Envoyer un feedback
                 </a>
@@ -63,7 +63,7 @@ export default function BetaBanner() {
                     transform: "translateY(-50%)",
                     background: "transparent",
                     border: "none",
-                    color: "#FFFFFF",
+                    color: "var(--on-accent)",
                     cursor: "pointer",
                     fontSize: 16,
                     lineHeight: 1,

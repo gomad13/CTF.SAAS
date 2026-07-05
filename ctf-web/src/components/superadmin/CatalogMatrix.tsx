@@ -23,7 +23,7 @@ type MatrixData = {
 };
 
 const card: React.CSSProperties = {
-    background: "#0d0000",
+    background: "var(--surface)",
     border: "1px solid rgba(239,68,68,0.15)",
     borderRadius: 8,
     padding: 20,
@@ -31,19 +31,19 @@ const card: React.CSSProperties = {
 
 const btnGhost: React.CSSProperties = {
     padding: "6px 12px", background: "transparent",
-    color: "#94A3B8", border: "1px solid rgba(239,68,68,0.25)",
+    color: "var(--text-3)", border: "1px solid rgba(239,68,68,0.25)",
     borderRadius: 6, fontSize: 12, cursor: "pointer", transition: "all 200ms"
 };
 
 const btnPrimary: React.CSSProperties = {
-    padding: "8px 14px", background: "#ef4444",
-    color: "#fff", border: "none",
+    padding: "8px 14px", background: "var(--danger)",
+    color: "white", border: "none",
     borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "background 200ms"
 };
 
 const chip: React.CSSProperties = {
     padding: "4px 10px", borderRadius: 999, fontSize: 11,
-    background: "rgba(239,68,68,0.08)", color: "#f87171",
+    background: "rgba(239,68,68,0.08)", color: "var(--danger-t)",
     border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer",
     fontFamily: "'JetBrains Mono', monospace"
 };
@@ -222,12 +222,12 @@ export default function CatalogMatrix() {
     };
 
     return (
-        <div style={{ padding: "var(--page-x)", color: "#94A3B8" }}>
+        <div style={{ padding: "var(--page-x)", color: "var(--text-3)" }}>
             <div style={{ marginBottom: 18 }}>
-                <h2 style={{ color: "#f87171", fontSize: 22, margin: 0, marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+                <h2 style={{ color: "var(--danger-t)", fontSize: 22, margin: 0, marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
                     ▸ Matrice d'attribution catalogue
                 </h2>
-                <div style={{ fontSize: 13, color: "#94A3B8" }}>
+                <div style={{ fontSize: 13, color: "var(--text-3)" }}>
                     Tenants (lignes) × parcours (colonnes). Toggle par cellule, Enregistrer envoie le diff en une fois.
                 </div>
             </div>
@@ -239,9 +239,9 @@ export default function CatalogMatrix() {
                 <button style={chip} onClick={presetResetDemo}>[Reset Demo]</button>
                 <div style={{ flex: 1 }} />
                 <input placeholder="Recherche tenant/parcours" value={search} onChange={e => setSearch(e.target.value)}
-                    style={{ padding: "6px 12px", background: "#0d0000", color: "#94A3B8", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 12 }} />
+                    style={{ padding: "6px 12px", background: "var(--surface)", color: "var(--text-3)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 12 }} />
                 <select value={filterSector} onChange={e => setFilterSector(e.target.value)}
-                    style={{ padding: "6px 12px", background: "#0d0000", color: "#94A3B8", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 12 }}>
+                    style={{ padding: "6px 12px", background: "var(--surface)", color: "var(--text-3)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 12 }}>
                     <option value="">Tous secteurs</option>
                     <option value="sante">Santé</option>
                     <option value="cyber-general">Cyber</option>
@@ -253,12 +253,12 @@ export default function CatalogMatrix() {
             {/* Actions toolbar */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
                 {dirtyCount > 0 && (
-                    <span style={{ fontSize: 12, color: "#F59E0B" }}>
+                    <span style={{ fontSize: 12, color: "var(--warning)" }}>
                         {dirtyCount} modification{dirtyCount > 1 ? "s" : ""} en attente
                     </span>
                 )}
                 <div style={{ flex: 1 }} />
-                {msg && <span style={{ fontSize: 12, color: msg.startsWith("✓") ? "#34d399" : "#F87171" }}>{msg}</span>}
+                {msg && <span style={{ fontSize: 12, color: msg.startsWith("✓") ? "var(--success-t)" : "var(--danger-t)" }}>{msg}</span>}
                 <button
                     disabled={dirtyCount === 0 || saving}
                     onClick={save}
@@ -274,9 +274,9 @@ export default function CatalogMatrix() {
                         <thead>
                             <tr>
                                 <th style={{
-                                    position: "sticky", left: 0, background: "#0d0000",
+                                    position: "sticky", left: 0, background: "var(--surface)",
                                     padding: "10px 14px", textAlign: "left", borderBottom: "1px solid rgba(239,68,68,0.15)",
-                                    color: "#94A3B8", textTransform: "uppercase", fontSize: 10, letterSpacing: "0.08em",
+                                    color: "var(--text-3)", textTransform: "uppercase", fontSize: 10, letterSpacing: "0.08em",
                                     minWidth: 180
                                 }}>Tenant</th>
                                 {filtered.paths.map(p => (
@@ -285,7 +285,7 @@ export default function CatalogMatrix() {
                                         onContextMenu={e => { e.preventDefault(); if (confirm(`Révoquer "${p.title}" de TOUS les tenants ?`)) bulkRevokeColumn(p.id); }}
                                         style={{
                                             padding: "10px 8px", borderBottom: "1px solid rgba(239,68,68,0.15)",
-                                            color: "#f87171", fontSize: 10, writingMode: "vertical-rl",
+                                            color: "var(--danger-t)", fontSize: 10, writingMode: "vertical-rl",
                                             transform: "rotate(180deg)", whiteSpace: "nowrap",
                                             height: 160, cursor: "pointer",
                                             fontFamily: "'JetBrains Mono', monospace"
@@ -299,8 +299,8 @@ export default function CatalogMatrix() {
                             {filtered.tenants.map(t => (
                                 <tr key={t.id} style={{ borderBottom: "1px solid rgba(239,68,68,0.05)" }}>
                                     <td style={{
-                                        position: "sticky", left: 0, background: "#0d0000",
-                                        padding: "8px 14px", color: "#94A3B8", fontSize: 12,
+                                        position: "sticky", left: 0, background: "var(--surface)",
+                                        padding: "8px 14px", color: "var(--text-3)", fontSize: 12,
                                         display: "flex", alignItems: "center", gap: 6
                                     }}>
                                         <span>{t.name}</span>
@@ -324,7 +324,7 @@ export default function CatalogMatrix() {
                                                     onChange={() => toggle(t.id, p.id)}
                                                     style={{
                                                         width: 16, height: 16, cursor: "pointer",
-                                                        accentColor: "#10b981"
+                                                        accentColor: "var(--success)"
                                                     }}
                                                 />
                                             </td>
@@ -334,7 +334,7 @@ export default function CatalogMatrix() {
                             ))}
                         </tbody>
                     </table>
-                    <div style={{ fontSize: 10, color: "#94A3B8", marginTop: 12 }}>
+                    <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 12 }}>
                         Astuces : clic sur en-tête parcours = accorder à tous. Clic droit = révoquer à tous. +all / −all par tenant.
                     </div>
                 </div>

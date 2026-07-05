@@ -6,9 +6,9 @@ export default function Footer({ compact = false }: { compact?: boolean }) {
             style={{
                 marginTop: compact ? 16 : 32,
                 padding: compact ? "14px 20px" : "20px 24px",
-                borderTop: "1px solid rgba(255,255,255,0.06)",
+                borderTop: "1px solid var(--border)",
                 background: "transparent",
-                color: "#94A3B8",
+                color: "var(--text-3)",
                 fontSize: 12,
                 lineHeight: 1.6,
                 display: "flex",
@@ -31,7 +31,7 @@ export default function Footer({ compact = false }: { compact?: boolean }) {
 
 function linkStyle(): React.CSSProperties {
     return {
-        color: "#CBD5E1",
+        color: "var(--text-2)",
         textDecoration: "none",
         transition: "color 0.15s",
     };

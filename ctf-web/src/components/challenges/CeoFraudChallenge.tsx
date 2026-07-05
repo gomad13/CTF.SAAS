@@ -138,16 +138,16 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                 {/* Score banner */}
                 <div style={{
                     background: result.allCorrect ? "rgba(34,197,94,0.12)" : "rgba(249,115,22,0.12)",
-                    border: `1px solid ${result.allCorrect ? "#10B981" : "#f97316"}`,
+                    border: `1px solid ${result.allCorrect ? "var(--success)" : "var(--warning)"}`,
                     borderRadius: 10, padding: "14px 18px",
                     display: "flex", alignItems: "center", gap: 12,
                 }}>
                     <span style={{ fontSize: 24 }}>{result.allCorrect ? "✅" : "⚠️"}</span>
                     <div>
-                        <p style={{ color: "#1E293B", fontWeight: 600, fontSize: 14 }}>
+                        <p style={{ color: "var(--text)", fontWeight: 600, fontSize: 14 }}>
                             {result.allCorrect ? "Toutes les bonnes réactions !" : "Partiellement correct"}
                         </p>
-                        <p style={{ color: "#64748B", fontSize: 12 }}>
+                        <p style={{ color: "var(--text-2)", fontSize: 12 }}>
                             Score : <span style={{ color: "var(--pr)", fontFamily: "monospace", fontWeight: 700 }}>{result.score}</span> / {result.maxScore} pts
                         </p>
                     </div>
@@ -160,9 +160,9 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                     const isBad     = !r.isCorrect && r.selected;
                     const isNeutral = !r.isCorrect && !r.selected;
 
-                    const borderColor = isGood ? "#10B981" : isMissed ? "#f97316" : isBad ? "#ef4444" : "var(--border)";
+                    const borderColor = isGood ? "var(--success)" : isMissed ? "var(--warning)" : isBad ? "var(--danger)" : "var(--border)";
                     const bgColor     = isGood ? "rgba(34,197,94,0.12)" : isMissed ? "rgba(249,115,22,0.12)" : isBad ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.02)";
-                    const statusColor = isGood ? "#10B981" : isMissed ? "#f97316" : isBad ? "#ef4444" : "#4b5563";
+                    const statusColor = isGood ? "var(--success)" : isMissed ? "var(--warning)" : isBad ? "var(--danger)" : "var(--text-2)";
                     const statusIcon  = isGood ? "✓" : isMissed ? "⚠" : isBad ? "✗" : "—";
                     const statusText  = isGood ? "Bonne réaction !" : isMissed ? "Vous auriez dû choisir ceci" : isBad ? "Mauvaise réaction" : "";
 
@@ -173,11 +173,11 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                         <span style={{ color: statusColor }}>{r.icon && ICONS[r.icon] ? ICONS[r.icon] : null}</span>
-                                        <p style={{ color: "#1E293B", fontSize: 14, fontWeight: 500 }}>{r.label}</p>
+                                        <p style={{ color: "var(--text)", fontSize: 14, fontWeight: 500 }}>{r.label}</p>
                                     </div>
                                     {statusText && <p style={{ color: statusColor, fontSize: 12, marginTop: 4, fontWeight: 600 }}>{statusText}</p>}
                                     {(isGood || isMissed || isBad) && (
-                                        <p style={{ color: "#64748B", fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>{r.explanation}</p>
+                                        <p style={{ color: "var(--text-2)", fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>{r.explanation}</p>
                                     )}
                                 </div>
                             </div>
@@ -187,13 +187,13 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
 
                 {/* Red flags */}
                 {result.redFlags.length > 0 && (
-                    <div style={{ background: "var(--bg-surface)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ background: "var(--bg-surface)", border: "1px solid var(--accent-border)", borderRadius: 8, padding: "14px 16px" }}>
                         <p style={{ color: "var(--pr)", fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
                             🚩 Signaux d&apos;alarme dans cet email
                         </p>
                         <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
                             {result.redFlags.map((f, i) => (
-                                <li key={i} style={{ display: "flex", gap: 8, fontSize: 13, color: "#334155" }}>
+                                <li key={i} style={{ display: "flex", gap: 8, fontSize: 13, color: "var(--text-2)" }}>
                                     <span>⚠️</span><span>{f}</span>
                                 </li>
                             ))}
@@ -203,7 +203,7 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
 
                 <button
                     onClick={() => onComplete(result.score, result.maxScore)}
-                    style={{ width: "100%", background: "var(--pr)", color: "#FFFFFF", border: "none", borderRadius: 8, padding: "12px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+                    style={{ width: "100%", background: "var(--pr)", color: "var(--on-accent)", border: "none", borderRadius: 8, padding: "12px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
                     onMouseOver={e => (e.currentTarget.style.background = "var(--pr-h)")}
                     onMouseOut={e => (e.currentTarget.style.background = "var(--pr)")}
                 >
@@ -217,22 +217,22 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
     return (
         <div className="space-y-5">
             {/* Email card */}
-            <div style={{ background: "var(--bg-card)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--accent-border)", borderRadius: 10, overflow: "hidden" }}>
                 {/* Header */}
-                <div style={{ background: "var(--bg-surface)", borderBottom: "1px solid rgba(59,130,246,0.15)", padding: "14px 18px" }}>
+                <div style={{ background: "var(--bg-surface)", borderBottom: "1px solid var(--accent-border)", padding: "14px 18px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                         <div style={{ minWidth: 0 }}>
-                            <p style={{ color: "#1E293B", fontWeight: 600, fontSize: 14 }}>{content.email.from_name}</p>
-                            <p style={{ color: "#ef4444", fontSize: 12, fontFamily: "monospace", marginTop: 2, wordBreak: "break-all" }}>{content.email.from_address}</p>
+                            <p style={{ color: "var(--text)", fontWeight: 600, fontSize: 14 }}>{content.email.from_name}</p>
+                            <p style={{ color: "var(--danger)", fontSize: 12, fontFamily: "monospace", marginTop: 2, wordBreak: "break-all" }}>{content.email.from_address}</p>
                         </div>
-                        <span style={{ color: "#64748B", fontSize: 11, whiteSpace: "nowrap", flexShrink: 0 }}>{content.email.sent_at}</span>
+                        <span style={{ color: "var(--text-2)", fontSize: 11, whiteSpace: "nowrap", flexShrink: 0 }}>{content.email.sent_at}</span>
                     </div>
-                    <p style={{ color: "#1E293B", fontWeight: 600, fontSize: 14, marginTop: 10 }}>{content.email.subject}</p>
-                    <p style={{ color: "#64748B", fontSize: 12, marginTop: 2 }}>À : {content.email.to}</p>
+                    <p style={{ color: "var(--text)", fontWeight: 600, fontSize: 14, marginTop: 10 }}>{content.email.subject}</p>
+                    <p style={{ color: "var(--text-2)", fontSize: 12, marginTop: 2 }}>À : {content.email.to}</p>
                 </div>
                 {/* Body */}
                 <div style={{ padding: "16px 18px" }}>
-                    <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "#334155", margin: 0 }}>
+                    <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "var(--text-2)", margin: 0 }}>
                         {content.email.body.replace(
                             /(IBAN\s*:\s*[A-Z]{2}\d{2}[\s\d]+)/g,
                             '$1'
@@ -240,7 +240,7 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                     </pre>
                     {/* IBAN highlighted */}
                     {content.email.body.match(/IBAN\s*:\s*([A-Z]{2}\d{2}[\s\w]+)/)?.[1] && (
-                        <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(59,130,246,0.08)", borderRadius: 6, fontFamily: "monospace", fontSize: 13, color: "var(--pr-l)", wordBreak: "break-all" }}>
+                        <div style={{ marginTop: 8, padding: "6px 10px", background: "var(--accent-subtle)", borderRadius: 6, fontFamily: "monospace", fontSize: 13, color: "var(--pr-l)", wordBreak: "break-all" }}>
                             IBAN : {content.email.body.match(/IBAN\s*:\s*([A-Z]{2}\d{2}[\s\w]+)/)?.[1]?.trim()}
                         </div>
                     )}
@@ -271,7 +271,7 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                 </div>
             </div>
 
-            {error && <p style={{ color: "#f87171", fontSize: 13, textAlign: "center" }}>{error}</p>}
+            {error && <p style={{ color: "var(--danger-t)", fontSize: 13, textAlign: "center" }}>{error}</p>}
 
             <button
                 onClick={handleSubmit}
@@ -281,11 +281,11 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                     marginTop: 20,
                     padding: 15,
                     background: selected.size === 0
-                        ? "rgba(59,130,246,0.08)"
-                        : "linear-gradient(135deg, #3B82F6, #2563EB)",
-                    border: selected.size === 0 ? "1px solid rgba(59,130,246,0.2)" : "none",
+                        ? "var(--accent-subtle)"
+                        : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
+                    border: selected.size === 0 ? "1px solid var(--accent-border)" : "none",
                     borderRadius: 10,
-                    color: selected.size === 0 ? "#6b7280" : "var(--bg-base)",
+                    color: selected.size === 0 ? "var(--text-3)" : "var(--on-accent)",
                     fontSize: 14,
                     fontWeight: 700,
                     fontFamily: "'JetBrains Mono', monospace",
@@ -293,7 +293,7 @@ export default function CeoFraudChallenge({ challengeId, content, variantIndex =
                     textTransform: "uppercase",
                     cursor: selected.size === 0 || loading ? "not-allowed" : "pointer",
                     transition: "all 0.2s",
-                    boxShadow: selected.size > 0 ? "0 0 20px rgba(59,130,246,0.25)" : "none",
+                    boxShadow: selected.size > 0 ? "0 0 20px var(--accent-border)" : "none",
                 }}
             >
                 {loading

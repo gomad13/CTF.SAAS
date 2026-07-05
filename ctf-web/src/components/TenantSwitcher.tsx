@@ -52,8 +52,8 @@ export default function TenantSwitcher() {
     }
 
     return (
-        <div style={{ padding: "10px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)", position: "relative", flexShrink: 0 }}>
-            <div style={{ fontSize: "9.5px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.10em", marginBottom: 6 }}>
+        <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border)", position: "relative", flexShrink: 0 }}>
+            <div style={{ fontSize: "9.5px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.10em", marginBottom: 6 }}>
                 Société
             </div>
             <button
@@ -61,21 +61,21 @@ export default function TenantSwitcher() {
                 disabled={switching}
                 style={{
                     width: "100%", display: "flex", alignItems: "center", gap: 8,
-                    padding: "8px 10px", background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
-                    color: "#F1F5F9", fontSize: "12.5px", cursor: switching ? "wait" : "pointer",
+                    padding: "8px 10px", background: "var(--surface-2)",
+                    border: "1px solid var(--border)", borderRadius: 8,
+                    color: "var(--text)", fontSize: "12.5px", cursor: switching ? "wait" : "pointer",
                     fontFamily: "inherit", textAlign: "left",
                 }}
             >
-                <Building2 size={14} color="#60A5FA" strokeWidth={1.75} style={{ flexShrink: 0 }} />
+                <Building2 size={14} color="var(--accent)" strokeWidth={1.75} style={{ flexShrink: 0 }} />
                 <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{active.name}</span>
-                <ChevronDown size={14} color="#94A3B8" style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "none", transition: "transform .15s" }} />
+                <ChevronDown size={14} color="var(--text-3)" style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "none", transition: "transform .15s" }} />
             </button>
             {open && (
                 <div
                     style={{
                         position: "absolute", left: 12, right: 12, top: "100%", marginTop: 4, zIndex: 50,
-                        background: "#1E293B", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 8,
+                        background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8,
                         boxShadow: "0 8px 24px rgba(0,0,0,0.4)", overflow: "hidden",
                     }}
                 >
@@ -85,16 +85,16 @@ export default function TenantSwitcher() {
                             onClick={() => switchTo(t.tenantId)}
                             style={{
                                 width: "100%", display: "flex", alignItems: "center", gap: 8,
-                                padding: "9px 11px", background: t.isActive ? "rgba(59,130,246,0.15)" : "transparent",
-                                border: "none", color: t.isActive ? "#FFFFFF" : "#CBD5E1",
+                                padding: "9px 11px", background: t.isActive ? "var(--accent-subtle)" : "transparent",
+                                border: "none", color: t.isActive ? "var(--text)" : "var(--text-2)",
                                 fontSize: "12.5px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                             }}
-                            onMouseEnter={(e) => { if (!t.isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+                            onMouseEnter={(e) => { if (!t.isActive) (e.currentTarget as HTMLElement).style.background = "var(--surface)"; }}
                             onMouseLeave={(e) => { if (!t.isActive) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                         >
                             <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
-                            <span style={{ fontSize: "10px", color: "#94A3B8" }}>{t.role}</span>
-                            {t.isActive && <Check size={13} color="#60A5FA" style={{ flexShrink: 0 }} />}
+                            <span style={{ fontSize: "10px", color: "var(--text-3)" }}>{t.role}</span>
+                            {t.isActive && <Check size={13} color="var(--accent)" style={{ flexShrink: 0 }} />}
                         </button>
                     ))}
                 </div>

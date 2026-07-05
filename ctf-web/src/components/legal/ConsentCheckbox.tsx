@@ -37,9 +37,9 @@ export default function ConsentCheckbox({ id, label, documentSlug, checked, requ
                     aria-required={required ? "true" : undefined}
                     aria-invalid={error ? "true" : undefined}
                 />
-                <span style={{ fontSize: 13, lineHeight: 1.5, color: "var(--tx-1, #1E293B)" }}>
+                <span style={{ fontSize: 13, lineHeight: 1.5, color: "var(--text)" }}>
                     {label}
-                    {required && <span style={{ color: "#ef4444", marginLeft: 4 }} aria-hidden="true">*</span>}
+                    {required && <span style={{ color: "var(--danger)", marginLeft: 4 }} aria-hidden="true">*</span>}
                     {documentSlug && (
                         <>
                             {" "}
@@ -48,6 +48,7 @@ export default function ConsentCheckbox({ id, label, documentSlug, checked, requ
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={e => e.stopPropagation()}
+                                className="transition-colors duration-200 hover:text-[var(--accent-hover)]"
                                 style={{ color: "var(--accent)", fontWeight: 500, textDecoration: "underline" }}
                             >
                                 Lire le document complet
@@ -57,7 +58,7 @@ export default function ConsentCheckbox({ id, label, documentSlug, checked, requ
                 </span>
             </label>
             {error && (
-                <div role="alert" style={{ fontSize: 11, color: "#ef4444", marginTop: 2, marginLeft: 38 }}>
+                <div role="alert" style={{ fontSize: 11, color: "var(--danger)", marginTop: 2, marginLeft: 38 }}>
                     {error}
                 </div>
             )}

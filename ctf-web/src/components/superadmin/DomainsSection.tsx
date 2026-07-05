@@ -16,24 +16,24 @@ type DomainRow = {
 type TenantLite = { id: string; name: string; isActive: boolean };
 
 const card: React.CSSProperties = {
-    background: "#0d0000",
+    background: "var(--surface)",
     border: "1px solid rgba(239,68,68,0.15)",
     borderRadius: 8,
     padding: 20,
 };
 
 const btnPrimary: React.CSSProperties = {
-    padding: "8px 14px", background: "#ef4444", color: "#fff", border: "none",
+    padding: "8px 14px", background: "var(--danger)", color: "rgba(255,255,255,0.95)", border: "none",
     borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: "pointer"
 };
 
 const btnGhost: React.CSSProperties = {
-    padding: "6px 12px", background: "transparent", color: "#D1D5DB",
+    padding: "6px 12px", background: "transparent", color: "var(--text-2)",
     border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 12, cursor: "pointer"
 };
 
 const labelCss: React.CSSProperties = {
-    fontSize: 11, color: "#9CA3AF", fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "var(--text-3)", fontFamily: "'JetBrains Mono', monospace",
     letterSpacing: "0.08em", textTransform: "uppercase"
 };
 
@@ -75,25 +75,25 @@ export default function DomainsSection() {
     };
 
     return (
-        <div style={{ padding: "var(--page-x)", color: "#D1D5DB" }}>
+        <div style={{ padding: "var(--page-x)", color: "var(--text-2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, gap: 12, flexWrap: "wrap" }}>
                 <div>
-                    <h2 style={{ color: "#f87171", fontSize: 22, margin: 0, marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+                    <h2 style={{ color: "var(--danger)", fontSize: 22, margin: 0, marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
                         ▸ Domaines SSO
                     </h2>
-                    <div style={{ fontSize: 13, color: "#9CA3AF" }}>
+                    <div style={{ fontSize: 13, color: "var(--text-3)" }}>
                         Whitelist des domaines email → tenant. Un SSO reconnu sur un domaine whitelisté crée/login le user sur le tenant correspondant. Sinon fallback sur Demo.
                     </div>
                 </div>
                 <button style={btnPrimary} onClick={() => setShowCreate(true)}>+ Ajouter un domaine</button>
             </div>
 
-            {msg && <div style={{ ...card, marginBottom: 12, background: "rgba(16,185,129,0.1)", borderColor: "rgba(16,185,129,0.25)", fontSize: 12, color: "#34d399" }}>{msg}</div>}
+            {msg && <div style={{ ...card, marginBottom: 12, background: "var(--success-subtle)", borderColor: "rgba(16,185,129,0.25)", fontSize: 12, color: "var(--success)" }}>{msg}</div>}
 
             {loading ? (
                 <div style={{ ...card, textAlign: "center", padding: 40 }}>Chargement…</div>
             ) : rows.length === 0 ? (
-                <div style={{ ...card, textAlign: "center", padding: 40, color: "#9CA3AF" }}>
+                <div style={{ ...card, textAlign: "center", padding: 40, color: "var(--text-3)" }}>
                     Aucun domaine whitelisté. Cliquez sur « + Ajouter un domaine » pour commencer.
                 </div>
             ) : (
@@ -111,27 +111,27 @@ export default function DomainsSection() {
                         <tbody>
                             {rows.map(r => (
                                 <tr key={r.id} style={{ borderBottom: "1px solid rgba(239,68,68,0.05)" }}>
-                                    <td style={{ padding: 10, fontFamily: "'JetBrains Mono', monospace", color: "#f87171" }}>@{r.domain}</td>
+                                    <td style={{ padding: 10, fontFamily: "'JetBrains Mono', monospace", color: "var(--danger)" }}>@{r.domain}</td>
                                     <td style={{ padding: 10 }}>{r.tenantName}</td>
                                     <td style={{ padding: 10, textAlign: "center" }}>
                                         <button onClick={() => toggle(r)}
                                             style={{
                                                 width: 42, height: 22, borderRadius: 11,
-                                                background: r.isAutoProvisioningEnabled ? "#10b981" : "#444",
+                                                background: r.isAutoProvisioningEnabled ? "var(--success)" : "var(--surface-2)",
                                                 border: "none", cursor: "pointer", position: "relative", transition: "background 200ms",
                                             }}>
                                             <span style={{
                                                 position: "absolute", top: 2, left: r.isAutoProvisioningEnabled ? 22 : 2,
-                                                width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 200ms",
+                                                width: 18, height: 18, borderRadius: "50%", background: "rgba(255,255,255,0.95)", transition: "left 200ms",
                                             }} />
                                         </button>
                                     </td>
-                                    <td style={{ padding: 10, color: "#9CA3AF", fontSize: 11 }}>
+                                    <td style={{ padding: 10, color: "var(--text-3)", fontSize: 11 }}>
                                         {new Date(r.createdAt).toLocaleDateString("fr-FR")}
                                     </td>
                                     <td style={{ padding: 10, textAlign: "right" }}>
                                         <button onClick={() => del(r)} style={{
-                                            padding: "4px 10px", background: "transparent", color: "#f87171",
+                                            padding: "4px 10px", background: "transparent", color: "var(--danger)",
                                             border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 11, cursor: "pointer"
                                         }}>Supprimer</button>
                                     </td>
@@ -178,17 +178,17 @@ function CreateDomainModal({ tenants, onClose, onSuccess }: {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 16
         }}>
             <form onClick={e => e.stopPropagation()} onSubmit={submit} style={{
-                background: "#0d0000", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10,
+                background: "var(--surface)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10,
                 padding: 24, width: 480, maxWidth: "100%"
             }}>
-                <h2 style={{ color: "#f87171", fontSize: 18, margin: 0, marginBottom: 16, fontFamily: "'JetBrains Mono', monospace" }}>
+                <h2 style={{ color: "var(--danger)", fontSize: 18, margin: 0, marginBottom: 16, fontFamily: "'JetBrains Mono', monospace" }}>
                     ▸ Nouveau domaine SSO
                 </h2>
 
                 <div style={{ marginBottom: 14 }}>
                     <label style={{ ...labelCss, display: "block", marginBottom: 6 }}>Tenant</label>
                     <select required value={tenantId} onChange={e => setTenantId(e.target.value)}
-                        style={{ width: "100%", padding: "8px 12px", background: "#0d0000", color: "#fff", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 13 }}>
+                        style={{ width: "100%", padding: "8px 12px", background: "var(--surface)", color: "#fff", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 13 }}>
                         <option value="">-- sélectionner --</option>
                         {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
@@ -198,20 +198,20 @@ function CreateDomainModal({ tenants, onClose, onSuccess }: {
                     <label style={{ ...labelCss, display: "block", marginBottom: 6 }}>Domaine email</label>
                     <input required type="text" value={domain} onChange={e => setDomain(e.target.value)}
                         placeholder="cybermed.fr"
-                        style={{ width: "100%", padding: "8px 12px", background: "#0d0000", color: "#fff", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }} />
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+                        style={{ width: "100%", padding: "8px 12px", background: "var(--surface)", color: "#fff", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }} />
+                    <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>
                         Sans le `@`. Un domaine = un seul tenant (unicité globale).
                     </div>
                 </div>
 
                 <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
                     <input id="autoProv" type="checkbox" checked={autoProv} onChange={e => setAutoProv(e.target.checked)} />
-                    <label htmlFor="autoProv" style={{ fontSize: 13, color: "#D1D5DB" }}>
+                    <label htmlFor="autoProv" style={{ fontSize: 13, color: "var(--text-2)" }}>
                         Auto-provisioning activé (les nouveaux SSO créent les comptes)
                     </label>
                 </div>
 
-                {err && <div style={{ fontSize: 12, color: "#f87171", marginBottom: 12 }}>✗ {err}</div>}
+                {err && <div style={{ fontSize: 12, color: "var(--danger)", marginBottom: 12 }}>✗ {err}</div>}
 
                 <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
                     <button type="button" onClick={onClose} style={btnGhost}>Annuler</button>

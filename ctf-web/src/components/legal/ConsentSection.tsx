@@ -57,13 +57,13 @@ export default function ConsentSection({ documents, isAdmin, state, onChange, sh
 
     return (
         <fieldset style={{
-            border: "1px solid var(--bd, #E2E8F0)", borderRadius: 10, padding: 16,
-            margin: "16px 0", background: "var(--bg-card, #ffffff05)",
+            border: "1px solid var(--border)", borderRadius: 10, padding: 16,
+            margin: "16px 0", background: "var(--surface)",
         }}>
-            <legend style={{ padding: "0 8px", fontSize: 12, fontWeight: 600, color: "var(--tx-2, #64748B)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <legend style={{ padding: "0 8px", fontSize: 12, fontWeight: 600, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Consentements
             </legend>
-            <p style={{ fontSize: 12, color: "var(--tx-3, #64748B)", margin: "0 0 12px" }}>
+            <p style={{ fontSize: 12, color: "var(--text-3)", margin: "0 0 12px" }}>
                 Pour finaliser ton inscription, merci d&apos;accepter les documents suivants. Les cases marquées d&apos;un astérisque sont obligatoires.
             </p>
 
@@ -105,8 +105,8 @@ export default function ConsentSection({ documents, isAdmin, state, onChange, sh
                 error={errMajeur}
             />
 
-            <div style={{ height: 1, background: "var(--bd, #E2E8F0)", margin: "12px 0" }} />
-            <div style={{ fontSize: 11, color: "var(--tx-3, #64748B)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+            <div style={{ height: 1, background: "var(--border)", margin: "12px 0" }} />
+            <div style={{ fontSize: 11, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                 Optionnel
             </div>
             <ConsentCheckbox

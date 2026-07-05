@@ -68,17 +68,17 @@ export default function DemoProgress({ refreshKey = 0, onReset }: Props) {
         <div style={{
             position: "sticky", bottom: 0, zIndex: 40,
             background: "var(--bg-surface)",
-            borderTop: "1px solid rgba(59,130,246,0.2)",
+            borderTop: "1px solid var(--accent-border)",
             padding: "8px var(--page-x)",
             minHeight: 56,
             display: "flex", alignItems: "center", flexWrap: "wrap", gap: 12,
         }}>
             {/* Progress bar + score */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                <span style={{ color: "#64748B", fontSize: 12, whiteSpace: "nowrap" }}>Parcours Demo</span>
+                <span style={{ color: "var(--text-2)", fontSize: 12, whiteSpace: "nowrap" }}>Parcours Demo</span>
 
                 {/* Bar */}
-                <div style={{ flex: 1, height: 6, background: "#1e293b", borderRadius: 99, overflow: "hidden", maxWidth: 160 }}>
+                <div style={{ flex: 1, height: 6, background: "var(--surface-2)", borderRadius: 99, overflow: "hidden", maxWidth: 160 }}>
                     <div style={{
                         height: "100%", width: `${pct}%`,
                         background: "var(--pr)", borderRadius: 99,
@@ -88,7 +88,7 @@ export default function DemoProgress({ refreshKey = 0, onReset }: Props) {
 
                 {/* Score */}
                 <span style={{ fontSize: 13, fontWeight: 700, color: "var(--pr)", whiteSpace: "nowrap" }}>
-                    {data.totalPoints} <span style={{ color: "#64748B", fontWeight: 400 }}>/ {data.maxPoints} pts</span>
+                    {data.totalPoints} <span style={{ color: "var(--text-2)", fontWeight: 400 }}>/ {data.maxPoints} pts</span>
                 </span>
             </div>
 
@@ -100,15 +100,15 @@ export default function DemoProgress({ refreshKey = 0, onReset }: Props) {
                         title={`${c.challengeTitle} — ${c.pointsEarned}/${c.maxPoints} pts`}
                         style={{
                             display: "flex", alignItems: "center", gap: 4,
-                            fontSize: 11, color: c.completed ? "#86efac" : "#4b5563",
+                            fontSize: 11, color: c.completed ? "var(--success-t)" : "var(--text-2)",
                         }}
                     >
                         <span style={{
                             width: 16, height: 16, borderRadius: "50%",
-                            background: c.completed ? "#10B981" : "#1e293b",
-                            border: `1.5px solid ${c.completed ? "#10B981" : "#334155"}`,
+                            background: c.completed ? "var(--success)" : "var(--surface-2)",
+                            border: `1.5px solid ${c.completed ? "var(--success)" : "var(--border)"}`,
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 9, color: "#fff", fontWeight: 700,
+                            fontSize: 9, color: c.completed ? "var(--on-accent)" : "var(--text-2)", fontWeight: 700,
                         }}>
                             {c.completed ? "✓" : i + 1}
                         </span>
@@ -124,13 +124,13 @@ export default function DemoProgress({ refreshKey = 0, onReset }: Props) {
                 style={{
                     display: "flex", alignItems: "center", gap: 4,
                     background: "transparent", border: "none",
-                    color: confirmReset ? "#f87171" : "#4b5563",
+                    color: confirmReset ? "var(--danger-t)" : "var(--text-2)",
                     fontSize: 11, cursor: "pointer", padding: "4px 6px",
                     borderRadius: 4, whiteSpace: "nowrap",
                     transition: "color 0.15s",
                 }}
-                onMouseOver={e => { e.currentTarget.style.color = confirmReset ? "#ef4444" : "#94a3b8"; }}
-                onMouseOut={e => { e.currentTarget.style.color = confirmReset ? "#f87171" : "#4b5563"; }}
+                onMouseOver={e => { e.currentTarget.style.color = confirmReset ? "var(--danger)" : "var(--text-3)"; }}
+                onMouseOut={e => { e.currentTarget.style.color = confirmReset ? "var(--danger-t)" : "var(--text-2)"; }}
                 onBlur={() => setTimeout(() => setConfirmReset(false), 2000)}
             >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

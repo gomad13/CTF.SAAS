@@ -41,7 +41,7 @@ export default function ChallengeIntro({
                         width: 40,
                         height: 40,
                         borderRadius: 10,
-                        background: "rgba(59,130,246,0.15)",
+                        background: "var(--accent-subtle)",
                         flexShrink: 0,
                     }}
                 >
@@ -80,7 +80,7 @@ export default function ChallengeIntro({
                     alignItems: "center",
                     gap: 8,
                     background: "var(--pr)",
-                    color: "#FFFFFF",
+                    color: "var(--on-accent)",
                     border: "none",
                     borderRadius: 10,
                     padding: "12px 22px",

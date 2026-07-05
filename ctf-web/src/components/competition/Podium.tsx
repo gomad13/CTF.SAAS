@@ -9,6 +9,8 @@ type Props = {
     third?: ScoreboardEntry | null;
 };
 
+// Couleurs de médailles (or / argent / bronze) : couleurs IDENTITAIRES du podium,
+// volontairement conservées en hex (elles ne suivent pas le thème sombre/clair).
 const TIER_STYLES = {
     1: { border: "#F59E0B", accent: "#F59E0B", label: "1er", IconElem: Crown, minH: 190 },
     2: { border: "#94A3B8", accent: "#64748B", label: "2e", IconElem: Medal, minH: 168 },
@@ -38,13 +40,15 @@ function PodiumCard({ entry, tier }: { entry?: ScoreboardEntry | null; tier: 1 |
             style={{
                 minHeight: cfg.minH,
                 border: `2px solid ${cfg.border}`,
-                boxShadow: isCurrent ? "0 0 0 3px rgba(59,130,246,0.20)" : undefined,
+                boxShadow: isCurrent
+                    ? "0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)"
+                    : undefined,
             }}
         >
             {/* Couronne / médaille : badge décoratif au-dessus de la carte (ne chevauche plus le contenu) */}
             <div
                 className="absolute -top-3.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full shadow"
-                style={{ background: cfg.accent, color: "#FFFFFF" }}
+                style={{ background: cfg.accent, color: "var(--on-accent)" }}
             >
                 <Icon size={15} strokeWidth={2.5} />
             </div>

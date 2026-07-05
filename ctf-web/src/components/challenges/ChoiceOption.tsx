@@ -5,9 +5,9 @@ import type { CSSProperties, ReactNode } from "react";
 /**
  * Option de réponse partagée par les challenges à choix (multichoice, ceo_fraud, etc.).
  *
- * État sélectionné — fix 2026-04-21 : fond primary plein + texte blanc pur.
+ * État sélectionné — fix 2026-04-21 : fond primary plein + texte on-accent.
  * Le texte doit rester **parfaitement lisible** (contrast AA garanti). Aucune
- * opacité ni bleu clair sur primary lorsque l'option est active.
+ * opacité ni couleur claire sur primary lorsque l'option est active.
  */
 type Props = {
     id: string;
@@ -19,10 +19,10 @@ type Props = {
     icon?: ReactNode;
 };
 
-const PRIMARY = "#3B82F6";
-const PRIMARY_HOVER = "#2563EB";
-const TEXT_ON_LIGHT = "#1E293B";
-const TEXT_ON_LIGHT_MUTED = "#64748B";
+const PRIMARY = "var(--accent)";
+const PRIMARY_HOVER = "var(--accent-hover)";
+const TEXT_ON_LIGHT = "var(--text)";
+const TEXT_ON_LIGHT_MUTED = "var(--text-2)";
 
 export default function ChoiceOption({ id, label, active, onToggle, letter, icon }: Props) {
     const buttonStyle: CSSProperties = {
@@ -31,11 +31,11 @@ export default function ChoiceOption({ id, label, active, onToggle, letter, icon
         alignItems: "center",
         gap: 16,
         padding: "16px 20px",
-        background: active ? PRIMARY : "#F1F5F9",
-        border: `1px solid ${active ? PRIMARY_HOVER : "rgba(59,130,246,0.12)"}`,
+        background: active ? PRIMARY : "var(--surface)",
+        border: `1px solid ${active ? PRIMARY_HOVER : "var(--border)"}`,
         borderRadius: 10,
         cursor: "pointer",
-        transition: "all 0.18s ease",
+        transition: "all 0.2s ease",
         textAlign: "left",
     };
 
@@ -50,16 +50,16 @@ export default function ChoiceOption({ id, label, active, onToggle, letter, icon
                 if (active) {
                     e.currentTarget.style.background = PRIMARY_HOVER;
                 } else {
-                    e.currentTarget.style.background = "#E2E8F0";
-                    e.currentTarget.style.borderColor = "rgba(59,130,246,0.25)";
+                    e.currentTarget.style.background = "var(--surface-2)";
+                    e.currentTarget.style.borderColor = "var(--accent-border)";
                 }
             }}
             onMouseOut={e => {
                 if (active) {
                     e.currentTarget.style.background = PRIMARY;
                 } else {
-                    e.currentTarget.style.background = "#F1F5F9";
-                    e.currentTarget.style.borderColor = "rgba(59,130,246,0.12)";
+                    e.currentTarget.style.background = "var(--surface)";
+                    e.currentTarget.style.borderColor = "var(--border)";
                 }
             }}
         >
@@ -68,8 +68,8 @@ export default function ChoiceOption({ id, label, active, onToggle, letter, icon
                 width: 20,
                 height: 20,
                 borderRadius: 5,
-                border: `2px solid ${active ? "#FFFFFF" : "rgba(59,130,246,0.3)"}`,
-                background: active ? "#FFFFFF" : "transparent",
+                border: `2px solid ${active ? "var(--on-accent)" : "var(--accent-border)"}`,
+                background: active ? "var(--on-accent)" : "transparent",
                 flexShrink: 0,
                 display: "flex",
                 alignItems: "center",
@@ -84,13 +84,13 @@ export default function ChoiceOption({ id, label, active, onToggle, letter, icon
                 width: 36,
                 height: 36,
                 borderRadius: 8,
-                background: active ? "rgba(255,255,255,0.15)" : "rgba(59,130,246,0.08)",
-                border: `1px solid ${active ? "rgba(255,255,255,0.35)" : "rgba(59,130,246,0.15)"}`,
+                background: active ? "rgba(255,255,255,0.15)" : "var(--accent-subtle)",
+                border: `1px solid ${active ? "rgba(255,255,255,0.35)" : "var(--accent-border)"}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                color: active ? "#FFFFFF" : "#64748B",
+                color: active ? "var(--on-accent)" : "var(--text-2)",
                 fontFamily: "'JetBrains Mono', monospace",
                 fontWeight: 700,
                 fontSize: 14,
@@ -102,7 +102,7 @@ export default function ChoiceOption({ id, label, active, onToggle, letter, icon
             {/* Texte principal */}
             <span style={{
                 fontSize: 14,
-                color: active ? "#FFFFFF" : TEXT_ON_LIGHT_MUTED,
+                color: active ? "var(--on-accent)" : TEXT_ON_LIGHT_MUTED,
                 lineHeight: 1.5,
                 fontWeight: active ? 600 : 400,
                 transition: "color 0.15s",

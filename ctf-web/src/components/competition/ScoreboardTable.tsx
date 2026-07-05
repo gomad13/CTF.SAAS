@@ -50,7 +50,7 @@ export default function ScoreboardTable({ data, isLoading, onPageChange }: Props
                         {data.items.map(entry => (
                             <tr
                                 key={entry.userId}
-                                className={`transition-colors duration-150 hover:bg-canvas ${
+                                className={`transition-colors duration-200 hover:bg-surface-2 ${
                                     entry.isCurrentUser ? "bg-primary/5" : ""
                                 }`}
                             >
@@ -62,7 +62,8 @@ export default function ScoreboardTable({ data, isLoading, onPageChange }: Props
                                                 : entry.rank === 2
                                                 ? "bg-fg-muted/10 text-fg-muted"
                                                 : entry.rank === 3
-                                                ? "bg-[#CD7F32]/10 text-[#CD7F32]"
+                                                ? /* bronze : couleur médaille identitaire, conservée en hex */
+                                                  "bg-[#CD7F32]/10 text-[#CD7F32]"
                                                 : "bg-table-head text-fg-muted"
                                         }`}
                                     >

@@ -104,7 +104,7 @@ function SaDialogHost({
                     onClick={cancel}
                     style={{
                         position: "fixed", inset: 0, zIndex: 9999,
-                        background: "rgba(5,0,0,0.72)",
+                        background: "rgba(0,0,0,0.72)",
                         backdropFilter: "blur(6px)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         padding: 16,
@@ -114,7 +114,7 @@ function SaDialogHost({
                         onClick={e => e.stopPropagation()}
                         style={{
                             width: "100%", maxWidth: 480,
-                            background: "#0d0000",
+                            background: "var(--surface)",
                             border: `1px solid ${color.border}`,
                             borderRadius: 10,
                             boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px ${color.border}`,
@@ -131,11 +131,11 @@ function SaDialogHost({
                             }}>{color.icon}</div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <h3 style={{
-                                    fontSize: 15, fontWeight: 700, color: "#FFFFFF",
+                                    fontSize: 15, fontWeight: 700, color: "var(--text)",
                                     margin: 0, marginBottom: 6, lineHeight: 1.35,
                                 }}>{pending.title}</h3>
                                 <p style={{
-                                    fontSize: 13, color: "#94A3B8",
+                                    fontSize: 13, color: "var(--text-3)",
                                     margin: 0, lineHeight: 1.55,
                                 }}>{pending.message}</p>
                             </div>
@@ -151,18 +151,18 @@ function SaDialogHost({
                                     placeholder={pending.placeholder}
                                     style={{
                                         width: "100%",
-                                        background: "#1a0000",
+                                        background: "var(--bg)",
                                         border: "1px solid rgba(239,68,68,0.35)",
                                         borderRadius: 6,
                                         padding: "9px 12px",
-                                        color: "#FFFFFF",
+                                        color: "var(--text)",
                                         fontSize: 13,
                                         fontFamily: "'JetBrains Mono', monospace",
                                         outline: "none",
                                     }}
                                 />
                                 {pending.expected && promptValue && promptValue !== pending.expected && (
-                                    <div style={{ marginTop: 6, fontSize: 11, color: "#FCA5A5" }}>
+                                    <div style={{ marginTop: 6, fontSize: 11, color: "var(--danger-t)" }}>
                                         Ne correspond pas à l&apos;intitulé exact.
                                     </div>
                                 )}
@@ -173,8 +173,8 @@ function SaDialogHost({
                             {pending.kind !== "alert" && (
                                 <button onClick={cancel} style={{
                                     background: "transparent",
-                                    border: "1px solid rgba(255,255,255,0.12)",
-                                    color: "#94A3B8",
+                                    border: "1px solid var(--border)",
+                                    color: "var(--text-3)",
                                     padding: "8px 16px",
                                     borderRadius: 6, fontSize: 12, cursor: "pointer",
                                 }}>Annuler</button>
@@ -185,7 +185,7 @@ function SaDialogHost({
                                 style={{
                                     background: color.fg,
                                     border: "none",
-                                    color: "#FFFFFF",
+                                    color: "white",
                                     padding: "8px 16px",
                                     borderRadius: 6, fontSize: 12, fontWeight: 600,
                                     cursor: "pointer",
@@ -214,11 +214,11 @@ function SaDialogHost({
                                 pointerEvents: "auto",
                                 display: "flex", alignItems: "center", gap: 10,
                                 padding: "10px 14px",
-                                background: "#0d0000",
+                                background: "var(--surface)",
                                 border: `1px solid ${c.border}`,
                                 borderLeft: `3px solid ${c.fg}`,
                                 borderRadius: 6,
-                                color: "#FFFFFF",
+                                color: "var(--text)",
                                 fontSize: 13,
                                 minWidth: 240, maxWidth: 360,
                                 boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
@@ -236,10 +236,10 @@ function SaDialogHost({
 
 function variantColor(v: DialogVariant) {
     switch (v) {
-        case "danger":  return { fg: "#EF4444", bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.45)", icon: "⚠" };
-        case "warning": return { fg: "#F59E0B", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.45)", icon: "!" };
-        case "success": return { fg: "#10B981", bg: "rgba(16,185,129,0.12)",  border: "rgba(16,185,129,0.45)", icon: "✓" };
+        case "danger":  return { fg: "var(--danger)", bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.45)", icon: "⚠" };
+        case "warning": return { fg: "var(--warning)", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.45)", icon: "!" };
+        case "success": return { fg: "var(--success)", bg: "rgba(16,185,129,0.12)",  border: "rgba(16,185,129,0.45)", icon: "✓" };
         case "info":
-        default:        return { fg: "#3B82F6", bg: "rgba(59,130,246,0.12)",  border: "rgba(59,130,246,0.45)", icon: "i" };
+        default:        return { fg: "var(--info)", bg: "rgba(59,130,246,0.12)",  border: "rgba(59,130,246,0.45)", icon: "i" };
     }
 }

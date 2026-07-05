@@ -51,8 +51,7 @@ export default function ModuleCard({
             <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
                     <div
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                        style={{ background: "rgba(59,130,246,0.10)", color: "#1E40AF" }}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
                         aria-hidden
                     >
                         <BookOpen size={18} strokeWidth={2} />

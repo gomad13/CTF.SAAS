@@ -5,15 +5,14 @@ import { ShieldCheck } from "lucide-react";
 import type { RiskLevel, RiskScore } from "@/lib/types/riskScore";
 import { RISK_LEVEL_LABELS } from "@/lib/types/riskScore";
 
-// Palette : tokens CLAUDE.md §5.4 (#3B82F6, #10B981, #EF4444, #F59E0B).
-// Le prompt CRI mentionnait var(--accent) / var(--surface-2) mais CLAUDE.md (autorité) prescrit
-// la palette ci-dessous, et tous les composants existants la respectent.
-// Décision documentée dans le rapport final.
-const COLOR_DANGER = "#EF4444";
-const COLOR_WARNING = "#F59E0B";
-const COLOR_SUCCESS = "#10B981";
-const COLOR_PRIMARY = "#3B82F6";
-const COLOR_TRACK = "#E2E8F0";
+// Couleurs de la jauge SVG : les attributs `stroke` d'un SVG ne résolvent pas var(--x),
+// on garde donc des littéraux hex qui reflètent les tokens de la charte
+// (danger/warning/success + accent vert cyber à la place de l'ancien bleu).
+const COLOR_DANGER = "#EF4444"; // = var(--danger)
+const COLOR_WARNING = "#F59E0B"; // = var(--warning)
+const COLOR_SUCCESS = "#16A34A"; // = var(--success)
+const COLOR_PRIMARY = "#22C55E"; // accent vert cyber (ex-#3B82F6 bleu, interdit par la charte)
+const COLOR_TRACK = "#E2E8F0"; // piste neutre (SVG, ne suit pas le thème)
 
 // Jauge SVG native — aucune dépendance ajoutée. Cercle de 200×200,
 // rayon 80, circumference ≈ 502.
@@ -67,7 +66,7 @@ function RiskScoreCardImpl({ data, isLoading, isError }: Props) {
     return (
         <section
             aria-label="Cyber Resilience Index"
-            className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
+            className="rounded-xl border border-border bg-surface p-6 shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1)]"
         >
             <header className="mb-4 flex items-start justify-between">
                 <div>
@@ -150,7 +149,7 @@ function Gauge({ score, color, dashOffset }: { score: number; color: string; das
 function Skeleton() {
     return (
         <div
-            className="animate-pulse rounded-full bg-[#F1F5F9]"
+            className="animate-pulse rounded-full bg-surface-2"
             style={{ width: SIZE, height: SIZE }}
             aria-label="Chargement du score"
         />
@@ -160,7 +159,7 @@ function Skeleton() {
 function ErrorState() {
     return (
         <div
-            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-[#E2E8F0] text-center text-fg-muted"
+            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-border text-center text-fg-muted"
             style={{ width: SIZE, height: SIZE }}
         >
             <p className="px-6 text-sm">Score temporairement indisponible</p>
@@ -171,7 +170,7 @@ function ErrorState() {
 function InsufficientState() {
     return (
         <div
-            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-[#E2E8F0] px-6 text-center text-fg-muted"
+            className="flex flex-col items-center justify-center rounded-full border-2 border-dashed border-border px-6 text-center text-fg-muted"
             style={{ width: SIZE, height: SIZE }}
         >
             <p className="text-sm font-medium">

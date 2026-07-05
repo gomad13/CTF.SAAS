@@ -8,29 +8,31 @@ type Props = {
     status: ModuleStatus;
 };
 
+// Tokens sémantiques : à faire / verrouillé = neutre (--surface-2/--text-3),
+// en cours = --warning, complété = --success. color-mix pour les fonds à 10 %.
 const CONFIG: Record<ModuleStatus, { label: string; bg: string; color: string; Icon: typeof CheckCircle2 }> = {
     todo: {
         label: "À faire",
-        bg: "#F1F5F9",
-        color: "#64748B",
+        bg: "var(--surface-2)",
+        color: "var(--text-3)",
         Icon: CircleDashed,
     },
     in_progress: {
         label: "En cours",
-        bg: "rgba(59,130,246,0.10)",
-        color: "#1E40AF",
+        bg: "color-mix(in srgb, var(--warning) 12%, transparent)",
+        color: "var(--warning)",
         Icon: Clock,
     },
     completed: {
         label: "Complété",
-        bg: "rgba(16,185,129,0.10)",
-        color: "#065F46",
+        bg: "color-mix(in srgb, var(--success) 12%, transparent)",
+        color: "var(--success)",
         Icon: CheckCircle2,
     },
     locked: {
         label: "Verrouillé",
-        bg: "#F1F5F9",
-        color: "#64748B",
+        bg: "var(--surface-2)",
+        color: "var(--text-3)",
         Icon: Lock,
     },
 };

@@ -49,7 +49,7 @@ interface Props {
 // ── Avatar color (deterministic from name) ────────────────────────────────────
 
 function avatarColor(name: string): string {
-    const colors = ["#0e7490","#0d9488","var(--pr)","#b45309","#be123c","var(--pr-h)","#065f46","#9a3412"];
+    const colors = ["var(--pr)","var(--accent-2)","var(--info)","var(--warning)","var(--danger)","var(--pr-h)","var(--success)","var(--text-3)"];
     let h = 0;
     for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % colors.length;
     return colors[Math.abs(h)];
@@ -110,9 +110,9 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                 {/* Score row */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: 10 }}>
                     {[
-                        { label: "Détectés",     value: result.truePositives,  color: "#10B981", bg: "rgba(34,197,94,0.1)" },
-                        { label: "Faux positifs", value: result.falsePositives, color: "#ef4444", bg: "rgba(239,68,68,0.1)" },
-                        { label: "Manqués",       value: result.missed,         color: "#f97316", bg: "rgba(249,115,22,0.1)" },
+                        { label: "Détectés",     value: result.truePositives,  color: "var(--success)", bg: "rgba(34,197,94,0.1)" },
+                        { label: "Faux positifs", value: result.falsePositives, color: "var(--danger)", bg: "rgba(239,68,68,0.1)" },
+                        { label: "Manqués",       value: result.missed,         color: "var(--warning)", bg: "rgba(249,115,22,0.1)" },
                     ].map(t => (
                         <div key={t.label} style={{ background: t.bg, border: `1px solid ${t.color}33`, borderRadius: 8, padding: "12px 8px", textAlign: "center" }}>
                             <p style={{ fontSize: 26, fontWeight: 700, color: t.color, lineHeight: 1 }}>{t.value}</p>
@@ -138,9 +138,9 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                         </div>
                         {content.emails.map(email => {
                             const detail = detailMap.get(email.id);
-                            const badge = detail?.isDangerous && detail?.wasChecked   ? { icon: "✅", color: "#10B981" }
-                                        : detail?.isDangerous && !detail?.wasChecked  ? { icon: "❌", color: "#ef4444" }
-                                        : !detail?.isDangerous && detail?.wasChecked  ? { icon: "⚠️", color: "#f97316" }
+                            const badge = detail?.isDangerous && detail?.wasChecked   ? { icon: "✅", color: "var(--success)" }
+                                        : detail?.isDangerous && !detail?.wasChecked  ? { icon: "❌", color: "var(--danger)" }
+                                        : !detail?.isDangerous && detail?.wasChecked  ? { icon: "⚠️", color: "var(--warning)" }
                                         : { icon: "✓",  color: "var(--text-2)" };
                             return (
                                 <button
@@ -204,7 +204,7 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
 
                 <button
                     onClick={() => onComplete(result.score, result.maxScore)}
-                    style={{ width: "100%", background: "var(--pr)", color: "#FFFFFF", border: "none", borderRadius: 8, padding: "13px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+                    style={{ width: "100%", background: "var(--pr)", color: "var(--on-accent)", border: "none", borderRadius: 8, padding: "13px 0", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "background-color 0.2s" }}
                     onMouseOver={e => (e.currentTarget.style.background = "var(--pr-h)")}
                     onMouseOut={e => (e.currentTarget.style.background = "var(--pr)")}
                 >
@@ -257,7 +257,7 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                                         flexShrink: 0, marginTop: 1, cursor: "pointer", padding: 9, boxSizing: "content-box",
                                     }}
                                 >
-                                    {checked.has(email.id) && <svg width="15" height="15" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>}
+                                    {checked.has(email.id) && <svg width="15" height="15" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="var(--on-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>}
                                 </span>
                                 {/* Avatar */}
                                 <span style={{ width: 28, height: 28, borderRadius: "50%", background: avatarColor(email.from_name), display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text)", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
@@ -322,7 +322,7 @@ export default function MailboxChallenge({ challengeId, content, variantIndex = 
                     disabled={loading}
                     style={{
                         background: loading ? "var(--accent-subtle)" : "var(--pr)",
-                        color: "#FFFFFF", border: "none", borderRadius: 8,
+                        color: "var(--on-accent)", border: "none", borderRadius: 8,
                         padding: "10px 22px", fontSize: 13, fontWeight: 600,
                         cursor: loading ? "not-allowed" : "pointer",
                     }}

@@ -181,7 +181,7 @@ export default function PhishingAiChallenge({ challengeId, content, onComplete }
 
                 <button
                     onClick={() => onComplete(result.score, result.maxScore)}
-                    style={{ width: "100%", background: "var(--pr)", color: "#FFFFFF", border: "none", borderRadius: 8, padding: "13px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+                    style={{ width: "100%", background: "var(--pr)", color: "var(--on-accent)", border: "none", borderRadius: 8, padding: "13px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
                     onMouseOver={e => (e.currentTarget.style.background = "var(--pr-h)")}
                     onMouseOut={e => (e.currentTarget.style.background = "var(--pr)")}
                 >
@@ -268,7 +268,7 @@ export default function PhishingAiChallenge({ challengeId, content, onComplete }
                 style={{
                     width: "100%",
                     background: text.trim().length < 15 ? "var(--accent-subtle)" : "var(--pr)",
-                    color: "#FFFFFF", border: "none", borderRadius: 8,
+                    color: "var(--on-accent)", border: "none", borderRadius: 8,
                     padding: "13px 0", fontSize: 14, fontWeight: 600,
                     cursor: text.trim().length < 15 ? "not-allowed" : "pointer",
                     transition: "background 0.15s",

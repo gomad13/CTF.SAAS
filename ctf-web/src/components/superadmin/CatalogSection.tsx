@@ -75,7 +75,7 @@ type PathStats = {
 };
 
 const card: React.CSSProperties = {
-    background: "#0d0000",
+    background: "var(--surface)",
     border: "1px solid rgba(239,68,68,0.15)",
     borderRadius: 8,
     padding: 20,
@@ -83,7 +83,7 @@ const card: React.CSSProperties = {
 
 const labelCss: React.CSSProperties = {
     fontSize: 11,
-    color: "#94A3B8",
+    color: "var(--text-3)",
     fontFamily: "'JetBrains Mono', monospace",
     letterSpacing: "0.08em",
     textTransform: "uppercase",
@@ -91,8 +91,8 @@ const labelCss: React.CSSProperties = {
 
 const btnPrimary: React.CSSProperties = {
     padding: "8px 14px",
-    background: "#ef4444",
-    color: "#fff",
+    background: "var(--danger)",
+    color: "rgba(255,255,255,0.95)",
     border: "none",
     borderRadius: 6,
     fontSize: 13,
@@ -103,7 +103,7 @@ const btnPrimary: React.CSSProperties = {
 const btnGhost: React.CSSProperties = {
     padding: "6px 12px",
     background: "transparent",
-    color: "#94A3B8",
+    color: "var(--text-3)",
     border: "1px solid rgba(239,68,68,0.25)",
     borderRadius: 6,
     fontSize: 12,
@@ -167,13 +167,13 @@ export default function CatalogSection() {
     }
 
     return (
-        <div style={{ padding: "var(--page-x)", color: "#94A3B8" }}>
+        <div style={{ padding: "var(--page-x)", color: "var(--text-3)" }}>
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 20 }}>
                 <div>
-                    <h2 style={{ color: "#f87171", fontSize: 22, margin: 0, marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+                    <h2 style={{ color: "var(--danger)", fontSize: 22, margin: 0, marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
                         ▸ Gestion des parcours catalogue
                     </h2>
-                    <div style={{ fontSize: 13, color: "#94A3B8" }}>
+                    <div style={{ fontSize: 13, color: "var(--text-3)" }}>
                         Contrôle quels tenants ont accès à chaque parcours de catalogue (modèle à la carte).
                     </div>
                 </div>
@@ -182,7 +182,7 @@ export default function CatalogSection() {
             <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center", flexWrap: "wrap" }}>
                 <label style={labelCss}>Secteur</label>
                 <select value={filterSector} onChange={e => setFilterSector(e.target.value)}
-                    style={{ padding: "6px 10px", background: "#0d0000", color: "#94A3B8", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6 }}
+                    style={{ padding: "6px 10px", background: "var(--surface)", color: "var(--text-3)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6 }}
                 >
                     <option value="">Tous</option>
                     <option value="sante">Santé</option>
@@ -192,7 +192,7 @@ export default function CatalogSection() {
                 </select>
                 <label style={labelCss}>Niveau</label>
                 <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)}
-                    style={{ padding: "6px 10px", background: "#0d0000", color: "#94A3B8", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6 }}
+                    style={{ padding: "6px 10px", background: "var(--surface)", color: "var(--text-3)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6 }}
                 >
                     <option value="">Tous</option>
                     <option value="beginner">Débutant</option>
@@ -200,13 +200,13 @@ export default function CatalogSection() {
                     <option value="advanced">Avancé</option>
                 </select>
                 <div style={{ flex: 1 }} />
-                <span style={{ fontSize: 12, color: "#94A3B8" }}>{paths.length} parcours</span>
+                <span style={{ fontSize: 12, color: "var(--text-3)" }}>{paths.length} parcours</span>
             </div>
 
             {loading ? (
                 <div style={{ ...card, textAlign: "center", padding: 40 }}>Chargement...</div>
             ) : paths.length === 0 ? (
-                <div style={{ ...card, textAlign: "center", padding: 40, color: "#94A3B8" }}>
+                <div style={{ ...card, textAlign: "center", padding: 40, color: "var(--text-3)" }}>
                     Aucun parcours catalogue. Les seeds doivent être initialisés au démarrage du backend en mode dev.
                 </div>
             ) : (
@@ -218,20 +218,20 @@ export default function CatalogSection() {
                             onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(239,68,68,0.15)"; }}
                         >
                             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
-                                <div style={{ fontSize: 15, fontWeight: 600, color: "#f87171", lineHeight: 1.3 }}>{p.title}</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: "var(--danger)", lineHeight: 1.3 }}>{p.title}</div>
                                 <span style={{
                                     padding: "2px 8px", borderRadius: 999, fontSize: 10, fontWeight: 600,
-                                    background: p.status === "published" ? "rgba(16,185,129,0.15)" : "rgba(156,163,175,0.15)",
-                                    color: p.status === "published" ? "#34d399" : "#9CA3AF",
+                                    background: p.status === "published" ? "var(--success-subtle)" : "var(--surface-2)",
+                                    color: p.status === "published" ? "var(--success)" : "var(--text-3)",
                                     whiteSpace: "nowrap"
                                 }}>{p.status}</span>
                             </div>
                             {p.description && (
-                                <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 12, lineHeight: 1.45 }}>
+                                <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
                                     {p.description.length > 110 ? p.description.slice(0, 110) + "..." : p.description}
                                 </div>
                             )}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11, color: "#94A3B8" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11, color: "var(--text-3)" }}>
                                 <div><span style={labelCss}>Secteur</span><br />{sectorLabel(p.sector)}</div>
                                 <div><span style={labelCss}>Niveau</span><br />{levelLabel(p.level)}</div>
                                 <div><span style={labelCss}>Challenges</span><br />{p.challengesCount}</div>
@@ -242,7 +242,7 @@ export default function CatalogSection() {
                                     {p.tags.split(",").map(t => t.trim()).filter(Boolean).slice(0, 4).map(t => (
                                         <span key={t} style={{
                                             fontSize: 10, padding: "2px 8px", borderRadius: 999,
-                                            background: "rgba(239,68,68,0.08)", color: "#f87171",
+                                            background: "rgba(239,68,68,0.08)", color: "var(--danger)",
                                             border: "1px solid rgba(239,68,68,0.2)"
                                         }}>{t}</span>
                                     ))}
@@ -267,7 +267,7 @@ function CatalogDetail({ pathId, onBack }: { pathId: string; onBack: () => void 
     }, [pathId]);
 
     return (
-        <div style={{ padding: "var(--page-x)", color: "#94A3B8" }}>
+        <div style={{ padding: "var(--page-x)", color: "var(--text-3)" }}>
             <button onClick={onBack} style={{ ...btnGhost, marginBottom: 16 }}>← Retour</button>
 
             {!detail ? (
@@ -275,13 +275,13 @@ function CatalogDetail({ pathId, onBack }: { pathId: string; onBack: () => void 
             ) : (
                 <>
                     <div style={{ ...card, marginBottom: 16 }}>
-                        <h2 style={{ color: "#f87171", fontSize: 20, margin: 0, marginBottom: 4 }}>{detail.title}</h2>
-                        {detail.description && <div style={{ color: "#94A3B8", fontSize: 13, marginBottom: 10 }}>{detail.description}</div>}
-                        <div style={{ display: "flex", gap: 14, fontSize: 12, color: "#94A3B8", flexWrap: "wrap" }}>
-                            <span><strong style={{ color: "#94A3B8" }}>Secteur:</strong> {sectorLabel(detail.sector)}</span>
-                            <span><strong style={{ color: "#94A3B8" }}>Niveau:</strong> {levelLabel(detail.level)}</span>
-                            <span><strong style={{ color: "#94A3B8" }}>Durée:</strong> {detail.estimatedMinutes ?? "—"} min</span>
-                            <span><strong style={{ color: "#94A3B8" }}>Statut:</strong> {detail.status}</span>
+                        <h2 style={{ color: "var(--danger)", fontSize: 20, margin: 0, marginBottom: 4 }}>{detail.title}</h2>
+                        {detail.description && <div style={{ color: "var(--text-3)", fontSize: 13, marginBottom: 10 }}>{detail.description}</div>}
+                        <div style={{ display: "flex", gap: 14, fontSize: 12, color: "var(--text-3)", flexWrap: "wrap" }}>
+                            <span><strong style={{ color: "var(--text-3)" }}>Secteur:</strong> {sectorLabel(detail.sector)}</span>
+                            <span><strong style={{ color: "var(--text-3)" }}>Niveau:</strong> {levelLabel(detail.level)}</span>
+                            <span><strong style={{ color: "var(--text-3)" }}>Durée:</strong> {detail.estimatedMinutes ?? "—"} min</span>
+                            <span><strong style={{ color: "var(--text-3)" }}>Statut:</strong> {detail.status}</span>
                         </div>
                     </div>
 
@@ -292,7 +292,7 @@ function CatalogDetail({ pathId, onBack }: { pathId: string; onBack: () => void 
                                 style={{
                                     padding: "8px 16px",
                                     background: tab === t ? "rgba(239,68,68,0.1)" : "transparent",
-                                    color: tab === t ? "#f87171" : "#9CA3AF",
+                                    color: tab === t ? "var(--danger)" : "var(--text-3)",
                                     border: "1px solid " + (tab === t ? "rgba(239,68,68,0.3)" : "rgba(239,68,68,0.1)"),
                                     borderRadius: 6,
                                     fontSize: 13,
@@ -319,11 +319,11 @@ function ContentTab({ detail }: { detail: CatalogPathDetail }) {
     return (
         <div style={card}>
             {detail.modules.length === 0 ? (
-                <div style={{ color: "#94A3B8", textAlign: "center", padding: 20 }}>Aucun module.</div>
+                <div style={{ color: "var(--text-3)", textAlign: "center", padding: 20 }}>Aucun module.</div>
             ) : (
                 detail.modules.map(m => (
                     <div key={m.id} style={{ marginBottom: 18 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: "#f87171", marginBottom: 8 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--danger)", marginBottom: 8 }}>
                             Module {m.sortOrder}. {m.title}
                         </div>
                         <div className="resp-scroll-x">
@@ -340,10 +340,10 @@ function ContentTab({ detail }: { detail: CatalogPathDetail }) {
                             <tbody>
                                 {m.challenges.map(c => (
                                     <tr key={c.id} style={{ borderBottom: "1px solid rgba(239,68,68,0.05)" }}>
-                                        <td style={{ padding: "8px 10px", color: "#94A3B8" }}>{c.sortOrder}</td>
+                                        <td style={{ padding: "8px 10px", color: "var(--text-3)" }}>{c.sortOrder}</td>
                                         <td style={{ padding: "8px 10px" }}>{c.title}</td>
-                                        <td style={{ padding: "8px 10px", color: "#94A3B8" }}>{c.contentType ?? c.type}</td>
-                                        <td style={{ padding: "8px 10px", color: "#94A3B8" }}>{c.category ?? "—"}</td>
+                                        <td style={{ padding: "8px 10px", color: "var(--text-3)" }}>{c.contentType ?? c.type}</td>
+                                        <td style={{ padding: "8px 10px", color: "var(--text-3)" }}>{c.category ?? "—"}</td>
                                         <td style={{ padding: "8px 10px", textAlign: "right" }}>{c.points}</td>
                                     </tr>
                                 ))}
@@ -437,7 +437,7 @@ function AccessTab({ pathId }: { pathId: string }) {
                 <button style={btnGhost} onClick={bulkGrantAll}>Accorder à tous</button>
                 <button style={btnGhost} onClick={bulkRevokeAll}>Révoquer de tous</button>
                 <div style={{ flex: 1 }} />
-                {msg && <span style={{ fontSize: 12, color: "#34d399" }}>{msg}</span>}
+                {msg && <span style={{ fontSize: 12, color: "var(--success)" }}>{msg}</span>}
                 <button
                     style={{ ...btnPrimary, opacity: dirtyCount > 0 ? 1 : 0.4, cursor: dirtyCount > 0 ? "pointer" : "not-allowed" }}
                     disabled={dirtyCount === 0 || saving}
@@ -467,7 +467,7 @@ function AccessTab({ pathId }: { pathId: string }) {
                                         onClick={() => toggle(t.tenantId)}
                                         style={{
                                             width: 42, height: 22, borderRadius: 11,
-                                            background: desired ? "#10b981" : "#444",
+                                            background: desired ? "var(--success)" : "var(--surface-2)",
                                             border: "none", cursor: "pointer",
                                             position: "relative", transition: "background 200ms",
                                         }}
@@ -476,15 +476,15 @@ function AccessTab({ pathId }: { pathId: string }) {
                                             position: "absolute", top: 2,
                                             left: desired ? 22 : 2,
                                             width: 18, height: 18, borderRadius: "50%",
-                                            background: "#fff",
+                                            background: "rgba(255,255,255,0.95)",
                                             transition: "left 200ms",
                                         }} />
                                     </button>
                                 </td>
-                                <td style={{ padding: "10px", color: "#94A3B8", fontSize: 11 }}>
+                                <td style={{ padding: "10px", color: "var(--text-3)", fontSize: 11 }}>
                                     {t.grantedAt ? new Date(t.grantedAt).toLocaleDateString("fr-FR") : "—"}
                                 </td>
-                                <td style={{ padding: "10px", color: "#94A3B8", fontSize: 11 }}>
+                                <td style={{ padding: "10px", color: "var(--text-3)", fontSize: 11 }}>
                                     {t.grantedByEmail ?? "—"}
                                 </td>
                             </tr>
@@ -507,7 +507,7 @@ function StatsTab({ pathId }: { pathId: string }) {
     }, [pathId]);
 
     if (loading) return <div style={{ ...card, textAlign: "center", padding: 40 }}>Chargement...</div>;
-    if (!stats) return <div style={{ ...card, textAlign: "center", padding: 40, color: "#94A3B8" }}>Pas de statistiques disponibles.</div>;
+    if (!stats) return <div style={{ ...card, textAlign: "center", padding: 40, color: "var(--text-3)" }}>Pas de statistiques disponibles.</div>;
 
     const kpis = [
         ["Tenants avec accès", stats.tenantsWithAccess],
@@ -522,7 +522,7 @@ function StatsTab({ pathId }: { pathId: string }) {
             {kpis.map(([label, val]) => (
                 <div key={label} style={card}>
                     <div style={labelCss}>{label}</div>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: "#f87171", marginTop: 8 }}>{val}</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: "var(--danger)", marginTop: 8 }}>{val}</div>
                 </div>
             ))}
         </div>

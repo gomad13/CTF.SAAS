@@ -27,7 +27,7 @@ export default function ParcoursHeader({
         <div className="flex flex-col gap-5">
             <Link
                 href="/dashboard/parcours"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted transition-colors duration-200 hover:text-[#60A5FA]"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted transition-colors duration-200 hover:text-primary"
             >
                 <ArrowLeft size={14} />
                 Mes parcours

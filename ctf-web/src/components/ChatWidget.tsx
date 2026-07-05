@@ -186,19 +186,19 @@ export default function ChatWidget({
                     width: 56,
                     height: 56,
                     borderRadius: "50%",
-                    background: isAvailable ? "linear-gradient(135deg, var(--accent), var(--accent-hover))" : "#374151",
+                    background: isAvailable ? "linear-gradient(135deg, var(--accent), var(--accent-hover))" : "var(--surface-2)",
                     border: "none",
                     cursor: "pointer",
                     zIndex: 1000,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    boxShadow: isAvailable ? "0 4px 20px rgba(59,130,246,0.4)" : "0 4px 12px rgba(0,0,0,0.3)",
+                    boxShadow: isAvailable ? "0 4px 20px rgba(34,197,94,0.4)" : "0 4px 12px rgba(0,0,0,0.3)",
                 }}
                 title={isAvailable ? "Sentys Bot — Assistante IA" : "IA indisponible"}
             >
                 {isOpen ? (
-                    <span style={{ color: "#fff", fontSize: 22 }}>×</span>
+                    <span style={{ color: "white", fontSize: 22 }}>×</span>
                 ) : (
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm1-10c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" fill="white" />
@@ -207,8 +207,8 @@ export default function ChatWidget({
                 <span style={{
                     position: "absolute", top: 2, right: 2,
                     width: 12, height: 12, borderRadius: "50%",
-                    background: isAvailable ? "#10B981" : "#ef4444",
-                    border: "2px solid #0A0A0B",
+                    background: isAvailable ? "var(--success)" : "var(--danger)",
+                    border: "2px solid var(--bg)",
                 }} />
             </button>
 
@@ -221,18 +221,18 @@ export default function ChatWidget({
                     width: "min(360px, calc(100vw - 32px))",
                     height: "min(560px, calc(100vh - 120px))",
                     background: "var(--bg-surface)",
-                    border: "1px solid rgba(59,130,246,0.25)",
+                    border: "1px solid var(--accent-border)",
                     borderRadius: 16,
                     display: "flex",
                     flexDirection: "column",
                     zIndex: 1000,
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.1)",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,197,94,0.1)",
                     overflow: "hidden",
                 }}>
                     {/* Header */}
                     <div style={{
                         padding: "16px 20px",
-                        borderBottom: "1px solid #E2E8F0",
+                        borderBottom: "1px solid var(--border)",
                         background: "var(--bg-base)",
                         display: "flex",
                         alignItems: "center",
@@ -249,14 +249,14 @@ export default function ChatWidget({
                                 <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: 14 }}>Sentys Bot</div>
                                 <div style={{
                                     fontSize: 11,
-                                    color: isAvailable ? "#4ade80" : "#f87171",
+                                    color: isAvailable ? "var(--success-t)" : "var(--danger-t)",
                                     display: "flex",
                                     alignItems: "center",
                                     gap: 4,
                                 }}>
                                     <span style={{
                                         width: 6, height: 6, borderRadius: "50%",
-                                        background: isAvailable ? "#10B981" : "#ef4444",
+                                        background: isAvailable ? "var(--success)" : "var(--danger)",
                                         display: "inline-block",
                                     }} />
                                     {isAvailable
@@ -272,7 +272,7 @@ export default function ChatWidget({
                                 onClick={() => setMessages([])}
                                 style={{
                                     background: "transparent",
-                                    border: "1px solid rgba(255,255,255,0.1)",
+                                    border: "1px solid var(--border)",
                                     borderRadius: 6,
                                     color: "var(--text-muted)",
                                     cursor: "pointer",
@@ -295,8 +295,8 @@ export default function ChatWidget({
                         {messages.length === 0 && (
                             <div>
                                 <div style={{
-                                    background: "rgba(59,130,246,0.08)",
-                                    border: "1px solid rgba(59,130,246,0.2)",
+                                    background: "var(--accent-subtle)",
+                                    border: "1px solid var(--accent-border)",
                                     borderRadius: 12,
                                     padding: 14,
                                     marginBottom: 16,
@@ -308,7 +308,7 @@ export default function ChatWidget({
                                         {challengeTitle && (
                                             <>
                                                 <br /><br />
-                                                <span style={{ color: "#fbbf24" }}>
+                                                <span style={{ color: "var(--warning)" }}>
                                                     📌 Challenge actuel : <strong>{challengeTitle}</strong>
                                                 </span>
                                             </>
@@ -323,7 +323,7 @@ export default function ChatWidget({
                                         borderRadius: 8,
                                         padding: 12,
                                         fontSize: 12,
-                                        color: "#f87171",
+                                        color: "var(--danger-t)",
                                     }}>
                                         ⚠️ L&apos;IA locale n&apos;est pas disponible.<br />
                                         Assurez-vous qu&apos;Ollama est lancé :
@@ -333,7 +333,7 @@ export default function ChatWidget({
                                             background: "var(--bg-base)",
                                             padding: "4px 8px",
                                             borderRadius: 4,
-                                            color: "#4ade80",
+                                            color: "var(--success-t)",
                                         }}>ollama serve</code>
                                     </div>
                                 ) : (
@@ -347,7 +347,7 @@ export default function ChatWidget({
                                                     width: "100%",
                                                     textAlign: "left",
                                                     background: "var(--bg-card)",
-                                                    border: "1px solid #E2E8F0",
+                                                    border: "1px solid var(--border)",
                                                     borderRadius: 8,
                                                     padding: "8px 12px",
                                                     color: "var(--text-secondary)",
@@ -390,8 +390,8 @@ export default function ChatWidget({
                                         ? "1px solid rgba(239,68,68,0.3)"
                                         : msg.role === "user"
                                             ? "none"
-                                            : "1px solid rgba(255,255,255,0.06)",
-                                    color: msg.error ? "#f87171" : "#ffffff",
+                                            : "1px solid var(--border)",
+                                    color: msg.error ? "var(--danger-t)" : "white",
                                     fontSize: 13,
                                     lineHeight: 1.6,
                                     whiteSpace: "pre-wrap",
@@ -415,7 +415,7 @@ export default function ChatWidget({
                                 }}>🤖</div>
                                 <div style={{
                                     background: "var(--bg-card)",
-                                    border: "1px solid #E2E8F0",
+                                    border: "1px solid var(--border)",
                                     borderRadius: "14px 14px 14px 4px",
                                     padding: "12px 16px",
                                     display: "flex", gap: 4, alignItems: "center",
@@ -435,9 +435,9 @@ export default function ChatWidget({
                     </div>
 
                     {/* Footer */}
-                    <div style={{ padding: "12px 16px", borderTop: "1px solid #E2E8F0", background: "var(--bg-base)" }}>
+                    <div style={{ padding: "12px 16px", borderTop: "1px solid var(--border)", background: "var(--bg-base)" }}>
                         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                            <span style={{ fontSize: 10, color: remaining < 10 ? "#f87171" : "#6b7280" }}>
+                            <span style={{ fontSize: 10, color: remaining < 10 ? "var(--danger-t)" : "var(--text-3)" }}>
                                 {remaining} messages restants / heure
                             </span>
                         </div>
@@ -453,14 +453,14 @@ export default function ChatWidget({
                                 style={{
                                     flex: 1,
                                     background: "var(--bg-card)",
-                                    border: "1px solid #E2E8F0",
+                                    border: "1px solid var(--border)",
                                     borderRadius: 10,
                                     padding: "10px 14px",
                                     color: "var(--text-primary)",
                                     fontSize: 13,
                                     outline: "none",
                                 }}
-                                onFocus={e => { e.currentTarget.style.borderColor = "rgba(59,130,246,0.5)"; }}
+                                onFocus={e => { e.currentTarget.style.borderColor = "var(--accent)"; }}
                                 onBlur={e => { e.currentTarget.style.borderColor = "var(--border)"; }}
                             />
                             <button

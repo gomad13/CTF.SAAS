@@ -103,19 +103,19 @@ export default function ModesSettings() {
     return (
         <div className="flex flex-col gap-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">Modes entreprise</h2>
-            <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
+            <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
                 {MODES.map((m, idx) => {
                     const enabled = isEnabled(m.key);
                     const Icon = m.icon;
                     return (
                         <div
                             key={m.key}
-                            className={`flex items-start justify-between gap-4 px-4 py-4 sm:px-6 sm:py-5 ${idx > 0 ? "border-t border-[#E2E8F0]" : ""}`}
+                            className={`flex items-start justify-between gap-4 px-4 py-4 sm:px-6 sm:py-5 ${idx > 0 ? "border-t border-border" : ""}`}
                         >
                             <div className="flex items-start gap-3">
                                 <div
                                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                                    style={{ background: "rgba(59,130,246,0.10)", color: "#1E40AF" }}
+                                    style={{ background: "var(--accent-subtle)", color: "var(--accent)" }}
                                 >
                                     <Icon size={18} strokeWidth={2} />
                                 </div>
@@ -132,7 +132,7 @@ export default function ModesSettings() {
                                     disabled={statusQ.isLoading || toggleM.isPending}
                                     onChange={e => setPending({ mode: m, nextValue: e.target.checked })}
                                 />
-                                <span className="relative h-6 w-11 rounded-full bg-[#E2E8F0] transition-colors duration-200 peer-checked:bg-[#3B82F6] peer-disabled:opacity-50">
+                                <span className="relative h-6 w-11 rounded-full bg-surface-2 transition-colors duration-200 peer-checked:bg-primary peer-disabled:opacity-50">
                                     <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
                                 </span>
                             </label>
@@ -142,8 +142,8 @@ export default function ModesSettings() {
             </div>
 
             {pending && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0B]/60 backdrop-blur-sm">
-                    <div className="mx-4 w-full max-w-md rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-lg">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="mx-4 w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg">
                         <div className="flex items-start justify-between gap-3">
                             <h4 className="text-base font-semibold text-fg-heading">
                                 {pending.nextValue ? `Activer ${pending.mode.title} ?` : `Désactiver ${pending.mode.title} ?`}
@@ -165,7 +165,7 @@ export default function ModesSettings() {
                             <button
                                 type="button"
                                 onClick={() => setPending(null)}
-                                className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]"
+                                className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2"
                             >
                                 Annuler
                             </button>
@@ -173,7 +173,7 @@ export default function ModesSettings() {
                                 type="button"
                                 onClick={() => toggleM.mutate({ mode: pending.mode, value: pending.nextValue })}
                                 disabled={toggleM.isPending}
-                                className="rounded-lg bg-[#3B82F6] px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#2563EB] disabled:opacity-60"
+                                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover disabled:opacity-60"
                             >
                                 {toggleM.isPending ? "En cours…" : "Confirmer"}
                             </button>
@@ -183,7 +183,7 @@ export default function ModesSettings() {
             )}
 
             {toast && (
-                <div className="fixed bottom-6 right-6 z-50 rounded-lg border border-[#E2E8F0] bg-surface px-4 py-3 text-sm font-medium text-fg-heading shadow-lg">
+                <div className="fixed bottom-6 right-6 z-50 rounded-lg border border-border bg-surface px-4 py-3 text-sm font-medium text-fg-heading shadow-lg">
                     {toast}
                 </div>
             )}

@@ -23,19 +23,19 @@ const TYPE_META: Record<InviteType, { short: string; label: string; help: string
         short: "Application",
         label: "Application — inscription générale",
         help: "Invite à créer un compte Sentys, SANS rattachement à une entreprise. Mène à la page d'inscription générale.",
-        cls: "bg-[#EEF2FF] text-[#4338CA]",
+        cls: "bg-info/10 text-info",
     },
     enterprise_signup: {
         short: "Inscription",
         label: "Entreprise — inscription (nouveau compte)",
         help: "Une personne SANS compte s'inscrit avec l'entreprise pré-remplie et verrouillée, puis est rattachée automatiquement (rôle Membre).",
-        cls: "bg-[#ECFDF5] text-[#047857]",
+        cls: "bg-success/10 text-success",
     },
     enterprise_join: {
         short: "Rejoindre",
         label: "Entreprise — rejoindre (compte existant)",
         help: "Une personne qui a DÉJÀ un compte scanne le QR et rejoint l'entreprise (rôle Membre). Ses autres sociétés sont conservées.",
-        cls: "bg-[#EFF6FF] text-[#1D4ED8]",
+        cls: "bg-primary/10 text-primary",
     },
 };
 
@@ -49,7 +49,7 @@ type Status = { label: string; cls: string };
 
 function inviteStatus(i: InviteDto): Status {
     if (i.isRevoked) return { label: "Révoquée", cls: "bg-danger/10 text-danger" };
-    if (i.isExpired) return { label: "Expirée", cls: "bg-[#F1F5F9] text-fg-muted" };
+    if (i.isExpired) return { label: "Expirée", cls: "bg-surface-2 text-fg-muted" };
     if (i.usedCount >= i.maxUses) return { label: "Épuisée", cls: "bg-warning/10 text-warning" };
     return { label: "Active", cls: "bg-success/10 text-success" };
 }
@@ -134,7 +134,7 @@ export default function InvitesManager() {
     return (
         <div className="flex flex-col gap-6">
             {/* Générateur */}
-            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
                 <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-fg-body">
                     <Plus size={14} /> Générer une invitation QR
                 </h2>
@@ -148,7 +148,7 @@ export default function InvitesManager() {
                         return (
                             <button
                                 key={t} type="button" onClick={() => setType(t)}
-                                className={`flex flex-col gap-1.5 rounded-lg border p-4 text-left transition-colors duration-200 ${active ? "border-primary bg-[#EFF6FF]" : "border-[#E2E8F0] bg-surface hover:bg-[#F8FAFC]"}`}
+                                className={`flex flex-col gap-1.5 rounded-lg border p-4 text-left transition-colors duration-200 ${active ? "border-primary bg-primary/10" : "border-border bg-surface hover:bg-surface-2"}`}
                             >
                                 <span className="flex items-center gap-2 text-sm font-semibold text-fg-heading">
                                     <Icon size={15} className={active ? "text-primary" : "text-fg-muted"} /> {meta.short}
@@ -165,7 +165,7 @@ export default function InvitesManager() {
                         <select
                             value={hours}
                             onChange={e => setHours(Number(e.target.value))}
-                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading"
+                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading"
                         >
                             {DURATIONS.map(d => <option key={d.hours} value={d.hours}>{d.label}</option>)}
                         </select>
@@ -175,7 +175,7 @@ export default function InvitesManager() {
                         <input
                             type="number" min={1} max={1000} value={maxUses}
                             onChange={e => setMaxUses(e.target.value)}
-                            className="w-[120px] rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading"
+                            className="w-[120px] rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading"
                         />
                     </label>
                     <button
@@ -197,7 +197,7 @@ export default function InvitesManager() {
                 )}
 
                 {created && (
-                    <div className="mt-6 grid grid-cols-1 gap-6 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-6 sm:grid-cols-[auto_1fr]">
+                    <div className="mt-6 grid grid-cols-1 gap-6 rounded-lg border border-border bg-surface-2 p-6 sm:grid-cols-[auto_1fr]">
                         <div className="flex flex-col items-center gap-2">
                             <div ref={qrRef} className="rounded-lg bg-surface p-3 shadow-sm">
                                 <QRCode value={created.joinUrl} size={160} />
@@ -228,11 +228,11 @@ export default function InvitesManager() {
                                 <input
                                     readOnly value={created.joinUrl}
                                     onFocus={e => e.currentTarget.select()}
-                                    className="min-w-0 flex-1 rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 font-mono text-xs text-fg-body"
+                                    className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 font-mono text-xs text-fg-body"
                                 />
                                 <button
                                     type="button" onClick={() => copyUrl(created.joinUrl)}
-                                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]"
+                                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2"
                                 >
                                     {copied ? <><Check size={13} className="text-success" /> Copié</> : <><Copy size={13} /> Copier</>}
                                 </button>
@@ -243,10 +243,10 @@ export default function InvitesManager() {
             </section>
 
             {/* Liste */}
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
+            <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
                 <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                    <thead className="bg-[#F1F5F9] text-xs uppercase tracking-wider text-fg-body">
+                    <thead className="bg-table-head text-xs uppercase tracking-wider text-fg-body">
                         <tr>
                             <th className="px-6 py-3 text-left font-semibold">Type</th>
                             <th className="px-6 py-3 text-left font-semibold">Statut</th>
@@ -256,13 +256,13 @@ export default function InvitesManager() {
                             <th className="px-6 py-3 text-right font-semibold">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E2E8F0]">
+                    <tbody className="divide-y divide-border">
                         {(listQ.data ?? []).map(i => {
                             const st = inviteStatus(i);
                             const tm = TYPE_META[i.type];
                             const canRevoke = !i.isRevoked && !i.isExpired;
                             return (
-                                <tr key={i.id} className="hover:bg-[#F8FAFC]">
+                                <tr key={i.id} className="hover:bg-surface-2">
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${tm.cls}`}>
                                             {tm.short}
@@ -282,7 +282,7 @@ export default function InvitesManager() {
                                             type="button"
                                             disabled={!canRevoke || revokeM.isPending}
                                             onClick={() => { if (confirm("Révoquer cette invitation ? Elle ne pourra plus être utilisée.")) revokeM.mutate(i.id); }}
-                                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#FCA5A5] bg-surface px-3 py-1.5 text-xs font-medium text-danger transition-colors duration-200 hover:bg-[#FEE2E2] disabled:cursor-not-allowed disabled:opacity-40"
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-danger/40 bg-surface px-3 py-1.5 text-xs font-medium text-danger transition-colors duration-200 hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-40"
                                             title={canRevoke ? "Révoquer" : "Déjà inactive"}
                                         >
                                             <Trash2 size={13} /> Révoquer

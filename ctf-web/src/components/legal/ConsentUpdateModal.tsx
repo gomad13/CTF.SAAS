@@ -57,14 +57,14 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
             aria-labelledby="consent-update-title"
             style={{
                 position: "fixed", inset: 0, zIndex: 9999,
-                background: "rgba(2, 52, 54, 0.85)",
+                background: "rgba(0, 0, 0, 0.7)",
                 backdropFilter: "blur(8px)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 padding: 16,
             }}
         >
             <div style={{
-                background: "#FFFFFF", color: "#1E293B",
+                background: "var(--surface)", color: "var(--text)",
                 borderRadius: 12, padding: "clamp(20px, 5vw, 28px)", maxWidth: 640, width: "100%",
                 maxHeight: "90vh", overflowY: "auto",
                 boxShadow: "0 20px 50px -10px rgba(0,0,0,0.4)",
@@ -73,7 +73,7 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                 <h2 id="consent-update-title" style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px" }}>
                     Mise à jour de nos conditions
                 </h2>
-                <p style={{ fontSize: 14, lineHeight: 1.6, color: "#475569", margin: "0 0 20px" }}>
+                <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-2)", margin: "0 0 20px" }}>
                     Pour continuer à utiliser Sentys, merci d&apos;accepter la nouvelle version
                     {missing.length > 1 ? " des documents suivants" : " du document suivant"}.
                 </p>
@@ -81,13 +81,13 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
                     {missing.map(m => (
                         <div key={m.documentSlug} style={{
-                            border: "1px solid #E2E8F0", borderRadius: 10, padding: 16,
-                            background: "#F8FAFC",
+                            border: "1px solid var(--border)", borderRadius: 10, padding: 16,
+                            background: "var(--surface-2)",
                         }}>
                             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
                                 <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontSize: 15, fontWeight: 600, color: "#1E293B" }}>{m.documentTitle}</div>
-                                    <div style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>
+                                    <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>{m.documentTitle}</div>
+                                    <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                                         {m.lastAcceptedVersion
                                             ? <>Version acceptée : <strong>{m.lastAcceptedVersion}</strong> → nouvelle : <strong>{m.currentVersion}</strong></>
                                             : <>Nouvelle version : <strong>{m.currentVersion}</strong></>
@@ -98,6 +98,7 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                                     href={`/legal/${m.documentSlug}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    className="transition-colors duration-200 hover:text-[var(--accent-hover)]"
                                     style={{ fontSize: 12, color: "var(--accent)", whiteSpace: "nowrap", textDecoration: "underline" }}
                                 >
                                     Lire la nouvelle version
@@ -105,8 +106,8 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                             </div>
                             {m.changeLog && (
                                 <div style={{
-                                    fontSize: 12, color: "#475569",
-                                    background: "#FFFFFF", border: "1px solid #E2E8F0",
+                                    fontSize: 12, color: "var(--text-2)",
+                                    background: "var(--surface)", border: "1px solid var(--border)",
                                     borderRadius: 6, padding: "8px 10px", marginBottom: 10,
                                 }}>
                                     <strong>Changements&nbsp;:</strong> {m.changeLog}
@@ -127,8 +128,8 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
 
                 {error && (
                     <div role="alert" style={{
-                        background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
-                        color: "#B91C1C", padding: "10px 12px", borderRadius: 8, fontSize: 13, marginBottom: 12,
+                        background: "var(--danger-subtle)", border: "1px solid var(--danger-subtle)",
+                        color: "var(--danger-t)", padding: "10px 12px", borderRadius: 8, fontSize: 13, marginBottom: 12,
                     }}>{error}</div>
                 )}
 
@@ -140,8 +141,8 @@ export default function ConsentUpdateModal({ missing, onAccepted }: Props) {
                         width: "100%",
                         padding: "12px 20px",
                         minHeight: 44,
-                        background: allChecked && !submitting ? "var(--accent)" : "#94A3B8",
-                        color: "#FFFFFF",
+                        background: allChecked && !submitting ? "var(--accent)" : "var(--text-3)",
+                        color: "var(--on-accent)",
                         border: "none",
                         borderRadius: 10,
                         fontSize: 14,
