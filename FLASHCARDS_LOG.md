@@ -82,3 +82,62 @@ Route 100% **isolée**, données démo en dur, **aucune** table BDD, **aucun** p
 
 ## Bugs fonctionnels repérés ailleurs (NOTÉS, non corrigés)
 (aucun rencontré durant cette passe)
+
+---
+
+# PASSE 2 — 3ᵉ MODE : MEMORY (association par paires)
+
+> Périmètre : ajouter UNIQUEMENT le mode Memory au menu `/flashcards-test`. Ne PAS toucher aux modes Révision/Épreuve ni au reste de l'app.
+> Backup : `backups/flashcards-memory-20260705/frontend.tgz`. Charte tokens, 0 hex, AA, `prefers-reduced-motion`.
+
+## PLAN
+
+### Fichiers créés
+| Fichier | Rôle |
+|---|---|
+| `ctf-web/src/lib/flashcards-memory-demo.ts` | Paires démo cyber (risque ↔ contre-mesure), `MEMORY_PAIR_COUNT` configurable |
+| `ctf-web/src/components/flashcards/MemoryCard.tsx` | Tuile memory : flip 3D face-cachée/face-visible, états verrouillé/juste/faux |
+| `ctf-web/src/components/flashcards/MemoryMode.tsx` | Jeu : grille mélangée, logique de paires, JUSTE/FAUX, timer, compteur de coups, récap |
+
+### Fichiers modifiés (dans le périmètre flashcards, ajout seulement)
+| Fichier | Changement |
+|---|---|
+| `components/flashcards/FlashcardsMenu.tsx` | +1 entrée « Memory » (3ᵉ carte de choix) |
+| `app/flashcards-test/page.tsx` | +état `memory` → rend `MemoryMode` |
+
+### Données
+8 paires **risque ↔ contre-mesure** (cyber, textes courts pour la grille) → 16 tuiles, grille 4×4. `MEMORY_PAIR_COUNT` ajustable.
+
+### Logique de jeu
+- Grille de tuiles face cachée, mélange aléatoire (`Math.random`, runtime navigateur) à chaque partie.
+- Clic → flip 3D. 2ᵉ clic → +1 coup, évaluation :
+  - même `pairId` → **JUSTE** (pulse vert accent + check), tuiles verrouillées révélées.
+  - sinon → **FAUX** (shake + flash rouge danger), re-retournement après court délai (setTimeout nettoyé).
+- Fin quand toutes les paires trouvées → récap (temps mm:ss, nb de coups, Rejouer = remélange).
+- Verrou (`lock`) pendant l'évaluation pour éviter le 3ᵉ clic. `prefers-reduced-motion` → flip/scale/shake désactivés, feedback couleur+icône conservés.
+
+### Réutilisation
+Même technique d'animation que le mode existant (rotateY + perspective + backface-hidden ; overlays glow token). `useSessionTimer` réutilisé.
+
+### Critère d'arrêt
+Memory jouable en local, flip au clic, détection paire + juste/faux, re-retournement si non-match, fin quand tout trouvé, timer + compteur + récap ; `npm run build` OK ; 0 hex ; AA. → arrêt + MAJ log.
+
+## JOURNAL — PASSE 2
+
+1. ✅ Backup `backups/flashcards-memory-20260705/frontend.tgz` (5,5 Mo).
+2. ✅ `lib/flashcards-memory-demo.ts` : 8 paires risque ↔ contre-mesure + `buildShuffledDeck()` (Fisher-Yates) + `MEMORY_PAIR_COUNT`.
+3. ✅ `MemoryCard.tsx` : tuile flip 3D (dos ShieldQuestion / face contenu), états `matched` (vert + check) et `wrong` (shake + bordure rouge), badge Risque/Parade, reduced-motion.
+4. ✅ `MemoryMode.tsx` : grille 4×4, mélange **côté client** (`useEffect`, pas de mismatch d'hydratation), logique 1re/2e carte + verrou anti-3e-clic, JUSTE (verrouillage à 380 ms) / FAUX (re-retournement à 900 ms), chrono `useSessionTimer`, compteur de coups, récap (temps + coups + Rejouer=remélange). Timeouts nettoyés à l'unmount.
+5. ✅ Intégration menu : +1 carte « Memory » dans `FlashcardsMenu` (grille passée à `sm:grid-cols-3`), +état `memory` dans `page.tsx` (remount via `key` → remélange).
+6. ✅ Modes Révision et Épreuve **non modifiés** (ajout seulement).
+
+## RAPPORT FINAL — PASSE 2 (Memory) TERMINÉE ✅
+- [x] Mode Memory jouable depuis `/flashcards-test` : grille face cachée, flip 3D au clic, détection de paire avec JUSTE/FAUX, re-retournement si non-match, fin quand toutes les paires trouvées.
+- [x] Timer mm:ss + compteur de coups visibles + dans le récap ; Rejouer remélange.
+- [x] Mélange aléatoire à chaque partie ; `prefers-reduced-motion` respecté (flip/scale/shake désactivés, feedback couleur+icône conservés).
+- [x] `npm run build` (local) → **✓ Compiled successfully**. **Zéro hex en dur** (grep = 0). Contraste AA (tokens).
+- Vérif serveur dev : menu rend Révision · Épreuve · Memory, HTTP 200.
+- Périmètre respecté : aucun autre écran/logique touché, aucune BDD, aucun déploiement/push/serveur.
+
+### Bugs fonctionnels repérés ailleurs (PASSE 2)
+(aucun rencontré)

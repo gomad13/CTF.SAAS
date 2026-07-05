@@ -8,8 +8,9 @@ import { DEMO_FLASHCARDS } from "@/lib/flashcards-demo";
 import FlashcardsMenu from "@/components/flashcards/FlashcardsMenu";
 import RevisionMode from "@/components/flashcards/RevisionMode";
 import EpreuveMode from "@/components/flashcards/EpreuveMode";
+import MemoryMode from "@/components/flashcards/MemoryMode";
 
-type Screen = "menu" | "revision" | "epreuve";
+type Screen = "menu" | "revision" | "epreuve" | "memory";
 
 export default function FlashcardsTestPage() {
     const [screen, setScreen] = useState<Screen>("menu");
@@ -26,6 +27,8 @@ export default function FlashcardsTestPage() {
                 {screen === "epreuve" && (
                     <EpreuveMode key="epreuve-run" cards={DEMO_FLASHCARDS} onExit={backToMenu} />
                 )}
+                {/* key force le remount → grille remélangée + chrono/coups réinitialisés */}
+                {screen === "memory" && <MemoryMode key="memory-run" onExit={backToMenu} />}
             </div>
         </main>
     );

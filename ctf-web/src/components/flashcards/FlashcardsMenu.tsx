@@ -1,11 +1,11 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { BookOpen, Timer, Layers, ArrowRight } from "lucide-react";
+import { BookOpen, Timer, Puzzle, Layers, ArrowRight } from "lucide-react";
 
 type Props = {
     total: number;
-    onPick: (mode: "revision" | "epreuve") => void;
+    onPick: (mode: "revision" | "epreuve" | "memory") => void;
 };
 
 /** Écran d'accueil du menu de test flashcards : choix Révision / Épreuve. */
@@ -26,6 +26,13 @@ export default function FlashcardsMenu({ total, onPick }: Props) {
             desc: "Répondez au QCM contre la montre. Feedback immédiat juste / faux, chrono et score en fin de session.",
             cta: "Se tester",
         },
+        {
+            mode: "memory" as const,
+            icon: Puzzle,
+            title: "Memory",
+            desc: "Retrouvez les paires risque ↔ parade. Grille mélangée, flip au clic, chrono et nombre de coups.",
+            cta: "Jouer",
+        },
     ];
 
     return (
@@ -40,7 +47,7 @@ export default function FlashcardsMenu({ total, onPick }: Props) {
                 </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
                 {cards.map((c, i) => (
                     <motion.button
                         key={c.mode}
