@@ -17,6 +17,7 @@ import FlashCardsChallenge from "@/components/challenges/FlashCardsChallenge";
 import ChallengeHeader from "@/components/challenges/ChallengeHeader";
 import ChallengeIntro from "@/components/challenges/ChallengeIntro";
 import ChallengeReminderBar from "@/components/challenges/ChallengeReminderBar";
+import Reveal from "@/components/Reveal";
 import {
     DndContext,
     closestCenter,
@@ -135,7 +136,7 @@ export default function ChallengePage({ params }: { params: Promise<{ id: string
                 ← Retour au parcours
             </button>
 
-            <ChallengeHeader challenge={c} />
+            <Reveal><ChallengeHeader challenge={c} /></Reveal>
 
             {showIntro ? (
                 <ChallengeIntro
@@ -373,7 +374,7 @@ function InteractiveMission({ challengeId, onComplete }: { challengeId: string; 
     if (error) return <p className="text-sm text-red-400 py-6 text-center">{error}</p>;
     if (!data)  return (
         <div className="flex items-center justify-center gap-3 py-12 text-fg-heading">
-            <span className="h-5 w-5 rounded-full border-2 border-border border-t-[#3B82F6] animate-spin" />
+            <span className="h-5 w-5 rounded-full border-2 border-border border-t-primary animate-spin" />
             <span className="text-sm">Chargement de la mission…</span>
         </div>
     );
