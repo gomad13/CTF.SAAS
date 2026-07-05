@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import Reveal from "@/components/Reveal";
 
 // ── Password strength (shared logic) ─────────────────────────────────────────
 const PASSWORD_CRITERIA = [
@@ -16,9 +17,9 @@ const PASSWORD_CRITERIA = [
 ] as const;
 
 const STRENGTH_LEVELS = [
-    { min: 0, max: 0, label: "Très faible", color: "#ef4444", pct: "0%"   },
-    { min: 1, max: 2, label: "Faible",      color: "#f97316", pct: "40%"  },
-    { min: 3, max: 3, label: "Moyen",       color: "#eab308", pct: "60%"  },
+    { min: 0, max: 0, label: "Très faible", color: "var(--danger)", pct: "0%"   },
+    { min: 1, max: 2, label: "Faible",      color: "var(--warning)", pct: "40%"  },
+    { min: 3, max: 3, label: "Moyen",       color: "var(--warning)", pct: "60%"  },
     { min: 4, max: 4, label: "Fort",        color: "var(--pr)", pct: "80%"  },
     { min: 5, max: 5, label: "Très fort",   color: "var(--pr)", pct: "100%" },
 ] as const;
@@ -111,6 +112,7 @@ function ResetPasswordForm() {
             </div>
 
             <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-16">
+                <Reveal>
                 <div className="w-full rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 shadow-sm">
 
                     {/* Icon */}
@@ -168,7 +170,7 @@ function ResetPasswordForm() {
                                         const ok = c.test(password);
                                         return (
                                             <li key={c.label} className="flex items-center gap-2 text-xs">
-                                                <span style={{ color: ok ? "var(--pr)" : "#ef4444" }}>
+                                                <span style={{ color: ok ? "var(--pr)" : "var(--danger)" }}>
                                                     {ok ? "✓" : "✗"}
                                                 </span>
                                                 <span className={ok ? "text-neutral-300" : "text-neutral-300"}>
@@ -209,6 +211,7 @@ function ResetPasswordForm() {
                         </button>
                     </form>
                 </div>
+                </Reveal>
             </div>
         </div>
     );
