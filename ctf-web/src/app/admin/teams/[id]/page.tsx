@@ -10,6 +10,8 @@ import {
 import { apiFetch } from "@/lib/api";
 import { renderTeamIcon } from "@/components/teams/teamIcons";
 import TeamEditModal from "@/components/teams/TeamEditModal";
+import Reveal from "@/components/Reveal";
+import CountUp from "@/components/CountUp";
 
 type Team = {
     id: string; name: string; description: string | null; color: string | null; icon: string | null;
@@ -31,9 +33,9 @@ type Stats = {
 type TabKey = "members" | "parcours" | "stats";
 
 function complianceColor(pct: number) {
-    if (pct >= 80) return "#047857";
-    if (pct >= 50) return "#B45309";
-    return "#B91C1C";
+    if (pct >= 80) return "var(--success)";
+    if (pct >= 50) return "var(--warning)";
+    return "var(--danger)";
 }
 
 export default function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,26 +49,27 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
     });
 
     if (teamQ.isLoading) return <div className="mx-auto max-w-5xl px-6 py-8 text-fg-muted">Chargement…</div>;
-    if (teamQ.isError || !teamQ.data) return <div className="mx-auto max-w-5xl px-6 py-8 text-[#B91C1C]">Équipe introuvable.</div>;
+    if (teamQ.isError || !teamQ.data) return <div className="mx-auto max-w-5xl px-6 py-8 text-danger">Équipe introuvable.</div>;
 
     const team = teamQ.data;
 
     return (
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
+            <Reveal>
             <div>
-                <Link href="/admin/teams" className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted transition-colors duration-200 hover:text-[#60A5FA]">
+                <Link href="/admin/teams" className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted transition-colors duration-200 hover:text-primary">
                     <ArrowLeft size={14} /> Équipes
                 </Link>
                 <div className="mt-3 flex items-start gap-3">
-                    <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-white"
-                        style={{ background: team.color ?? "#64748B" }}>
+                    <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-[var(--on-accent)]"
+                        style={{ background: team.color ?? "var(--text-2)" }}>
                         {renderTeamIcon(team.icon, 22)}
                     </span>
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                            <h1 className="truncate text-2xl font-bold text-[#F1F5F9]">{team.name}</h1>
+                            <h1 className="truncate text-2xl font-bold text-fg-heading">{team.name}</h1>
                             <button type="button" onClick={() => setEditing(true)}
-                                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[#334155] px-2.5 py-1 text-xs font-medium text-fg-muted transition-colors duration-200 hover:border-[#60A5FA] hover:text-[#60A5FA]"
+                                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-fg-muted transition-colors duration-200 hover:border-primary hover:text-primary"
                                 title="Modifier l'équipe (nom, capacité, couleur, icône)">
                                 <Pencil size={13} /> Modifier
                             </button>
@@ -85,13 +88,14 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
                     <span>·</span>
                     <span>Compliance <strong style={{ color: complianceColor(team.compliancePercent) }}>{team.compliancePercent}%</strong></span>
                     <span>·</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${team.isOpen ? "bg-success/15 text-success" : "bg-[#334155] text-fg-muted"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${team.isOpen ? "bg-success/15 text-success" : "bg-surface-2 text-fg-muted"}`}>
                         {team.isOpen ? "🔓 Ouverte" : "🔒 Fermée"}
                     </span>
                 </div>
             </div>
+            </Reveal>
 
-            <div className="flex gap-2 overflow-x-auto border-b border-[#334155]">
+            <div className="flex gap-2 overflow-x-auto border-b border-border">
                 {([
                     ["members",  "Membres",           <Users key="u" size={14} />],
                     ["parcours", "Parcours assignés", <BookOpen key="b" size={14} />],
@@ -99,7 +103,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
                 ] as [TabKey, string, React.ReactNode][]).map(([key, label, icon]) => (
                     <button key={key} type="button" onClick={() => setTab(key)}
                         className={`inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                            tab === key ? "border-primary text-[#F1F5F9]" : "border-transparent text-fg-muted hover:text-[#CBD5E1]"
+                            tab === key ? "border-primary text-fg-heading" : "border-transparent text-fg-muted hover:text-fg-body"
                         }`}>
                         {icon}{label}
                     </button>
@@ -166,17 +170,17 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
     return (
         <div className="flex flex-col gap-4">
             {memberError && (
-                <div className="rounded-lg border border-[#FCA5A5] bg-[#FEE2E2] px-3 py-2 text-xs text-[#B91C1C]">{memberError}</div>
+                <div className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">{memberError}</div>
             )}
             <div className="flex justify-end">
                 <button type="button" onClick={() => { setMemberError(null); setShowAdd(v => !v); }}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover">
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-primary-hover">
                     <UserPlus size={14} /> Ajouter des membres
                 </button>
             </div>
 
             {showAdd && (
-                <section className="rounded-xl border border-[#E2E8F0] bg-surface p-4 shadow-sm">
+                <section className="rounded-xl border border-border bg-surface p-4 shadow-sm">
                     <p className="mb-3 text-sm text-fg-body">Sélectionne les collaborateurs à intégrer dans cette équipe.</p>
                     <div className="grid max-h-64 grid-cols-1 gap-1 overflow-y-auto md:grid-cols-2">
                         {candidateUsers.map(u => {
@@ -188,11 +192,11 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                                     setSelected(next);
                                 }}
                                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors duration-200 ${
-                                        ok ? "border-primary bg-primary text-white" : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
+                                        ok ? "border-primary bg-primary text-[var(--on-accent)]" : "border-border bg-surface text-fg-body hover:bg-surface-2"
                                     }`}>
                                     <div>
                                         <div className="font-medium">{u.firstName} {u.lastName}</div>
-                                        <div className={`text-xs ${ok ? "text-white/80" : "text-fg-muted"}`}>{u.email}</div>
+                                        <div className={`text-xs ${ok ? "text-[var(--on-accent)]/80" : "text-fg-muted"}`}>{u.email}</div>
                                     </div>
                                     {ok && <span className="text-xs">✓</span>}
                                 </button>
@@ -203,22 +207,22 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                     <div className="mt-4 flex gap-2">
                         <button type="button" disabled={selected.size === 0 || addM.isPending}
                             onClick={() => addM.mutate()}
-                            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50">
+                            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50">
                             Ajouter ({selected.size})
                         </button>
                         <button type="button" onClick={() => { setShowAdd(false); setSelected(new Set()); }}
-                            className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
+                            className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2">
                             Annuler
                         </button>
                     </div>
                 </section>
             )}
 
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+                <div className="border-b border-border bg-table-head px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Membres ({membersQ.data?.length ?? 0})
                 </div>
-                <ul className="divide-y divide-[#E2E8F0]">
+                <ul className="divide-y divide-border">
                     {(membersQ.data ?? []).map(m => (
                         <li key={m.userId} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
                             <div className="min-w-0">
@@ -227,7 +231,7 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                             </div>
                             <div className="flex items-center gap-2">
                                 {otherTeams.length > 0 && (
-                                    <div className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-surface pl-2 text-fg-body">
+                                    <div className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface pl-2 text-fg-body">
                                         <ArrowRightLeft size={13} className="flex-shrink-0" />
                                         <select
                                             value=""
@@ -242,7 +246,7 @@ function MembersTab({ teamId, onChange }: { teamId: string; onChange: () => void
                                 )}
                                 <button type="button"
                                     onClick={() => { if (confirm(`Retirer ${m.firstName} ${m.lastName} de l'équipe ?`)) removeM.mutate(m.userId); }}
-                                    className="rounded-lg border border-[#FCA5A5] bg-surface p-1.5 text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2]" title="Retirer">
+                                    className="rounded-lg border border-danger/40 bg-surface p-1.5 text-danger transition-colors duration-200 hover:bg-danger/10" title="Retirer">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
@@ -296,21 +300,21 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
         <div className="flex flex-col gap-4">
             <div className="flex justify-end">
                 <button type="button" onClick={() => setShowAssign(v => !v)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover">
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-primary-hover">
                     <Plus size={14} /> Assigner un parcours
                 </button>
             </div>
 
             {showAssign && (
-                <section className="rounded-xl border border-[#E2E8F0] bg-surface p-4 shadow-sm">
+                <section className="rounded-xl border border-border bg-surface p-4 shadow-sm">
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_180px_auto]">
                         <select value={selectedPath} onChange={e => setSelectedPath(e.target.value)}
-                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading">
+                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading">
                             <option value="">— Choisir un parcours —</option>
                             {candidatePaths.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                         </select>
                         <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)}
-                            className="rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading" />
+                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading" />
                         <label className="flex items-center gap-2 px-3 text-sm text-fg-body">
                             <input type="checkbox" checked={isMandatory} onChange={e => setIsMandatory(e.target.checked)} />
                             Obligatoire
@@ -319,29 +323,29 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
                     <div className="mt-4 flex gap-2">
                         <button type="button" disabled={!selectedPath || assignM.isPending}
                             onClick={() => assignM.mutate()}
-                            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50">
+                            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50">
                             Assigner
                         </button>
                         <button type="button" onClick={() => setShowAssign(false)}
-                            className="rounded-lg border border-[#E2E8F0] bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
+                            className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2">
                             Annuler
                         </button>
                     </div>
                 </section>
             )}
 
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+                <div className="border-b border-border bg-table-head px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Parcours assignés ({parcoursQ.data?.length ?? 0})
                 </div>
-                <ul className="divide-y divide-[#E2E8F0]">
+                <ul className="divide-y divide-border">
                     {(parcoursQ.data ?? []).map(p => (
                         <li key={p.pathId} className="flex flex-col gap-3 px-4 py-3 sm:grid sm:grid-cols-[1fr_auto_auto_auto] sm:items-center sm:gap-4 sm:px-6">
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium text-fg-heading">{p.title}</span>
                                     {p.isMandatory && (
-                                        <span className="rounded-full bg-[#FEE2E2] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#B91C1C]">
+                                        <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-danger">
                                             Obligatoire
                                         </span>
                                     )}
@@ -352,14 +356,14 @@ function ParcoursTab({ teamId, onChange }: { teamId: string; onChange: () => voi
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 sm:contents">
-                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E2E8F0] sm:w-40 sm:flex-none">
+                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2 sm:w-40 sm:flex-none">
                                     <div className="h-full rounded-full bg-primary" style={{ width: `${p.avgCompletionPercent}%` }} />
                                 </div>
                                 <span className="shrink-0 text-sm font-semibold" style={{ color: complianceColor(p.avgCompletionPercent) }}>
                                     {p.avgCompletionPercent}%
                                 </span>
                                 <button type="button" onClick={() => { if (confirm(`Retirer l'assignation ?`)) removeM.mutate(p.pathId); }}
-                                    className="shrink-0 rounded-lg border border-[#FCA5A5] bg-surface p-1.5 text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2]" title="Retirer">
+                                    className="shrink-0 rounded-lg border border-danger/40 bg-surface p-1.5 text-danger transition-colors duration-200 hover:bg-danger/10" title="Retirer">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
@@ -384,17 +388,17 @@ function StatsTab({ teamId }: { teamId: string }) {
     const s = statsQ.data;
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Compliance globale</h3>
                 <div className="mt-2 text-3xl font-bold" style={{ color: complianceColor(s.overallCompletionPercent) }}>
-                    {s.overallCompletionPercent}%
+                    <CountUp value={s.overallCompletionPercent} suffix="%" />
                 </div>
                 <p className="mt-1 text-xs text-fg-muted">
                     {s.memberCount} membre{s.memberCount > 1 ? "s" : ""} · {s.parcoursCount} parcours
                 </p>
             </section>
 
-            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Top collaborateurs</h3>
                 <ul className="mt-3 flex flex-col gap-2">
                     {s.topMembers.map((m, i) => (
@@ -407,14 +411,14 @@ function StatsTab({ teamId }: { teamId: string }) {
                 </ul>
             </section>
 
-            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm md:col-span-2">
+            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm md:col-span-2">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Progression par parcours</h3>
                 <ul className="mt-3 flex flex-col gap-3">
                     {s.parcoursProgress.map(p => (
                         <li key={p.pathId} className="flex flex-col gap-2 text-sm sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-4">
                             <span className="text-fg-heading">{p.title}</span>
                             <div className="flex items-center gap-3 sm:contents">
-                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E2E8F0] sm:w-48 sm:flex-none">
+                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2 sm:w-48 sm:flex-none">
                                     <div className="h-full rounded-full bg-primary" style={{ width: `${p.avgCompletionPercent}%` }} />
                                 </div>
                                 <span className="shrink-0 font-semibold" style={{ color: complianceColor(p.avgCompletionPercent) }}>
