@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Reveal from "@/components/Reveal";
 
 type FeedbackCategory = "bug" | "amelioration" | "question" | "autre";
 
@@ -63,25 +64,28 @@ export default function FeedbackPage() {
     if (submitted) {
         return (
             <main style={shellStyle()}>
-                <div style={cardStyle()}>
-                    <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Merci 🙏</h1>
-                    <p style={{ marginBottom: 8 }}>
-                        Votre retour a bien été enregistré. L&apos;équipe Sentys le consultera très prochainement.
-                    </p>
-                    <p style={{ fontSize: 13, color: "var(--text-muted, #94A3B8)", marginBottom: 24 }}>
-                        En phase bêta, vos retours sont précieux pour faire évoluer la plateforme.
-                    </p>
-                    <Link href="/dashboard" style={primaryLinkStyle()}>Retour au tableau de bord</Link>
-                </div>
+                <Reveal>
+                    <div style={cardStyle()}>
+                        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Merci 🙏</h1>
+                        <p style={{ marginBottom: 8 }}>
+                            Votre retour a bien été enregistré. L&apos;équipe Sentys le consultera très prochainement.
+                        </p>
+                        <p style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 24 }}>
+                            En phase bêta, vos retours sont précieux pour faire évoluer la plateforme.
+                        </p>
+                        <Link href="/dashboard" style={primaryLinkStyle()}>Retour au tableau de bord</Link>
+                    </div>
+                </Reveal>
             </main>
         );
     }
 
     return (
         <main style={shellStyle()}>
+            <Reveal>
             <div style={cardStyle()}>
                 <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 8 }}>Envoyer un feedback</h1>
-                <p style={{ fontSize: 14, color: "var(--text-muted, #94A3B8)", marginBottom: 24, lineHeight: 1.6 }}>
+                <p style={{ fontSize: 14, color: "var(--text-3)", marginBottom: 24, lineHeight: 1.6 }}>
                     Bug, suggestion ou question : tout retour nous aide à améliorer Sentys. Vos messages sont lus par
                     l&apos;équipe produit.
                 </p>
@@ -132,7 +136,7 @@ export default function FeedbackPage() {
                     </Field>
 
                     {error && (
-                        <p role="alert" style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{error}</p>
+                        <p role="alert" style={{ color: "var(--danger)", fontSize: 13, margin: 0 }}>{error}</p>
                     )}
 
                     <button type="submit" disabled={submitting} style={primaryBtnStyle(submitting)}>
@@ -140,15 +144,16 @@ export default function FeedbackPage() {
                     </button>
                 </form>
             </div>
+            </Reveal>
         </main>
     );
 }
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
     return (
-        <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: "var(--text-secondary, #CBD5E1)" }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: "var(--text-2)" }}>
             <span style={{ fontWeight: 500 }}>
-                {label} {required && <span style={{ color: "#f87171" }}>*</span>}
+                {label} {required && <span style={{ color: "var(--danger)" }}>*</span>}
             </span>
             {children}
         </label>
@@ -165,20 +170,20 @@ function shellStyle(): React.CSSProperties {
 
 function cardStyle(): React.CSSProperties {
     return {
-        background: "var(--bg-card, #1E293B)",
-        border: "1px solid var(--border, #334155)",
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
         borderRadius: 12,
         padding: 32,
-        color: "var(--text-primary, #E2E8F0)",
+        color: "var(--text)",
     };
 }
 
 function inputStyle(): React.CSSProperties {
     return {
         width: "100%",
-        background: "var(--bg-input, #0A0A0B)",
-        border: "1px solid var(--border, #334155)",
-        color: "var(--text-primary, #E2E8F0)",
+        background: "var(--bg)",
+        border: "1px solid var(--border)",
+        color: "var(--text)",
         borderRadius: 8,
         padding: "10px 14px",
         fontSize: 14,
@@ -188,8 +193,8 @@ function inputStyle(): React.CSSProperties {
 
 function primaryBtnStyle(disabled = false): React.CSSProperties {
     return {
-        background: disabled ? "rgba(59,130,246,0.55)" : "#3B82F6",
-        color: "#FFFFFF",
+        background: disabled ? "color-mix(in srgb, var(--accent) 55%, transparent)" : "var(--accent)",
+        color: "var(--on-accent)",
         border: "none",
         borderRadius: 8,
         padding: "12px 20px",
@@ -197,18 +202,20 @@ function primaryBtnStyle(disabled = false): React.CSSProperties {
         fontWeight: 600,
         cursor: disabled ? "wait" : "pointer",
         marginTop: 4,
+        transition: "background 0.2s",
     };
 }
 
 function primaryLinkStyle(): React.CSSProperties {
     return {
         display: "inline-block",
-        background: "#3B82F6",
-        color: "#FFFFFF",
+        background: "var(--accent)",
+        color: "var(--on-accent)",
         padding: "10px 18px",
         borderRadius: 8,
         fontSize: 14,
         fontWeight: 600,
         textDecoration: "none",
+        transition: "background 0.2s",
     };
 }
