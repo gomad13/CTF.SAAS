@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
     title: "Politique de confidentialité — Sentys",
@@ -10,8 +11,9 @@ const LAST_UPDATE = "27 avril 2026";
 export default function PrivacyPage() {
     return (
         <article>
+            <Reveal>
             <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Politique de confidentialité</h1>
-            <p style={{ color: "var(--text-muted, #94A3B8)", marginBottom: 32, fontSize: 13 }}>
+            <p style={{ color: "var(--text-3)", marginBottom: 32, fontSize: 13 }}>
                 Dernière mise à jour : {LAST_UPDATE} — conforme RGPD
             </p>
 
@@ -107,10 +109,11 @@ export default function PrivacyPage() {
                 journalisation des accès administrateurs, headers HTTP de sécurité (CSP, HSTS, X-Frame-Options).
             </p>
 
-            <p style={{ fontSize: 13, color: "var(--text-muted, #94A3B8)", marginTop: 32, fontStyle: "italic" }}>
+            <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 32, fontStyle: "italic" }}>
                 Document à valeur indicative — bêta privée. Une version V1 publique sera revue par un conseil juridique
                 spécialisé RGPD avant la commercialisation.
             </p>
+            </Reveal>
         </article>
     );
 }
