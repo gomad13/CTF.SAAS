@@ -7,6 +7,7 @@ import DOMPurify from "dompurify";
 import { useInboxEmail, useReportPhishing } from "@/lib/hooks/useScenarios";
 import { ArrowLeft, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import Reveal from "@/components/Reveal";
 
 export default function EmailDetailPage() {
     const params = useParams<{ emailId: string }>();
@@ -38,8 +39,8 @@ export default function EmailDetailPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [email?.id]);
 
-    if (isLoading) return <div style={{ padding: 24, color: "#64748B" }}>Chargement…</div>;
-    if (!email) return <div style={{ padding: 24, color: "#EF4444" }}>Email introuvable.</div>;
+    if (isLoading) return <div style={{ padding: 24, color: "var(--text-2)" }}>Chargement…</div>;
+    if (!email) return <div style={{ padding: 24, color: "var(--danger-t)" }}>Email introuvable.</div>;
 
     async function onReport() {
         const r = await report(email!.id);
@@ -52,36 +53,40 @@ export default function EmailDetailPage() {
     }
 
     return (
-        <div style={{ padding: isMobile ? "20px 16px" : "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
-            <Link href="/inbox" style={{ display: "inline-flex", alignItems: "center", gap: 6, minHeight: 44, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 8 }}>
+        <div style={{ padding: isMobile ? "20px 16px" : "32px 24px", background: "var(--bg)", minHeight: "100%" }}>
+            <Link href="/inbox" style={{ display: "inline-flex", alignItems: "center", gap: 6, minHeight: 44, color: "var(--text-2)", fontSize: 13, textDecoration: "none", marginBottom: 8 }}>
                 <ArrowLeft size={14} /> Retour Inbox
             </Link>
 
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: isMobile ? 16 : 24 }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid #E2E8F0" }}>
+            <Reveal>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: isMobile ? 16 : 24 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid var(--border)" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <h1 style={{ fontSize: 18, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", overflowWrap: "break-word" }}>{email.subject}</h1>
-                        <div style={{ fontSize: 13, color: "#64748B", overflowWrap: "break-word", wordBreak: "break-word" }}>
-                            <strong style={{ color: "#334155" }}>{email.fromName}</strong> &lt;{email.fromEmail}&gt;
+                        <h1 style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", margin: "0 0 8px", overflowWrap: "break-word" }}>{email.subject}</h1>
+                        <div style={{ fontSize: 13, color: "var(--text-2)", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                            <strong style={{ color: "var(--text)" }}>{email.fromName}</strong> &lt;{email.fromEmail}&gt;
                         </div>
-                        <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 2 }}>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                             {new Date(email.sentAt).toLocaleString("fr-FR")}
                         </div>
                     </div>
                     {!email.isSystemNotification && !email.isReported && (
                         <button onClick={onReport} disabled={reporting} style={{
                             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-                            padding: "10px 14px", minHeight: 44, border: "1px solid #FCA5A5",
-                            background: "#FEF2F2", color: "#B91C1C",
+                            padding: "10px 14px", minHeight: 44, border: "1px solid color-mix(in srgb, var(--danger) 40%, transparent)",
+                            background: "var(--danger-subtle)", color: "var(--danger-t)",
                             borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: reporting ? "wait" : "pointer",
                             transition: "all 0.2s",
                             width: isMobile ? "100%" : "auto",
-                        }}>
+                        }}
+                            onMouseEnter={e => { e.currentTarget.style.background = "color-mix(in srgb, var(--danger) 18%, transparent)"; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "var(--danger-subtle)"; }}
+                        >
                             <AlertTriangle size={14} /> {reporting ? "Signalement…" : "Signaler comme phishing"}
                         </button>
                     )}
                     {email.isReported && (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "rgba(16,185,129,0.10)", color: "#10B981", borderRadius: 99, fontSize: 12, fontWeight: 500 }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "var(--success-subtle)", color: "var(--success-t)", borderRadius: 99, fontSize: 12, fontWeight: 500 }}>
                             <ShieldCheck size={14} /> Email signalé
                         </span>
                     )}
@@ -90,18 +95,19 @@ export default function EmailDetailPage() {
                 {reportMessage && (
                     <div style={{
                         marginBottom: 16, padding: 12,
-                        background: reportSuccess ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
-                        border: reportSuccess ? "1px solid rgba(16,185,129,0.20)" : "1px solid rgba(239,68,68,0.20)",
-                        borderRadius: 8, color: reportSuccess ? "#065F46" : "#B91C1C", fontSize: 13,
+                        background: reportSuccess ? "var(--success-subtle)" : "var(--danger-subtle)",
+                        border: reportSuccess ? "1px solid color-mix(in srgb, var(--success) 22%, transparent)" : "1px solid color-mix(in srgb, var(--danger) 22%, transparent)",
+                        borderRadius: 8, color: reportSuccess ? "var(--success-t)" : "var(--danger-t)", fontSize: 13,
                     }}>{reportMessage}</div>
                 )}
 
                 <div
                     className="inbox-email-body"
-                    style={{ fontSize: 14, color: "#334155", lineHeight: 1.6, overflowWrap: "break-word", wordBreak: "break-word" }}
+                    style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.6, overflowWrap: "break-word", wordBreak: "break-word" }}
                     dangerouslySetInnerHTML={{ __html: safeHtml }}
                 />
             </div>
+            </Reveal>
         </div>
     );
 }
