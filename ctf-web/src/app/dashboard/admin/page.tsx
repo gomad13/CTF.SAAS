@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { Me } from "@/lib/types";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import CountUp from "@/components/CountUp";
 
 type Company = {
     id: string;
@@ -89,32 +92,29 @@ export default function AdminPage() {
     return (
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px var(--page-x) 80px" }}>
             {/* Header */}
-            <div style={{ marginBottom: 32 }}>
-                <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-                    Administration
-                </h1>
-                <p style={{ marginTop: 6, fontSize: 14, color: "var(--pr)", fontFamily: "'JetBrains Mono', monospace" }}>
-                    {company?.name ?? "—"}
-                </p>
-                {company && (
-                    <p style={{ marginTop: 4, fontSize: 12, color: "var(--text-muted)" }}>
-                        {company.sector} · {company.city} · SIRET {company.siret}
+            <Reveal>
+                <div style={{ marginBottom: 32 }}>
+                    <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+                        Administration
+                    </h1>
+                    <p style={{ marginTop: 6, fontSize: 14, color: "var(--pr)", fontFamily: "'JetBrains Mono', monospace" }}>
+                        {company?.name ?? "—"}
                     </p>
-                )}
-            </div>
+                    {company && (
+                        <p style={{ marginTop: 4, fontSize: 12, color: "var(--text-muted)" }}>
+                            {company.sector} · {company.city} · SIRET {company.siret}
+                        </p>
+                    )}
+                </div>
+            </Reveal>
 
             {/* Stats cards */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: 16,
-                marginBottom: 32,
-            }}>
-                <StatCard value={stats?.totalUsers ?? 0} label="COLLABORATEURS" />
-                <StatCard value={stats?.activeUsers ?? 0} label="ACTIFS" />
-                <StatCard value={stats?.totalCompletions ?? 0} label="FORMATIONS FAITES" />
-                <StatCard value={`${stats?.averageScore ?? 0}%`} label="SCORE MOYEN" />
-            </div>
+            <Stagger className="mb-8 grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]" gap={0.06}>
+                <StaggerItem><StatCard value={stats?.totalUsers ?? 0} label="COLLABORATEURS" /></StaggerItem>
+                <StaggerItem><StatCard value={stats?.activeUsers ?? 0} label="ACTIFS" /></StaggerItem>
+                <StaggerItem><StatCard value={stats?.totalCompletions ?? 0} label="FORMATIONS FAITES" /></StaggerItem>
+                <StaggerItem><StatCard value={stats?.averageScore ?? 0} suffix="%" label="SCORE MOYEN" /></StaggerItem>
+            </Stagger>
 
             {/* Users table */}
             <section>
@@ -124,7 +124,7 @@ export default function AdminPage() {
 
                 <div className="resp-scroll-x" style={{
                     background: "var(--bg-card)",
-                    border: "1px solid rgba(59,130,246,0.1)",
+                    border: "1px solid var(--border)",
                     borderRadius: 10,
                 }}>
                     <div style={{ minWidth: 720 }}>
@@ -134,8 +134,8 @@ export default function AdminPage() {
                         gridTemplateColumns: "1.5fr 2fr 0.8fr 0.8fr 0.8fr 1fr",
                         gap: 12,
                         padding: "12px 20px",
-                        borderBottom: "1px solid rgba(59,130,246,0.12)",
-                        background: "rgba(59,130,246,0.04)",
+                        borderBottom: "1px solid var(--border)",
+                        background: "var(--surface-2)",
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 10,
                         letterSpacing: "0.1em",
@@ -156,21 +156,22 @@ export default function AdminPage() {
                         </div>
                     )}
 
+                    <Stagger gap={0.03}>
                     {users.map((u) => {
                         const initials = `${u.firstName[0] ?? ""}${u.lastName[0] ?? ""}`.toUpperCase();
                         return (
+                            <StaggerItem key={u.id}>
                             <div
-                                key={u.id}
                                 style={{
                                     display: "grid",
                                     gridTemplateColumns: "1.5fr 2fr 0.8fr 0.8fr 0.8fr 1fr",
                                     gap: 12,
                                     padding: "14px 20px",
-                                    borderBottom: "1px solid rgba(59,130,246,0.06)",
+                                    borderBottom: "1px solid var(--border)",
                                     alignItems: "center",
                                     transition: "background 0.15s",
                                 }}
-                                onMouseOver={e => { e.currentTarget.style.background = "rgba(59,130,246,0.04)"; }}
+                                onMouseOver={e => { e.currentTarget.style.background = "var(--surface-2)"; }}
                                 onMouseOut={e => { e.currentTarget.style.background = "transparent"; }}
                             >
                                 {/* Nom + avatar */}
@@ -179,7 +180,7 @@ export default function AdminPage() {
                                         width: 32,
                                         height: 32,
                                         borderRadius: "50%",
-                                        background: "rgba(59,130,246,0.15)",
+                                        background: "var(--accent-subtle)",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
@@ -205,9 +206,9 @@ export default function AdminPage() {
                                     fontSize: 10,
                                     padding: "2px 8px",
                                     borderRadius: 4,
-                                    background: u.role === "admin" ? "rgba(59,130,246,0.12)" : "var(--border)",
-                                    border: u.role === "admin" ? "1px solid rgba(59,130,246,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                                    color: u.role === "admin" ? "var(--pr)" : "#a3a3a3",
+                                    background: u.role === "admin" ? "var(--accent-subtle)" : "var(--surface-2)",
+                                    border: u.role === "admin" ? "1px solid var(--accent-border)" : "1px solid var(--border)",
+                                    color: u.role === "admin" ? "var(--pr)" : "var(--text-3)",
                                     fontFamily: "'JetBrains Mono', monospace",
                                     width: "fit-content",
                                     textTransform: "uppercase",
@@ -220,9 +221,9 @@ export default function AdminPage() {
                                     fontSize: 10,
                                     padding: "2px 8px",
                                     borderRadius: 4,
-                                    background: u.isActive ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-                                    border: `1px solid ${u.isActive ? "#10B981" : "#ef4444"}`,
-                                    color: u.isActive ? "#4ade80" : "#f87171",
+                                    background: u.isActive ? "var(--success-subtle)" : "var(--danger-subtle)",
+                                    border: `1px solid ${u.isActive ? "var(--success)" : "var(--danger)"}`,
+                                    color: u.isActive ? "var(--success-t)" : "var(--danger-t)",
                                     fontFamily: "'JetBrains Mono', monospace",
                                     width: "fit-content",
                                     textTransform: "uppercase",
@@ -248,8 +249,8 @@ export default function AdminPage() {
                                         disabled={toggleM.isPending}
                                         style={{
                                             background: "transparent",
-                                            border: `1px solid ${u.isActive ? "rgba(239,68,68,0.35)" : "rgba(34,197,94,0.35)"}`,
-                                            color: u.isActive ? "#f87171" : "#4ade80",
+                                            border: `1px solid ${u.isActive ? "var(--danger)" : "var(--success)"}`,
+                                            color: u.isActive ? "var(--danger-t)" : "var(--success-t)",
                                             fontSize: 11,
                                             fontFamily: "'JetBrains Mono', monospace",
                                             fontWeight: 600,
@@ -263,8 +264,10 @@ export default function AdminPage() {
                                     </button>
                                 </div>
                             </div>
+                            </StaggerItem>
                         );
                     })}
+                    </Stagger>
 
                     {!usersQ.isLoading && users.length === 0 && (
                         <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
@@ -278,21 +281,24 @@ export default function AdminPage() {
     );
 }
 
-function StatCard({ value, label }: { value: string | number; label: string }) {
+function StatCard({ value, label, suffix = "" }: { value: string | number; label: string; suffix?: string }) {
     return (
-        <div style={{
+        <div className="transition-colors duration-200" style={{
             background: "var(--bg-card)",
             border: "1px solid var(--border)",
             borderRadius: 10,
             padding: 20,
-        }}>
+        }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; }}
+        >
             <div style={{
                 fontSize: 32,
                 fontWeight: 700,
                 fontFamily: "'JetBrains Mono', monospace",
                 color: "var(--pr)",
             }}>
-                {value}
+                {typeof value === "number" ? <CountUp value={value} suffix={suffix} /> : value}
             </div>
             <div style={{
                 fontSize: 11,
