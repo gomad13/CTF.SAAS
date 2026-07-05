@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users, LogIn, LogOut, Lock, Unlock } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { renderTeamIcon } from "@/components/teams/teamIcons";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
 
 type UserTeam = {
     teamId: string; name: string; description: string | null; color: string | null; icon: string | null;
@@ -48,12 +50,14 @@ export default function MesEquipesPage() {
 
     return (
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-            <div>
-                <h1 className="text-2xl font-bold text-fg-heading">Mes équipes</h1>
-                <p className="mt-1 text-sm text-fg-muted">Rejoignez une équipe ouverte de votre entreprise et consultez vos équipes.</p>
-            </div>
+            <Reveal>
+                <div>
+                    <h1 className="text-2xl font-bold text-fg-heading">Mes équipes</h1>
+                    <p className="mt-1 text-sm text-fg-muted">Rejoignez une équipe ouverte de votre entreprise et consultez vos équipes.</p>
+                </div>
+            </Reveal>
 
-            {error && <div className="rounded-lg border border-[#FCA5A5] bg-[#FEE2E2] px-3 py-2 text-sm text-[#B91C1C]">{error}</div>}
+            {error && <div className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>}
 
             {/* ── Mes équipes (membre) ── */}
             <section className="flex flex-col gap-3">
@@ -63,17 +67,18 @@ export default function MesEquipesPage() {
                         Vous n&apos;êtes membre d&apos;aucune équipe pour le moment.
                     </p>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Stagger className="grid grid-cols-1 gap-4 md:grid-cols-2" gap={0.06}>
                         {mine.map(t => (
-                            <div key={t.teamId} className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+                            <StaggerItem key={t.teamId}>
+                            <div className="rounded-xl border border-border bg-surface p-6 shadow-sm transition-colors duration-200 hover:border-accent">
                                 <div className="flex items-start gap-3">
-                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-white" style={{ background: t.color ?? "#64748B" }}>
+                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-white" style={{ background: t.color ?? "var(--text-3)" }}>
                                         {renderTeamIcon(t.icon, 18)}
                                     </span>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
                                             <h3 className="truncate font-semibold text-fg-heading">{t.name}</h3>
-                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${t.isOpen ? "bg-success/10 text-success" : "bg-[#F1F5F9] text-fg-muted"}`}>
+                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${t.isOpen ? "bg-success/10 text-success" : "bg-surface-2 text-fg-muted"}`}>
                                                 {t.isOpen ? "Ouverte" : "Fermée"}
                                             </span>
                                         </div>
@@ -86,7 +91,7 @@ export default function MesEquipesPage() {
                                     <ul className="flex flex-col gap-1">
                                         {t.members.map(m => (
                                             <li key={m.userId} className="flex items-center gap-2 text-sm text-fg-body">
-                                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E2E8F0] text-[10px] font-bold text-fg-body">
+                                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-[10px] font-bold text-fg-body">
                                                     {(m.firstName?.[0] ?? "") + (m.lastName?.[0] ?? "")}
                                                 </span>
                                                 {m.firstName} {m.lastName}
@@ -95,12 +100,13 @@ export default function MesEquipesPage() {
                                     </ul>
                                 </div>
                                 <button type="button" onClick={() => leaveM.mutate(t.teamId)} disabled={leaveM.isPending}
-                                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#FCA5A5] bg-surface px-3 py-1.5 text-xs font-medium text-[#B91C1C] transition-colors duration-200 hover:bg-[#FEE2E2] disabled:opacity-50">
+                                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-danger/40 bg-surface px-3 py-1.5 text-xs font-medium text-danger transition-colors duration-200 hover:bg-danger/10 disabled:opacity-50">
                                     <LogOut size={13} /> Quitter
                                 </button>
                             </div>
+                            </StaggerItem>
                         ))}
-                    </div>
+                    </Stagger>
                 )}
             </section>
 
@@ -112,13 +118,13 @@ export default function MesEquipesPage() {
                         {teams.map(t => (
                             <li key={t.teamId} className="flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-canvas sm:px-6">
                                 <div className="flex min-w-0 items-center gap-3">
-                                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-white" style={{ background: t.color ?? "#64748B" }}>
+                                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-white" style={{ background: t.color ?? "var(--text-3)" }}>
                                         {renderTeamIcon(t.icon, 16)}
                                     </span>
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className="truncate font-medium text-fg-heading">{t.name}</span>
-                                            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${t.isOpen ? "bg-success/10 text-success" : "bg-[#F1F5F9] text-fg-muted"}`}>
+                                            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${t.isOpen ? "bg-success/10 text-success" : "bg-surface-2 text-fg-muted"}`}>
                                                 {t.isOpen ? <Unlock size={9} /> : <Lock size={9} />}{t.isOpen ? "Ouverte" : "Fermée"}
                                             </span>
                                         </div>
