@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Download, UserPlus, Filter, MoreVertical, X } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import Reveal from "@/components/Reveal";
+import CountUp from "@/components/CountUp";
 
 type Row = {
     id: string;
@@ -157,11 +159,12 @@ export default function DirectoryPage() {
 
     return (
         <div style={{ padding: isMobile ? "16px var(--page-x)" : 24, background: "var(--bg)", minHeight: "100%" }}>
+            <Reveal>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", margin: 0 }}>Annuaire</h1>
                     <div style={{ fontSize: 13, color: "var(--text-2)", marginTop: 4 }}>
-                        {data?.aggregations.total ?? "…"} collaborateur{(data?.aggregations.total ?? 0) > 1 ? "s" : ""}
+                        {data ? <CountUp value={data.aggregations.total} /> : "…"} collaborateur{(data?.aggregations.total ?? 0) > 1 ? "s" : ""}
                         {data && ` · ${data.aggregations.activeCount} actif${data.aggregations.activeCount > 1 ? "s" : ""} · ${data.aggregations.adminCount} admin${data.aggregations.adminCount > 1 ? "s" : ""}`}
                     </div>
                 </div>
@@ -174,8 +177,10 @@ export default function DirectoryPage() {
                     </button>
                 </div>
             </div>
+            </Reveal>
 
             {/* Filtres */}
+            <Reveal delay={0.05}>
             <div style={{ ...card, marginBottom: 16, padding: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ position: "relative", flex: "1 1 280px", minWidth: 240 }}>
                     <Search size={14} style={{ position: "absolute", left: 10, top: 10, color: "var(--text-2)" }} />
@@ -214,6 +219,7 @@ export default function DirectoryPage() {
                     ><X size={12} /> Reset</button>
                 )}
             </div>
+            </Reveal>
 
             {/* Bulk actions */}
             {selectedIds.size > 0 && (
@@ -248,7 +254,7 @@ export default function DirectoryPage() {
                                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                         <div style={{
                                             width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                                            background: r.teamColor ?? "#64748B", color: "#fff",
+                                            background: r.teamColor ?? "var(--text-2)", color: "var(--on-accent)",
                                             display: "flex", alignItems: "center", justifyContent: "center",
                                             fontSize: 12, fontWeight: 600,
                                         }}>{initials(r.firstName, r.lastName)}</div>
@@ -264,7 +270,7 @@ export default function DirectoryPage() {
                                             {r.role === "admin" ? "Admin" : "User"}
                                         </span>
                                         {r.teamName && (
-                                            <span style={{ padding: "2px 8px", borderRadius: 999, background: (r.teamColor ?? "#64748B") + "22", color: r.teamColor ?? "#64748B", fontSize: 11, fontWeight: 500 }}>{r.teamName}</span>
+                                            <span style={{ padding: "2px 8px", borderRadius: 999, background: r.teamColor ? r.teamColor + "22" : "var(--surface-2)", color: r.teamColor ?? "var(--text-2)", fontSize: 11, fontWeight: 500 }}>{r.teamName}</span>
                                         )}
                                         {!r.isActive && <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: 11, color: "var(--danger-t)", background: "var(--danger-subtle)" }}>Suspendu</span>}
                                     </div>
@@ -315,7 +321,7 @@ export default function DirectoryPage() {
                                     <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
                                         <div style={{
                                             width: 32, height: 32, borderRadius: "50%",
-                                            background: r.teamColor ?? "#64748B", color: "#fff",
+                                            background: r.teamColor ?? "var(--text-2)", color: "var(--on-accent)",
                                             display: "flex", alignItems: "center", justifyContent: "center",
                                             fontSize: 12, fontWeight: 600
                                         }}>{initials(r.firstName, r.lastName)}</div>
@@ -330,7 +336,7 @@ export default function DirectoryPage() {
                                 </td>
                                 <td style={tdStyle}>
                                     {r.teamName ? (
-                                        <span style={{ padding: "2px 8px", borderRadius: 999, background: (r.teamColor ?? "#64748B") + "22", color: r.teamColor ?? "#64748B", fontSize: 11, fontWeight: 500 }}>
+                                        <span style={{ padding: "2px 8px", borderRadius: 999, background: r.teamColor ? r.teamColor + "22" : "var(--surface-2)", color: r.teamColor ?? "var(--text-2)", fontSize: 11, fontWeight: 500 }}>
                                             {r.teamName}
                                         </span>
                                     ) : <span style={{ color: "var(--text-2)" }}>—</span>}
@@ -431,7 +437,7 @@ function UserDetailPanel({ userId, onClose }: { userId: string; onClose: () => v
     const [tab, setTab] = useState<"parcours" | "activite" | "admin">("parcours");
 
     return (
-        <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.5)", zIndex: 100, display: "flex", justifyContent: "flex-end" }}>
+        <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", justifyContent: "flex-end" }}>
             <div onClick={e => e.stopPropagation()} style={{ width: 560, maxWidth: "100%", background: "var(--surface)", height: "100%", overflowY: "auto", padding: 24 }}>
                 {!data ? (
                     <div>Chargement…</div>
@@ -560,7 +566,7 @@ function InviteModal({ onClose, onSubmit, teams, isSubmitting }: { onClose: () =
 }
 
 // ── Styles ──
-const btnPrimary: React.CSSProperties = { padding: "8px 14px", background: "var(--accent)", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "background 200ms" };
+const btnPrimary: React.CSSProperties = { padding: "8px 14px", background: "var(--accent)", color: "var(--on-accent)", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "background 200ms" };
 const btnSecondary: React.CSSProperties = { padding: "8px 14px", background: "var(--surface)", color: "var(--text-2)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 };
 const btnBulk: React.CSSProperties = { padding: "6px 12px", background: "var(--surface)", color: "var(--accent)", border: "1px solid var(--accent-border)", borderRadius: 6, fontSize: 12, cursor: "pointer" };
 const btnBulkDanger: React.CSSProperties = { padding: "6px 12px", background: "var(--surface)", color: "var(--danger)", border: "1px solid var(--danger-subtle)", borderRadius: 6, fontSize: 12, cursor: "pointer" };
