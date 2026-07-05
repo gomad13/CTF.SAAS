@@ -124,8 +124,11 @@ export type AssignEmployeesPayload = {
     userIds: string[] | null;
 };
 
+// Styles de statut par sémantique (valeurs = tokens CSS, appliquées en style inline
+// afin de suivre le mode sombre/clair) : À venir = neutre, En cours = succès (vert),
+// Terminée = info (bleu, seul cas où le bleu est autorisé par la charte : état info).
 export const STATUS_STYLES: Record<CampaignStatus, { label: string; bg: string; color: string; border: string }> = {
-    Upcoming: { label: "À venir", bg: "#F1F5F9", color: "#475569", border: "#CBD5E1" },
-    Active: { label: "En cours", bg: "rgba(16,185,129,0.10)", color: "#065F46", border: "rgba(16,185,129,0.25)" },
-    Completed: { label: "Terminée", bg: "rgba(59,130,246,0.10)", color: "#1E40AF", border: "rgba(59,130,246,0.25)" },
+    Upcoming: { label: "À venir", bg: "var(--surface-2)", color: "var(--text-2)", border: "var(--border)" },
+    Active: { label: "En cours", bg: "var(--success-subtle)", color: "var(--success-t)", border: "color-mix(in srgb, var(--success) 30%, transparent)" },
+    Completed: { label: "Terminée", bg: "var(--info-subtle)", color: "var(--info-t)", border: "color-mix(in srgb, var(--info) 30%, transparent)" },
 };
