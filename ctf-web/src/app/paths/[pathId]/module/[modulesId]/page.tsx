@@ -159,11 +159,9 @@ export default function ModulePage() {
 
     // On supporte "general" pour l'instant (structure prod pr�te)
     // Tu peux �largir plus tard.
-    if (!pathId) return notFound();
-
     const scenario = SCENARIOS[moduleId];
-    if (!scenario) return notFound();
 
+    // Hooks appeles INCONDITIONNELLEMENT avant tout return (regles des Hooks React).
     const [step, setStep] = useState<"context" | "result">("context");
     const [selected, setSelected] = useState<ActionDef | null>(null);
     const [score, setScore] = useState<number>(100);
@@ -175,6 +173,10 @@ export default function ModulePage() {
         if (score >= 50) return "Vigilance � am�liorer";
         return "Risque �lev�";
     }, [score]);
+
+    // Garde-fous APRES les hooks : le nombre/l'ordre des hooks reste stable a chaque rendu.
+    if (!pathId) return notFound();
+    if (!scenario) return notFound();
 
     const onChoose = (a: ActionDef) => {
         const newScore = clamp(score + a.points, 0, 100);
