@@ -4,6 +4,9 @@ import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import CountUp from "@/components/CountUp";
 
 type ActionId =
     | "wire_now"
@@ -189,18 +192,21 @@ export default function ModulePage() {
     return (
         <div style={{ ...styles.page, padding: isMobile ? "20px var(--page-x) 40px" : styles.page.padding }}>
             {/* Header */}
-            <div style={styles.header}>
-                <div style={styles.headerBar} />
-                <div style={{ minWidth: 0 }}>
-                    <h1 style={{ ...styles.h1, fontSize: isMobile ? 28 : styles.h1.fontSize }}>{scenario.title}</h1>
-                    <div style={styles.subRow}>
-                        <span style={styles.badge}>{scenario.urgencyLabel}</span>
-                        <span style={styles.subTitle}>{scenario.contextTitle}</span>
+            <Reveal>
+                <div style={styles.header}>
+                    <div style={styles.headerBar} />
+                    <div style={{ minWidth: 0 }}>
+                        <h1 style={{ ...styles.h1, fontSize: isMobile ? 28 : styles.h1.fontSize }}>{scenario.title}</h1>
+                        <div style={styles.subRow}>
+                            <span style={styles.badge}>{scenario.urgencyLabel}</span>
+                            <span style={styles.subTitle}>{scenario.contextTitle}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Reveal>
 
             {/* Layout 2 colonnes */}
+            <Reveal delay={0.05}>
             <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr" }}>
                 {/* LEFT */}
                 <div style={styles.leftCard}>
@@ -224,24 +230,31 @@ export default function ModulePage() {
                                 L�utilisateur doit d�cider : Virement ? R�ponse ? V�rification ? Appel ?
                             </div>
 
-                            <div style={styles.actions}>
+                            <Stagger className="mt-2.5 grid gap-2.5" gap={0.05}>
                                 {scenario.actions.map((a) => (
-                                    <button key={a.id} onClick={() => onChoose(a)} style={styles.actionBtn}>
-                                        <div style={styles.actionLabel}>{a.label}</div>
-                                        <div style={styles.actionMeta}>
-                                            <span style={styles.actionType}>{a.type}</span>
-                                            <span
-                                                style={{
-                                                    ...styles.points,
-                                                    ...(a.points > 0 ? styles.pointsPos : a.points < 0 ? styles.pointsNeg : {}),
-                                                }}
-                                            >
-                                                {a.points > 0 ? `+${a.points}` : a.points} pts
-                                            </span>
-                                        </div>
-                                    </button>
+                                    <StaggerItem key={a.id}>
+                                        <button
+                                            onClick={() => onChoose(a)}
+                                            style={{ ...styles.actionBtn, width: "100%" }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent-2)")}
+                                            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+                                        >
+                                            <div style={styles.actionLabel}>{a.label}</div>
+                                            <div style={styles.actionMeta}>
+                                                <span style={styles.actionType}>{a.type}</span>
+                                                <span
+                                                    style={{
+                                                        ...styles.points,
+                                                        ...(a.points > 0 ? styles.pointsPos : a.points < 0 ? styles.pointsNeg : {}),
+                                                    }}
+                                                >
+                                                    {a.points > 0 ? `+${a.points}` : a.points} pts
+                                                </span>
+                                            </div>
+                                        </button>
+                                    </StaggerItem>
                                 ))}
-                            </div>
+                            </Stagger>
                         </>
                     )}
 
@@ -257,7 +270,7 @@ export default function ModulePage() {
 
                                 <div style={{ ...styles.scoreBox, alignSelf: isMobile ? "stretch" : undefined, textAlign: isMobile ? "left" : "right" }}>
                                     <div style={styles.scoreTitle}>Score</div>
-                                    <div style={styles.scoreValue}>{score}/100</div>
+                                    <div style={styles.scoreValue}><CountUp value={score} />/100</div>
                                     <div style={styles.scoreLabel}>{scoreLabel}</div>
                                 </div>
                             </div>
@@ -307,10 +320,20 @@ export default function ModulePage() {
                                     </div>
 
                                     <div style={styles.ctaRow}>
-                                        <button style={styles.secondaryBtn} onClick={() => setStep("context")}>
+                                        <button
+                                            style={styles.secondaryBtn}
+                                            onClick={() => setStep("context")}
+                                            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface)")}
+                                            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--surface-2)")}
+                                        >
                                             Revenir au contexte
                                         </button>
-                                        <button style={styles.primaryBtn} onClick={onReplay}>
+                                        <button
+                                            style={styles.primaryBtn}
+                                            onClick={onReplay}
+                                            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+                                            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
+                                        >
                                             Rejouer
                                         </button>
                                     </div>
@@ -338,6 +361,7 @@ export default function ModulePage() {
                     </div>
                 </div>
             </div>
+            </Reveal>
         </div>
     );
 }
@@ -346,73 +370,74 @@ const styles: Record<string, React.CSSProperties> = {
     page: {
         minHeight: "100vh",
         padding: "28px 28px 40px",
-        background: "linear-gradient(180deg, #0b1220 0%, #07101c 100%)",
-        color: "#eaf0ff",
+        background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)",
+        color: "var(--text)",
         fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
     },
     header: { display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 18 },
-    headerBar: { width: 6, height: 54, background: "#2dd4ff", borderRadius: 999 },
+    headerBar: { width: 6, height: 54, background: "var(--accent-2)", borderRadius: 999 },
     h1: { fontSize: 42, lineHeight: 1.05, margin: 0, fontWeight: 800 },
     subRow: { display: "flex", gap: 14, alignItems: "center", marginTop: 10 },
     badge: {
         fontSize: 12,
         padding: "6px 10px",
         borderRadius: 999,
-        background: "rgba(255, 80, 80, 0.14)",
-        border: "1px solid rgba(255, 80, 80, 0.35)",
-        color: "#ff7373",
+        background: "var(--danger-subtle)",
+        border: "1px solid color-mix(in srgb, var(--danger) 35%, transparent)",
+        color: "var(--danger-t)",
         fontWeight: 700,
         letterSpacing: 0.5,
     },
-    subTitle: { fontSize: 20, color: "#2dd4ff", fontWeight: 800 },
+    subTitle: { fontSize: 20, color: "var(--accent-2)", fontWeight: 800 },
 
     grid: { display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 18, alignItems: "start" },
 
     leftCard: {
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid #E2E8F0",
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
         borderRadius: 18,
         padding: 18,
         boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
     },
 
     rightCard: {
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid #E2E8F0",
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
         borderRadius: 18,
         padding: 14,
         boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
     },
 
     contextCard: {
-        background: "rgba(255,255,255,0.06)",
-        border: "1px solid rgba(255, 80, 80, 0.45)",
+        background: "var(--surface-2)",
+        border: "1px solid color-mix(in srgb, var(--danger) 45%, transparent)",
         borderRadius: 14,
         padding: 16,
     },
     contextMeta: { display: "grid", gap: 8 },
-    metaLine: { color: "#d9e3ff" },
+    metaLine: { color: "var(--text-2)" },
     quote: {
         marginTop: 14,
         padding: "14px 14px",
         borderRadius: 12,
-        background: "rgba(255,255,255,0.06)",
-        color: "#f4f7ff",
+        background: "var(--surface-2)",
+        color: "var(--text)",
         lineHeight: 1.5,
         fontStyle: "italic",
     },
 
-    h2: { margin: "18px 0 8px", fontSize: 28, fontWeight: 900, color: "#2dd4ff" },
-    help: { color: "rgba(234,240,255,0.75)", marginBottom: 12 },
+    h2: { margin: "18px 0 8px", fontSize: 28, fontWeight: 900, color: "var(--accent-2)" },
+    help: { color: "var(--text-2)", marginBottom: 12 },
 
     actions: { display: "grid", gap: 10, marginTop: 10 },
     actionBtn: {
         textAlign: "left",
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.10)",
+        background: "var(--surface-2)",
+        border: "1px solid var(--border)",
         borderRadius: 14,
         padding: 14,
         cursor: "pointer",
+        transition: "border-color 0.2s, background 0.2s",
     },
     actionLabel: { fontSize: 16, fontWeight: 800, marginBottom: 8 },
     actionMeta: {
@@ -420,13 +445,13 @@ const styles: Record<string, React.CSSProperties> = {
         justifyContent: "space-between",
         alignItems: "center",
         gap: 10,
-        color: "rgba(234,240,255,0.75)",
+        color: "var(--text-2)",
         fontSize: 13,
     },
     actionType: { opacity: 0.95 },
     points: { fontWeight: 900 },
-    pointsPos: { color: "#4ade80" },
-    pointsNeg: { color: "#ff7373" },
+    pointsPos: { color: "var(--success-t)" },
+    pointsNeg: { color: "var(--danger-t)" },
 
     imageWrap: {
         position: "relative",
@@ -434,25 +459,25 @@ const styles: Record<string, React.CSSProperties> = {
         height: 360,
         borderRadius: 14,
         overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.10)",
+        border: "1px solid var(--border)",
     },
     rightInfo: {
         marginTop: 12,
         borderRadius: 14,
         padding: 12,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid #E2E8F0",
+        background: "var(--surface-2)",
+        border: "1px solid var(--border)",
     },
     rightInfoTitle: { fontWeight: 900, marginBottom: 6 },
-    rightInfoText: { color: "rgba(234,240,255,0.78)", lineHeight: 1.4 },
+    rightInfoText: { color: "var(--text-2)", lineHeight: 1.4 },
 
     resultTopRow: { display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" },
     scoreBox: {
         minWidth: 170,
         borderRadius: 14,
         padding: 12,
-        background: "rgba(45, 212, 255, 0.10)",
-        border: "1px solid rgba(45, 212, 255, 0.30)",
+        background: "color-mix(in srgb, var(--accent-2) 12%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--accent-2) 30%, transparent)",
         textAlign: "right",
     },
     scoreTitle: { fontWeight: 900, opacity: 0.9 },
@@ -463,8 +488,8 @@ const styles: Record<string, React.CSSProperties> = {
 
     tableCard: {
         borderRadius: 14,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.10)",
+        background: "var(--surface-2)",
+        border: "1px solid var(--border)",
         padding: 12,
     },
     tableTitle: { fontWeight: 1000, marginBottom: 10 },
@@ -475,14 +500,14 @@ const styles: Record<string, React.CSSProperties> = {
         fontSize: 12,
         opacity: 0.8,
         paddingBottom: 8,
-        borderBottom: "1px solid rgba(255,255,255,0.10)",
+        borderBottom: "1px solid var(--border)",
     },
     tableRow: {
         display: "grid",
         gridTemplateColumns: "1fr 90px 140px",
         gap: 10,
         padding: "10px 0",
-        borderBottom: "1px solid #E2E8F0",
+        borderBottom: "1px solid var(--border)",
         alignItems: "center",
     },
     tableRowLeft: { fontWeight: 800 },
@@ -491,20 +516,20 @@ const styles: Record<string, React.CSSProperties> = {
 
     consequenceCard: {
         borderRadius: 14,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(45, 212, 255, 0.25)",
+        background: "var(--surface-2)",
+        border: "1px solid color-mix(in srgb, var(--accent-2) 25%, transparent)",
         padding: 12,
     },
     consequenceTitle: { fontWeight: 1000, marginBottom: 10 },
-    consequenceHighlight: { color: "#2dd4ff" },
-    consequenceText: { color: "rgba(234,240,255,0.85)", lineHeight: 1.45 },
+    consequenceHighlight: { color: "var(--accent-2)" },
+    consequenceText: { color: "var(--text-2)", lineHeight: 1.45 },
 
     impactBox: {
         marginTop: 12,
         borderRadius: 12,
         padding: 12,
-        background: "rgba(0,0,0,0.35)",
-        border: "1px solid rgba(255,255,255,0.10)",
+        background: "var(--bg)",
+        border: "1px solid var(--border)",
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
     },
     impactLine: { marginBottom: 6 },
@@ -513,19 +538,21 @@ const styles: Record<string, React.CSSProperties> = {
     primaryBtn: {
         padding: "10px 12px",
         borderRadius: 12,
-        border: "1px solid rgba(45, 212, 255, 0.35)",
-        background: "rgba(45, 212, 255, 0.14)",
-        color: "#eaf0ff",
+        border: "1px solid var(--accent)",
+        background: "var(--accent)",
+        color: "var(--on-accent)",
         fontWeight: 900,
         cursor: "pointer",
+        transition: "background 0.2s",
     },
     secondaryBtn: {
         padding: "10px 12px",
         borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.14)",
-        background: "rgba(255,255,255,0.05)",
-        color: "#eaf0ff",
+        border: "1px solid var(--border)",
+        background: "var(--surface-2)",
+        color: "var(--text)",
         fontWeight: 900,
         cursor: "pointer",
+        transition: "background 0.2s",
     },
 };
