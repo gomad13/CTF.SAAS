@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import Reveal from "@/components/Reveal";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -48,6 +49,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-16">
+                <Reveal>
                 <div className="w-full rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 shadow-sm">
 
                     {/* Icon */}
@@ -102,6 +104,7 @@ export default function ForgotPasswordPage() {
                         </Link>
                     </p>
                 </div>
+                </Reveal>
             </div>
         </div>
     );
