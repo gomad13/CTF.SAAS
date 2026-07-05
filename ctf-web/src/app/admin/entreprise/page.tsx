@@ -6,6 +6,7 @@ import {
     Building2, Copy, Check, QrCode, KeyRound, ShieldCheck, Users, Save, ExternalLink, AlertCircle,
 } from "lucide-react";
 import InvitesManager from "@/components/invites/InvitesManager";
+import Reveal from "@/components/Reveal";
 import { useTenantSettings, useUpdateTenantSettings } from "@/lib/hooks/useTenantSettings";
 import type { TenantSettings } from "@/lib/types/tenantSettings";
 
@@ -63,13 +64,14 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
     return (
         <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
             <div>
-                <h1 className="text-2xl font-bold text-[#F1F5F9]">Paramètres entreprise</h1>
+                <h1 className="text-2xl font-bold text-fg-heading">Paramètres entreprise</h1>
                 <p className="mt-1 text-sm text-fg-muted">
                     Configuration générale de votre organisation. Réservé aux administrateurs ; chaque admin
                     ne gère que sa propre entreprise.
                 </p>
             </div>
 
+            <Reveal>
             {/* 1. INFOS ENTREPRISE */}
             <Section icon={<Building2 size={15} />} title="Infos entreprise">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -89,7 +91,7 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                         <input readOnly value={initial.tenantId} onFocus={e => e.currentTarget.select()}
                             className={`${inputCls} flex-1 font-mono text-xs`} />
                         <button type="button" onClick={copyTenantId}
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-[#F1F5F9]">
+                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2">
                             {copied ? <><Check size={13} className="text-success" /> Copié</> : <><Copy size={13} /> Copier</>}
                         </button>
                     </div>
@@ -97,12 +99,18 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                 </Field>
             </Section>
 
+            </Reveal>
+
+            <Reveal delay={0.05}>
             {/* 2. INVITATIONS / QR — composant réutilisé */}
             <Section icon={<QrCode size={15} />} title="Invitations par QR code"
                 desc="Générez un lien/QR sécurisé (durée + usages limités, révocable) pour faire rejoindre votre entreprise.">
                 <InvitesManager />
             </Section>
 
+            </Reveal>
+
+            <Reveal delay={0.1}>
             {/* 3. SSO */}
             <Section icon={<KeyRound size={15} />} title="Connexions SSO"
                 desc="Autorisez la connexion de vos membres via Google ou Microsoft.">
@@ -120,6 +128,9 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                 />
             </Section>
 
+            </Reveal>
+
+            <Reveal delay={0.15}>
             {/* 4. SÉCURITÉ */}
             <Section icon={<ShieldCheck size={15} />} title="Sécurité">
                 <p className="text-sm text-fg-body">
@@ -138,6 +149,9 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                 </Link>
             </Section>
 
+            </Reveal>
+
+            <Reveal delay={0.2}>
             {/* 5. ÉQUIPES */}
             <Section icon={<Users size={15} />} title="Équipes"
                 desc={`${initial.teamsCount} équipe${initial.teamsCount > 1 ? "s" : ""} dans votre entreprise.`}>
@@ -160,8 +174,10 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                 )}
             </Section>
 
+            </Reveal>
+
             {/* Barre d'enregistrement */}
-            <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-[#E2E8F0] bg-surface/90 p-3 shadow-sm backdrop-blur-md">
+            <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-border bg-surface/90 p-3 shadow-sm backdrop-blur-md">
                 {toast && (
                     <span className="flex items-center gap-1.5 text-sm text-fg-body">
                         {update.isError ? <AlertCircle size={14} className="text-danger" /> : <Check size={14} className="text-success" />}
@@ -178,13 +194,13 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
 }
 
 // ── UI helpers (charte admin claire) ───────────────────────────────────────────
-const inputCls = "w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading";
+const inputCls = "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading transition-colors duration-200 focus:border-primary focus:outline-none";
 
 function Section({ icon, title, desc, children }: {
     icon: React.ReactNode; title: string; desc?: string; children: React.ReactNode;
 }) {
     return (
-        <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm">
+        <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
             <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-fg-body">
                 {icon} {title}
             </h2>
@@ -207,12 +223,12 @@ function ToggleRow({ label, desc, on, onChange, configured = true }: {
     label: string; desc?: string; on: boolean; onChange: (v: boolean) => void; configured?: boolean;
 }) {
     return (
-        <div className="flex items-center justify-between gap-4 border-b border-[#E2E8F0] pb-3 last:border-0 last:pb-0">
+        <div className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-0 last:pb-0">
             <div className="min-w-0">
                 <div className="flex items-center gap-2 text-sm font-medium text-fg-heading">
                     {label}
                     {!configured && (
-                        <span className="rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fg-muted">
+                        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fg-muted">
                             non configuré
                         </span>
                     )}
@@ -220,7 +236,7 @@ function ToggleRow({ label, desc, on, onChange, configured = true }: {
                 {desc && <div className="mt-0.5 text-xs text-fg-muted">{desc}</div>}
             </div>
             <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)}
-                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${on ? "bg-primary" : "bg-[#CBD5E1]"}`}>
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${on ? "bg-primary" : "bg-surface-2"}`}>
                 <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface transition-all duration-200 ${on ? "left-[22px]" : "left-0.5"}`} />
             </button>
         </div>
