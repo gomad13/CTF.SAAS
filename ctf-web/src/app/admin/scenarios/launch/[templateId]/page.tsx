@@ -14,6 +14,7 @@ import {
     Users, Eye, Rocket, CheckCircle2, XCircle, X,
 } from "lucide-react";
 import type { EmployeeWithConsent } from "@/lib/types/scenarios";
+import Reveal from "@/components/Reveal";
 
 const STEP_LABELS = ["Cible et expéditeur", "Personnalisation", "Confirmation"] as const;
 const MAX_CHIPS_VISIBLE = 10;
@@ -98,41 +99,43 @@ export default function LaunchScenarioPage() {
         }
     }
 
-    if (tplLoading) return <div style={{ padding: 24, color: "#64748B" }}>Chargement…</div>;
-    if (!tpl) return <div style={{ padding: 24, color: "#EF4444" }}>Scénario introuvable.</div>;
+    if (tplLoading) return <div style={{ padding: 24, color: "var(--text-2)" }}>Chargement…</div>;
+    if (!tpl) return <div style={{ padding: 24, color: "var(--danger)" }}>Scénario introuvable.</div>;
 
     return (
-        <div style={{ padding: isMobile ? "20px var(--page-x)" : "32px 24px", background: "#F8FAFC", minHeight: "100%" }}>
+        <div style={{ padding: isMobile ? "20px var(--page-x)" : "32px 24px", background: "var(--bg)", minHeight: "100%" }}>
             {/* Header */}
-            <Link href="/admin/scenarios" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748B", fontSize: 13, textDecoration: "none", marginBottom: 12 }}>
+            <Link href="/admin/scenarios" className="transition-colors duration-200" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--text-2)", fontSize: 13, textDecoration: "none", marginBottom: 12 }}>
                 <ArrowLeft size={14} /> Retour catalogue
             </Link>
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: isMobile ? 16 : 24, marginBottom: isMobile ? 16 : 24, display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: 16, flexWrap: "wrap" }}>
-                <div style={{ width: 48, height: 48, borderRadius: 8, background: "rgba(59,130,246,0.10)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Theater size={24} color="#3B82F6" strokeWidth={1.75} />
+            <Reveal>
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: isMobile ? 16 : 24, marginBottom: isMobile ? 16 : 24, display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: 16, flexWrap: "wrap" }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 8, background: "var(--accent-subtle)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Theater size={24} color="var(--accent)" strokeWidth={1.75} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <h1 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 700, color: "var(--text)", margin: 0 }}>{tpl.name}</h1>
+                        <p style={{ fontSize: 13, color: "var(--text-2)", margin: "4px 0 0" }}>{tpl.description}</p>
+                    </div>
+                    <div style={{ display: "flex", gap: 16, fontSize: 13, color: "var(--text-2)" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Clock size={14} />{tpl.durationDays} j</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Mail size={14} />{tpl.emailCount} emails</span>
+                    </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <h1 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 700, color: "#1E293B", margin: 0 }}>{tpl.name}</h1>
-                    <p style={{ fontSize: 13, color: "#64748B", margin: "4px 0 0" }}>{tpl.description}</p>
-                </div>
-                <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#64748B" }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Clock size={14} />{tpl.durationDays} j</span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Mail size={14} />{tpl.emailCount} emails</span>
-                </div>
-            </div>
+            </Reveal>
 
             {/* Stepper : compact "Étape n/N" + barre de progression sur mobile */}
             {isMobile ? (
                 <div style={{ marginBottom: 16 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1E293B" }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>
                             Étape {stepIndex + 1}/{STEP_LABELS.length} — {STEP_LABELS[stepIndex]}
                         </span>
                     </div>
-                    <div style={{ height: 6, background: "#E2E8F0", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ height: 6, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}>
                         <div style={{
                             height: "100%", width: `${((stepIndex + 1) / STEP_LABELS.length) * 100}%`,
-                            background: "#3B82F6", borderRadius: 999, transition: "width 0.2s",
+                            background: "var(--accent)", borderRadius: 999, transition: "width 0.2s",
                         }} />
                     </div>
                 </div>
@@ -142,61 +145,63 @@ export default function LaunchScenarioPage() {
                         <div key={label} style={{
                             flex: 1, display: "flex", alignItems: "center", gap: 8,
                             padding: "10px 14px", borderRadius: 8,
-                            background: i === stepIndex ? "#FFFFFF" : "transparent",
-                            border: i === stepIndex ? "1px solid #3B82F6" : "1px solid transparent",
+                            background: i === stepIndex ? "var(--surface)" : "transparent",
+                            border: i === stepIndex ? "1px solid var(--accent)" : "1px solid transparent",
                         }}>
                             <div style={{
                                 width: 24, height: 24, borderRadius: "50%",
-                                background: i < stepIndex ? "#10B981" : i === stepIndex ? "#3B82F6" : "#E2E8F0",
-                                color: i <= stepIndex ? "white" : "#64748B",
+                                background: i < stepIndex ? "var(--success)" : i === stepIndex ? "var(--accent)" : "var(--surface-2)",
+                                color: i <= stepIndex ? "var(--on-accent)" : "var(--text-2)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 fontSize: 12, fontWeight: 600,
                             }}>{i < stepIndex ? <Check size={13} /> : i + 1}</div>
-                            <span style={{ fontSize: 13, fontWeight: i === stepIndex ? 600 : 400, color: i === stepIndex ? "#1E293B" : "#64748B" }}>{label}</span>
+                            <span style={{ fontSize: 13, fontWeight: i === stepIndex ? 600 : 400, color: i === stepIndex ? "var(--text)" : "var(--text-2)" }}>{label}</span>
                         </div>
                     ))}
                 </div>
             )}
 
             {/* Content */}
-            <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12, padding: isMobile ? 16 : 24, minHeight: 320 }}>
-                {stepIndex === 0 && (
-                    <StepTargetAndSender
-                        employees={employees ?? []}
-                        loading={employeesLoading}
-                        targetUserIds={targetUserIds}
-                        senderUserId={senderUserId}
-                        onToggleTarget={toggleTarget}
-                        onRemoveTarget={removeTarget}
-                        onSelectSender={setSenderUserId}
-                        onScrollToTargets={scrollToTargetsList}
-                        targetsListRef={targetsListRef}
-                        isMobile={isMobile}
-                    />
-                )}
-                {stepIndex === 1 && (
-                    <StepCustomize
-                        tpl={tpl}
-                        overrides={overrides}
-                        onChange={setOverrides}
-                        mode={mode}
-                        onModeChange={setMode}
-                        isMobile={isMobile}
-                    />
-                )}
-                {stepIndex === 2 && (
-                    <StepReview
-                        tpl={tpl}
-                        targets={targetUsers}
-                        sender={senderUser}
-                        mode={mode}
-                        overrides={overrides}
-                    />
-                )}
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: isMobile ? 16 : 24, minHeight: 320 }}>
+                <Reveal key={stepIndex}>
+                    {stepIndex === 0 && (
+                        <StepTargetAndSender
+                            employees={employees ?? []}
+                            loading={employeesLoading}
+                            targetUserIds={targetUserIds}
+                            senderUserId={senderUserId}
+                            onToggleTarget={toggleTarget}
+                            onRemoveTarget={removeTarget}
+                            onSelectSender={setSenderUserId}
+                            onScrollToTargets={scrollToTargetsList}
+                            targetsListRef={targetsListRef}
+                            isMobile={isMobile}
+                        />
+                    )}
+                    {stepIndex === 1 && (
+                        <StepCustomize
+                            tpl={tpl}
+                            overrides={overrides}
+                            onChange={setOverrides}
+                            mode={mode}
+                            onModeChange={setMode}
+                            isMobile={isMobile}
+                        />
+                    )}
+                    {stepIndex === 2 && (
+                        <StepReview
+                            tpl={tpl}
+                            targets={targetUsers}
+                            sender={senderUser}
+                            mode={mode}
+                            overrides={overrides}
+                        />
+                    )}
+                </Reveal>
             </div>
 
             {error && (
-                <div style={{ marginTop: 12, padding: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.20)", borderRadius: 8, color: "#B91C1C", fontSize: 13 }}>
+                <div style={{ marginTop: 12, padding: 12, background: "var(--danger-subtle)", border: "1px solid var(--c-error-b)", borderRadius: 8, color: "var(--danger-t)", fontSize: 13 }}>
                     {error}
                 </div>
             )}
@@ -210,38 +215,47 @@ export default function LaunchScenarioPage() {
                 <button
                     onClick={() => setStepIndex(i => Math.max(0, i - 1))}
                     disabled={stepIndex === 0}
+                    className="transition-colors duration-200"
                     style={{
                         display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-                        padding: "10px 16px", border: "1px solid #E2E8F0", borderRadius: 8,
-                        background: "#FFFFFF", color: stepIndex === 0 ? "#CBD5E1" : "#334155",
+                        padding: "10px 16px", border: "1px solid var(--border)", borderRadius: 8,
+                        background: "var(--surface)", color: stepIndex === 0 ? "var(--text-3)" : "var(--text-2)",
                         fontSize: 14, cursor: stepIndex === 0 ? "not-allowed" : "pointer",
-                        transition: "all 0.2s", width: isMobile ? "100%" : "auto",
+                        width: isMobile ? "100%" : "auto",
                     }}
+                    onMouseEnter={e => { if (stepIndex !== 0) e.currentTarget.style.borderColor = "var(--accent)"; }}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}
                 ><ChevronLeft size={16} /> Précédent</button>
 
                 {stepIndex < STEP_LABELS.length - 1 ? (
                     <button
                         onClick={() => setStepIndex(i => Math.min(STEP_LABELS.length - 1, i + 1))}
                         disabled={!canNext}
+                        className="transition-colors duration-200"
                         style={{
                             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                             padding: "10px 16px", border: "none", borderRadius: 8,
-                            background: canNext ? "#3B82F6" : "#CBD5E1", color: "white",
+                            background: canNext ? "var(--accent)" : "var(--surface-2)", color: canNext ? "var(--on-accent)" : "var(--text-3)",
                             fontSize: 14, cursor: canNext ? "pointer" : "not-allowed",
-                            transition: "all 0.2s", fontWeight: 500, width: isMobile ? "100%" : "auto",
+                            fontWeight: 500, width: isMobile ? "100%" : "auto",
                         }}
+                        onMouseEnter={e => { if (canNext) e.currentTarget.style.background = "var(--accent-hover)"; }}
+                        onMouseLeave={e => { if (canNext) e.currentTarget.style.background = "var(--accent)"; }}
                     >Suivant <ChevronRight size={16} /></button>
                 ) : (
                     <button
                         onClick={onLaunch}
                         disabled={launching || targetUserIds.length === 0 || !senderUserId}
+                        className="transition-colors duration-200"
                         style={{
                             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                             padding: "10px 20px", border: "none", borderRadius: 8,
-                            background: "#10B981", color: "white",
+                            background: "var(--success)", color: "var(--on-accent)",
                             fontSize: 14, cursor: launching ? "wait" : "pointer",
-                            transition: "all 0.2s", fontWeight: 600, width: isMobile ? "100%" : "auto",
+                            fontWeight: 600, width: isMobile ? "100%" : "auto",
                         }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-hover)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "var(--success)")}
                     ><Rocket size={16} /> {launching ? "Lancement…" : `Lancer (${targetUserIds.length})`}</button>
                 )}
             </div>
@@ -295,8 +309,8 @@ function StepTargetAndSender({
 
     return (
         <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>Cible et expéditeur</h2>
-            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>{"Choisis les destinataires du scénario et l'employé qui prêtera son identité comme expéditeur fictif."}</p>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--text)", margin: "0 0 6px" }}>Cible et expéditeur</h2>
+            <p style={{ fontSize: 13, color: "var(--text-2)", margin: "0 0 16px" }}>{"Choisis les destinataires du scénario et l'employé qui prêtera son identité comme expéditeur fictif."}</p>
 
             {/* Récap des destinataires sélectionnés */}
             <RecipientsRecap
@@ -310,31 +324,30 @@ function StepTargetAndSender({
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginTop: 16 }}>
                 {/* Colonne destinataires (multi-select) */}
                 <div ref={targetsListRef}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
                         <Users size={15} /> Destinataires
                     </h3>
-                    <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 8px" }}>{"Sélectionne un ou plusieurs employés (multi-sélection). Le consentement n'est pas requis pour être destinataire."}</p>
+                    <p style={{ fontSize: 12, color: "var(--text-2)", margin: "0 0 8px" }}>{"Sélectionne un ou plusieurs employés (multi-sélection). Le consentement n'est pas requis pour être destinataire."}</p>
                     <input
                         type="search" placeholder="Rechercher (nom, email)…" value={filterTarget} onChange={e => setFilterTarget(e.target.value)}
-                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #E2E8F0", borderRadius: 8, marginBottom: 8, fontSize: 14 }}
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid var(--border)", borderRadius: 8, marginBottom: 8, fontSize: 14, background: "var(--bg)", color: "var(--text)" }}
                     />
-                    <div style={{ maxHeight: 360, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
-                        {loading && <div style={{ padding: 16, color: "#64748B" }}>Chargement…</div>}
-                        {!loading && targetCandidates.length === 0 && <div style={{ padding: 16, color: "#64748B" }}>Aucun résultat.</div>}
+                    <div style={{ maxHeight: 360, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8 }}>
+                        {loading && <div style={{ padding: 16, color: "var(--text-2)" }}>Chargement…</div>}
+                        {!loading && targetCandidates.length === 0 && <div style={{ padding: 16, color: "var(--text-2)" }}>Aucun résultat.</div>}
                         {targetCandidates.map(u => {
                             const checked = targetUserIds.includes(u.id);
                             return (
-                                <label key={u.id} style={{
+                                <label key={u.id} className="transition-colors duration-200" style={{
                                     display: "flex", alignItems: "center", gap: 10,
-                                    padding: 10, borderBottom: "1px solid #F1F5F9", cursor: "pointer",
-                                    background: checked ? "rgba(3,121,113,0.08)" : "transparent",
-                                    transition: "background 0.2s",
+                                    padding: 10, borderBottom: "1px solid var(--border)", cursor: "pointer",
+                                    background: checked ? "var(--accent-subtle)" : "transparent",
                                 }}>
                                     <input type="checkbox" checked={checked} onChange={() => onToggleTarget(u.id)} />
                                     <ConsentBadge consents={u.consentsToBeFictionalSender} side="recipient" />
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontSize: 13, color: "#1E293B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.firstName} {u.lastName}</div>
-                                        <div style={{ fontSize: 11, color: "#64748B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
+                                        <div style={{ fontSize: 13, color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.firstName} {u.lastName}</div>
+                                        <div style={{ fontSize: 11, color: "var(--text-2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
                                     </div>
                                 </label>
                             );
@@ -344,17 +357,17 @@ function StepTargetAndSender({
 
                 {/* Colonne expéditeur (single-select, non-consentants désactivés) */}
                 <div>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", margin: "0 0 8px", display: "inline-flex", alignItems: "center", gap: 6 }}>
                         <Mail size={15} /> Expéditeur fictif
                     </h3>
-                    <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 8px" }}>{"Seuls les employés ayant donné leur consentement peuvent être sélectionnés. Les autres restent visibles mais sont désactivés."}</p>
+                    <p style={{ fontSize: 12, color: "var(--text-2)", margin: "0 0 8px" }}>{"Seuls les employés ayant donné leur consentement peuvent être sélectionnés. Les autres restent visibles mais sont désactivés."}</p>
                     <input
                         type="search" placeholder="Rechercher (nom, email)…" value={filterSender} onChange={e => setFilterSender(e.target.value)}
-                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #E2E8F0", borderRadius: 8, marginBottom: 8, fontSize: 14 }}
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid var(--border)", borderRadius: 8, marginBottom: 8, fontSize: 14, background: "var(--bg)", color: "var(--text)" }}
                     />
-                    <div style={{ maxHeight: 360, overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: 8 }}>
-                        {loading && <div style={{ padding: 16, color: "#64748B" }}>Chargement…</div>}
-                        {!loading && senderCandidates.length === 0 && <div style={{ padding: 16, color: "#64748B" }}>Aucun résultat.</div>}
+                    <div style={{ maxHeight: 360, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8 }}>
+                        {loading && <div style={{ padding: 16, color: "var(--text-2)" }}>Chargement…</div>}
+                        {!loading && senderCandidates.length === 0 && <div style={{ padding: 16, color: "var(--text-2)" }}>Aucun résultat.</div>}
                         {senderCandidates.map(u => {
                             const consents = u.consentsToBeFictionalSender;
                             const selected = senderUserId === u.id;
@@ -362,13 +375,12 @@ function StepTargetAndSender({
                                 ? undefined
                                 : "Cet employé n'a pas consenti à être expéditeur fictif. Active l'option dans sa fiche pour pouvoir le sélectionner.";
                             return (
-                                <label key={u.id} title={tooltip} style={{
+                                <label key={u.id} title={tooltip} className="transition-colors duration-200" style={{
                                     display: "flex", alignItems: "center", gap: 10,
-                                    padding: 10, borderBottom: "1px solid #F1F5F9",
+                                    padding: 10, borderBottom: "1px solid var(--border)",
                                     cursor: consents ? "pointer" : "not-allowed",
                                     opacity: consents ? 1 : 0.5,
-                                    background: selected ? "rgba(3,121,113,0.08)" : "transparent",
-                                    transition: "background 0.2s",
+                                    background: selected ? "var(--accent-subtle)" : "transparent",
                                 }}>
                                     <input
                                         type="radio" name="sender"
@@ -378,8 +390,8 @@ function StepTargetAndSender({
                                     />
                                     <ConsentBadge consents={consents} side="sender" />
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontSize: 13, color: "#1E293B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.firstName} {u.lastName}</div>
-                                        <div style={{ fontSize: 11, color: "#64748B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
+                                        <div style={{ fontSize: 13, color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.firstName} {u.lastName}</div>
+                                        <div style={{ fontSize: 11, color: "var(--text-2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
                                     </div>
                                 </label>
                             );
@@ -397,11 +409,11 @@ function ConsentBadge({ consents, side }: { consents: boolean; side: "sender" | 
         ? "Cet employé n'a pas consenti à être expéditeur fictif (il peut quand même être destinataire d'un scénario)."
         : undefined;
     if (consents) {
-        return <CheckCircle2 size={16} color="#10b981" strokeWidth={1.75} aria-label={label} />;
+        return <CheckCircle2 size={16} color="var(--success)" strokeWidth={1.75} aria-label={label} />;
     }
     return (
         <span title={side === "recipient" ? recipientTooltip : undefined} style={{ display: "inline-flex" }}>
-            <XCircle size={16} color="#ef4444" strokeWidth={1.75} aria-label={label} />
+            <XCircle size={16} color="var(--danger)" strokeWidth={1.75} aria-label={label} />
         </span>
     );
 }
@@ -419,10 +431,10 @@ function RecipientsRecap({
         return (
             <div style={{
                 padding: "12px 16px",
-                background: "#F1F5F9",
-                border: "1px solid #E2E8F0",
+                background: "var(--surface-2)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
-                color: "#64748B",
+                color: "var(--text-2)",
                 fontSize: 13,
             }}>
                 Aucun destinataire sélectionné
@@ -435,25 +447,24 @@ function RecipientsRecap({
             borderLeft: "4px solid var(--accent)",
             borderRadius: 8,
             padding: 16,
-            color: "#FFFFFF",
+            color: "var(--text)",
         }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
                 Destinataires sélectionnés ({selected.length})
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {visibleChips.map(u => (
-                    <span key={u.id} style={{
+                    <span key={u.id} className="transition-colors duration-200" style={{
                         display: "inline-flex", alignItems: "center", gap: 6,
                         padding: "4px 12px",
-                        background: "var(--accent-hover)",
-                        color: "#FFFFFF",
+                        background: "var(--accent)",
+                        color: "var(--on-accent)",
                         borderRadius: 999,
                         fontSize: 12,
                         fontWeight: 500,
-                        transition: "background 0.2s",
                     }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--accent)"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "var(--accent-hover)"}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--accent-hover)"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "var(--accent)"}
                     >
                         {u.firstName} {u.lastName}
                         <button
@@ -463,7 +474,7 @@ function RecipientsRecap({
                             style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                                 background: "transparent", border: "none", padding: 0,
-                                color: "#FFFFFF", cursor: "pointer",
+                                color: "var(--on-accent)", cursor: "pointer",
                             }}
                         >
                             <X size={14} strokeWidth={2.25} />
@@ -474,19 +485,19 @@ function RecipientsRecap({
                     <button
                         type="button"
                         onClick={onScrollToList}
+                        className="transition-colors duration-200"
                         style={{
                             padding: "4px 12px",
-                            background: "rgba(255,255,255,0.10)",
-                            color: "#FFFFFF",
-                            border: "1px solid rgba(255,255,255,0.20)",
+                            background: "var(--surface)",
+                            color: "var(--text)",
+                            border: "1px solid var(--border)",
                             borderRadius: 999,
                             fontSize: 12,
                             fontWeight: 500,
                             cursor: "pointer",
-                            transition: "background 0.2s",
                         }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.20)"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.10)"}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-2)"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "var(--surface)"}
                     >
                         +{overflowCount} autres
                     </button>
@@ -521,19 +532,19 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange, isMobile 
 
     return (
         <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>Personnalisation & mode</h2>
-            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>Tu peux laisser le scénario tel quel ou retoucher sujet / corps de chaque étape. Les variables Scriban (<code>{"{{recipient.firstName}}"}</code> etc.) sont rendues automatiquement.</p>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--text)", margin: "0 0 6px" }}>Personnalisation & mode</h2>
+            <p style={{ fontSize: 13, color: "var(--text-2)", margin: "0 0 16px" }}>Tu peux laisser le scénario tel quel ou retoucher sujet / corps de chaque étape. Les variables Scriban (<code>{"{{recipient.firstName}}"}</code> etc.) sont rendues automatiquement.</p>
 
-            <div style={{ marginBottom: 16, padding: 16, background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#1E293B", marginBottom: 8 }}>{"Mode d'exécution"}</div>
+            <div style={{ marginBottom: 16, padding: 16, background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", marginBottom: 8 }}>{"Mode d'exécution"}</div>
                 <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => onModeChange("normal")} style={{ flex: 1, padding: 10, border: mode === "normal" ? "2px solid #3B82F6" : "1px solid #E2E8F0", borderRadius: 8, background: "#FFFFFF", cursor: "pointer", fontSize: 13, fontWeight: mode === "normal" ? 600 : 400, color: "#1E293B" }}>
+                    <button onClick={() => onModeChange("normal")} className="transition-colors duration-200" style={{ flex: 1, padding: 10, border: mode === "normal" ? "2px solid var(--accent)" : "1px solid var(--border)", borderRadius: 8, background: "var(--surface)", cursor: "pointer", fontSize: 13, fontWeight: mode === "normal" ? 600 : 400, color: "var(--text)" }}>
                         <div>Normal</div>
-                        <div style={{ fontSize: 11, color: "#64748B" }}>1 jour = 1 jour réel</div>
+                        <div style={{ fontSize: 11, color: "var(--text-2)" }}>1 jour = 1 jour réel</div>
                     </button>
-                    <button onClick={() => onModeChange("demo")} style={{ flex: 1, padding: 10, border: mode === "demo" ? "2px solid #3B82F6" : "1px solid #E2E8F0", borderRadius: 8, background: "#FFFFFF", cursor: "pointer", fontSize: 13, fontWeight: mode === "demo" ? 600 : 400, color: "#1E293B" }}>
+                    <button onClick={() => onModeChange("demo")} className="transition-colors duration-200" style={{ flex: 1, padding: 10, border: mode === "demo" ? "2px solid var(--accent)" : "1px solid var(--border)", borderRadius: 8, background: "var(--surface)", cursor: "pointer", fontSize: 13, fontWeight: mode === "demo" ? 600 : 400, color: "var(--text)" }}>
                         <div>Démo (1 j = 1 min)</div>
-                        <div style={{ fontSize: 11, color: "#64748B" }}>Compression 1440x</div>
+                        <div style={{ fontSize: 11, color: "var(--text-2)" }}>Compression 1440x</div>
                     </button>
                 </div>
             </div>
@@ -547,16 +558,16 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange, isMobile 
                     paddingBottom: isMobile ? 4 : 0,
                 }}>
                     {steps.map(s => (
-                        <button key={`${s.stepOrder}-${s.stepId}`} onClick={() => setActiveStep(s.stepId)} style={{
+                        <button key={`${s.stepOrder}-${s.stepId}`} onClick={() => setActiveStep(s.stepId)} className="transition-colors duration-200" style={{
                             textAlign: "left", padding: "10px 12px", borderRadius: 8,
-                            border: activeStep === s.stepId ? "2px solid #3B82F6" : "1px solid #E2E8F0",
-                            background: activeStep === s.stepId ? "#F1F5F9" : "#FFFFFF",
+                            border: activeStep === s.stepId ? "2px solid var(--accent)" : "1px solid var(--border)",
+                            background: activeStep === s.stepId ? "var(--surface-2)" : "var(--surface)",
                             cursor: "pointer", fontSize: 13,
-                            color: "#1E293B", flexShrink: isMobile ? 0 : undefined,
+                            color: "var(--text)", flexShrink: isMobile ? 0 : undefined,
                             whiteSpace: isMobile ? "nowrap" : undefined,
                         }}>
                             <div style={{ fontWeight: 600 }}>Étape {s.stepOrder}</div>
-                            <div style={{ fontSize: 11, color: s.isAttackStep ? "#EF4444" : "#64748B" }}>{s.isAttackStep ? "⚠ Attaque" : "Anodine"}</div>
+                            <div style={{ fontSize: 11, color: s.isAttackStep ? "var(--danger)" : "var(--text-2)" }}>{s.isAttackStep ? "⚠ Attaque" : "Anodine"}</div>
                         </button>
                     ))}
                 </div>
@@ -564,21 +575,21 @@ function StepCustomize({ tpl, overrides, onChange, mode, onModeChange, isMobile 
                     {current && (
                         <>
                             <label style={{ display: "block", marginBottom: 12 }}>
-                                <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 4 }}>SUJET</span>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", display: "block", marginBottom: 4 }}>SUJET</span>
                                 <input
                                     type="text"
                                     value={ov?.subject ?? current.subject ?? ""}
                                     onChange={e => setOverride(current.stepId, "subject", e.target.value)}
-                                    style={{ width: "100%", padding: "8px 12px", border: "1px solid #E2E8F0", borderRadius: 6, fontSize: 13 }}
+                                    style={{ width: "100%", padding: "8px 12px", border: "1px solid var(--border)", borderRadius: 6, fontSize: 13, background: "var(--bg)", color: "var(--text)" }}
                                 />
                             </label>
                             <label>
-                                <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "block", marginBottom: 4 }}>CORPS HTML</span>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", display: "block", marginBottom: 4 }}>CORPS HTML</span>
                                 <textarea
                                     rows={12}
                                     value={ov?.bodyTemplate ?? current.bodyTemplate ?? ""}
                                     onChange={e => setOverride(current.stepId, "bodyTemplate", e.target.value)}
-                                    style={{ width: "100%", padding: 12, border: "1px solid #E2E8F0", borderRadius: 6, fontSize: 13, fontFamily: "monospace", resize: "vertical" }}
+                                    style={{ width: "100%", padding: 12, border: "1px solid var(--border)", borderRadius: 6, fontSize: 13, fontFamily: "monospace", resize: "vertical", background: "var(--bg)", color: "var(--text)" }}
                                 />
                             </label>
                         </>
@@ -607,8 +618,8 @@ function StepReview({ tpl, targets, sender, mode, overrides }: {
 
     return (
         <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", margin: "0 0 6px" }}>Récapitulatif</h2>
-            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 16px" }}>{`Vérifie avant de lancer. ${targets.length > 1 ? `${targets.length} instances seront créées (une par destinataire).` : "Le scénario démarre immédiatement après confirmation."}`}</p>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--text)", margin: "0 0 6px" }}>Récapitulatif</h2>
+            <p style={{ fontSize: 13, color: "var(--text-2)", margin: "0 0 16px" }}>{`Vérifie avant de lancer. ${targets.length > 1 ? `${targets.length} instances seront créées (une par destinataire).` : "Le scénario démarre immédiatement après confirmation."}`}</p>
 
             <div style={{ display: "grid", gap: 12 }}>
                 <ReviewRow label="Scénario" value={`${tpl.name} (${tpl.emailCount} emails sur ${tpl.durationDays} j)`} />
@@ -623,9 +634,9 @@ function StepReview({ tpl, targets, sender, mode, overrides }: {
 
 function ReviewRow({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
     return (
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B", display: "inline-flex", alignItems: "center", gap: 6 }}>{icon}{label}</span>
-            <span style={{ fontSize: 13, color: "#1E293B", fontWeight: 500 }}>{value}</span>
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", display: "inline-flex", alignItems: "center", gap: 6 }}>{icon}{label}</span>
+            <span style={{ fontSize: 13, color: "var(--text)", fontWeight: 500 }}>{value}</span>
         </div>
     );
 }
