@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { AssignmentMine } from "@/lib/types";
 import { Search, Clock, ChevronRight, Check } from "lucide-react";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
 
 const LEVEL_LABELS: Record<string, string> = {
     beginner: "Débutant",
@@ -16,16 +18,16 @@ const LEVEL_LABELS: Record<string, string> = {
 
 const diffBadge = (level?: string): React.CSSProperties => {
     const map: Record<string, React.CSSProperties> = {
-        "Débutant": { background: "rgba(16,185,129,0.10)", color: "#065F46" },
-        "Intermédiaire": { background: "rgba(245,158,11,0.10)", color: "#92400E" },
-        "Avancé": { background: "rgba(239,68,68,0.10)", color: "#991B1B" },
-        "Expert": { background: "rgba(139,92,246,0.10)", color: "#5B21B6" },
+        "Débutant": { background: "var(--success-subtle)", color: "var(--success-t)" },
+        "Intermédiaire": { background: "var(--warning-subtle)", color: "var(--warning-t)" },
+        "Avancé": { background: "var(--danger-subtle)", color: "var(--danger-t)" },
+        "Expert": { background: "var(--accent-subtle)", color: "var(--accent)" },
     };
     return map[level ?? "Débutant"] ?? map["Débutant"];
 };
 
-const barColor = (pct: number): string =>
-    pct >= 100 ? "#10B981" : "#3B82F6";
+const labelColor = (pct: number): string =>
+    pct >= 100 ? "var(--success)" : "var(--accent)";
 
 export default function ParcoursList() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -42,31 +44,33 @@ export default function ParcoursList() {
     return (
         <div style={{ padding: "28px var(--page-x)", minHeight: "100%", maxWidth: 1200, margin: "0 auto" }}>
             {/* Header */}
-            <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", margin: "0 0 4px", letterSpacing: "-0.01em" }}>
-                    Mes parcours
-                </h1>
-                <p style={{ fontSize: 13.5, color: "#94A3B8", margin: 0 }}>
-                    Tous vos parcours de formation assignés.
-                </p>
-            </div>
+            <Reveal>
+                <div style={{ marginBottom: 24 }}>
+                    <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", margin: "0 0 4px", letterSpacing: "-0.01em" }}>
+                        Mes parcours
+                    </h1>
+                    <p style={{ fontSize: 13.5, color: "var(--text-2)", margin: 0 }}>
+                        Tous vos parcours de formation assignés.
+                    </p>
+                </div>
+            </Reveal>
 
             {/* Filtres */}
             <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
-                    <Search size={14} strokeWidth={1.75} color="#64748B" style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                    <Search size={14} strokeWidth={1.75} color="var(--text-3)" style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                     <input
                         placeholder="Rechercher un parcours..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         style={{
                             width: "100%", height: 36, paddingLeft: 34, paddingRight: 12,
-                            background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 8,
-                            fontSize: 13.5, color: "#1E293B", outline: "none", fontFamily: "inherit",
+                            background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                            fontSize: 13.5, color: "var(--text)", outline: "none", fontFamily: "inherit",
                             transition: "border-color 0.15s, box-shadow 0.15s",
                         }}
-                        onFocus={e => { e.target.style.borderColor = "#3B82F6"; e.target.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.10)"; }}
-                        onBlur={e => { e.target.style.borderColor = "#E2E8F0"; e.target.style.boxShadow = "none"; }}
+                        onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px var(--accent-border)"; }}
+                        onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }}
                     />
                 </div>
             </div>
@@ -82,30 +86,30 @@ export default function ParcoursList() {
 
             {/* Error */}
             {assignQ.isError && (
-                <div style={{ background: "rgba(239,68,68,0.10)", color: "#991B1B", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "12px 16px", fontSize: 13.5 }}>
+                <div style={{ background: "var(--danger-subtle)", color: "var(--danger-t)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "12px 16px", fontSize: 13.5 }}>
                     {(assignQ.error as Error)?.message || "Erreur de chargement"}
                 </div>
             )}
 
             {/* Liste */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Stagger className="flex flex-col gap-3.5" gap={0.05}>
                 {filtered.map(p => {
                     const pct = Math.round(p.progressPercent ?? 0);
                     const done = pct >= 100;
-                    const color = barColor(pct);
+                    const color = labelColor(pct);
                     const level = p.pathLevel ? (LEVEL_LABELS[p.pathLevel] ?? p.pathLevel) : null;
                     const STATUS: Record<string, string> = { assigned: "Assigné", started: "En cours", completed: "Complété" };
 
                     return (
-                        <div key={p.pathId} style={{
-                            background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12,
+                        <StaggerItem key={p.pathId}>
+                        <div className="transition-colors duration-200" style={{
+                            background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12,
                             padding: "22px 24px",
-                            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                             display: "flex", alignItems: "center", gap: 20,
-                            transition: "box-shadow 0.2s ease, transform 0.2s ease",
                         }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 20px -4px rgba(0,0,0,0.10), 0 4px 8px -2px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)"; (e.currentTarget as HTMLElement).style.transform = "none"; }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--accent-border)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.transform = "none"; }}
                         >
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 {/* Badges */}
@@ -117,10 +121,10 @@ export default function ParcoursList() {
                                     )}
                                     <span style={{
                                         ...(done
-                                            ? { background: "rgba(16,185,129,0.10)", color: "#065F46" }
+                                            ? { background: "var(--success-subtle)", color: "var(--success-t)" }
                                             : p.status === "started"
-                                                ? { background: "rgba(245,158,11,0.10)", color: "#92400E" }
-                                                : { background: "#F1F5F9", color: "#64748B" }),
+                                                ? { background: "var(--warning-subtle)", color: "var(--warning-t)" }
+                                                : { background: "var(--surface-2)", color: "var(--text-3)" }),
                                         padding: "3px 10px", borderRadius: 99, fontSize: 11.5, fontWeight: 600,
                                     }}>
                                         {STATUS[p.status] ?? p.status}
@@ -128,14 +132,14 @@ export default function ParcoursList() {
                                 </div>
 
                                 {/* Titre */}
-                                <div style={{ fontSize: 15.5, fontWeight: 700, color: "#1E293B", marginBottom: 14, lineHeight: 1.35, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.01em" }}>
+                                <div style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text)", marginBottom: 14, lineHeight: 1.35, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.01em" }}>
                                     {p.pathTitle ?? p.pathId}
                                 </div>
 
                                 {/* Progress bar */}
                                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                                    <div style={{ flex: 1, height: 6, background: "#F1F5F9", borderRadius: 99, overflow: "hidden" }}>
-                                        <div style={{ height: 6, borderRadius: 99, background: color, width: `${pct}%`, transition: "width 0.8s cubic-bezier(0.4,0,0.2,1)" }} />
+                                    <div style={{ flex: 1, height: 6, background: "var(--surface-2)", borderRadius: 99, overflow: "hidden" }}>
+                                        <div style={{ height: 6, borderRadius: 99, background: "linear-gradient(90deg, var(--accent), var(--accent-2))", width: `${pct}%`, transition: "width 0.8s cubic-bezier(0.4,0,0.2,1)" }} />
                                     </div>
                                     <span style={{ fontSize: 12.5, fontWeight: 700, color, minWidth: 36, textAlign: "right", fontFamily: "'JetBrains Mono', monospace" }}>
                                         {pct}%
@@ -143,8 +147,8 @@ export default function ParcoursList() {
                                 </div>
 
                                 {/* Date */}
-                                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#64748B" }}>
-                                    <Clock size={12} strokeWidth={1.75} color="#64748B" />
+                                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--text-3)" }}>
+                                    <Clock size={12} strokeWidth={1.75} color="var(--text-3)" />
                                     Assigné le {p.assignedAt ? new Date(p.assignedAt).toLocaleDateString("fr-FR") : "—"}
                                     {p.dueAt && <> · Échéance : {new Date(p.dueAt).toLocaleDateString("fr-FR")}</>}
                                 </div>
@@ -154,46 +158,46 @@ export default function ParcoursList() {
                             {done ? (
                                 <Link href={`/dashboard/parcours/${p.pathId}`} style={{
                                     display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 20px",
-                                    background: "rgba(16,185,129,0.10)", color: "#065F46",
-                                    border: "1px solid rgba(16,185,129,0.25)", borderRadius: 8,
+                                    background: "var(--success-subtle)", color: "var(--success-t)",
+                                    border: "1px solid rgba(34,197,94,0.25)", borderRadius: 8,
                                     textDecoration: "none", fontSize: 13, fontWeight: 600, flexShrink: 0,
                                 }}>
-                                    <Check size={13} strokeWidth={2.5} color="#10B981" />
+                                    <Check size={13} strokeWidth={2.5} color="var(--success)" />
                                     Terminé
                                 </Link>
                             ) : (
-                                <Link href={`/dashboard/parcours/${p.pathId}`} style={{
+                                <Link href={`/dashboard/parcours/${p.pathId}`} className="transition-colors duration-200" style={{
                                     display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 20px",
-                                    background: "#3B82F6", color: "#FFFFFF", borderRadius: 8,
+                                    background: "var(--accent)", color: "var(--on-accent)", borderRadius: 8,
                                     textDecoration: "none", fontSize: 13, fontWeight: 600, flexShrink: 0,
-                                    boxShadow: "0 1px 3px rgba(59,130,246,0.40)", transition: "all 0.2s ease",
                                 }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#2563EB"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(59,130,246,0.45)"; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#3B82F6"; (e.currentTarget as HTMLElement).style.transform = "none"; (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(59,130,246,0.40)"; }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--accent-hover)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; (e.currentTarget as HTMLElement).style.transform = "none"; }}
                                 >
                                     Continuer
                                     <ChevronRight size={14} strokeWidth={2.5} />
                                 </Link>
                             )}
                         </div>
+                        </StaggerItem>
                     );
                 })}
+            </Stagger>
 
-                {/* Empty */}
-                {!assignQ.isLoading && filtered.length === 0 && (
-                    <div style={{
-                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                        padding: "64px 24px", background: "#FFFFFF", border: "1px solid #E2E8F0",
-                        borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", textAlign: "center",
-                    }}>
-                        <div style={{ width: 56, height: 56, background: "#F1F5F9", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" /><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" /></svg>
-                        </div>
-                        <div style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", marginBottom: 6 }}>Aucun parcours trouvé</div>
-                        <div style={{ fontSize: 13.5, color: "#94A3B8", maxWidth: 300 }}>Modifiez vos filtres ou contactez votre administrateur.</div>
+            {/* Empty */}
+            {!assignQ.isLoading && filtered.length === 0 && (
+                <div style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    padding: "64px 24px", background: "var(--surface)", border: "1px solid var(--border)",
+                    borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", textAlign: "center",
+                }}>
+                    <div style={{ width: 56, height: 56, background: "var(--surface-2)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" /><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" /></svg>
                     </div>
-                )}
-            </div>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text)", marginBottom: 6 }}>Aucun parcours trouvé</div>
+                    <div style={{ fontSize: 13.5, color: "var(--text-2)", maxWidth: 300 }}>Modifiez vos filtres ou contactez votre administrateur.</div>
+                </div>
+            )}
         </div>
     );
 }
