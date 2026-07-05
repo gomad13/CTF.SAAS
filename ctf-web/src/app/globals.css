@@ -328,3 +328,28 @@ img,svg,video,canvas{max-width:100%;height:auto}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
 }
+
+/* ============ ÉCRAN TÉMOIN — dashboard style Vision UI (violet), SCOPÉ ============ */
+/* Tokens LOCAUX : ne s'appliquent qu'au sous-arbre .vision-dashboard. Le thème global (vert) est inchangé. */
+/* Seul endroit où vivent les hex de ce thème (définition de tokens) ; le JSX n'utilise que var(--v-*). */
+.vision-dashboard{
+  --v-bg:#0B1437;
+  --v-surface:#111C44;
+  --v-surface-2:#1A2456;
+  --v-border:#2A3568;
+  --v-text:#FFFFFF;
+  --v-text-2:#A0AEC0;
+  --v-text-3:#718096;
+  --v-accent:#7551FF;
+  --v-accent-2:#582CFF;
+  --v-cyan:#2CD9FF;
+  --v-success:#01B574;
+  --v-danger:#E53E3E;
+  --v-grad:linear-gradient(135deg,#7551FF 0%,#582CFF 100%);
+  background:var(--v-bg);
+  color:var(--v-text);
+  min-height:100%;
+}
+.vision-dashboard *:focus-visible{outline:2px solid var(--v-accent);outline-offset:2px}
+.vision-dashboard .v-hover{transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.vision-dashboard .v-hover:hover{border-color:color-mix(in srgb,var(--v-accent) 55%,var(--v-border));transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.35)}

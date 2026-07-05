@@ -41,3 +41,41 @@ Tous en **tokens** (mode sombre défaut + clair), WCAG AA, responsive.
 
 ## 5. À valider visuellement (AVANT d'étendre)
 Ouvrir `https://sentys.fr/dashboard` (compte user) — web + mobile, modes sombre & clair : KPIs animés, courbe CRI dégradé vert→cyan, donut, cartes soignées, hover, cascade. Une fois validé, on étend le même style (KPICard/ChartCard/DataTable/DonutChart/AreaChartCard) aux autres écrans (analytics, classements, admin).
+
+---
+
+# PASSE VIOLET — Dashboard témoin style Vision UI (bleu nuit / violet)
+
+> ⚠️ **Conflit de charte à acter** : ce prompt introduit un thème **bleu nuit / violet (Vision UI)** qui **contredit** la charte actuelle de `CLAUDE.md` (noir/gris/blanc + vert cyber #22C55E). Sur demande explicite de l'utilisateur, ce thème est appliqué **UNIQUEMENT au dashboard témoin, en local, pour validation** avant toute décision de réplication. `CLAUDE.md` et le thème global (vert) ne sont **pas modifiés**. Le violet est **scopé** au seul sous-arbre `.vision-dashboard`.
+
+## Périmètre
+- **Un seul écran** refondu : `app/dashboard/page.tsx` (dashboard user). Aucun autre écran, aucun composant partagé vert, aucun backend/auth/IA/scoring touché.
+- Backup : `backups/dashboard-temoin-20260705/frontend.tgz`.
+
+## Comment le violet est isolé (zéro hex en dur dans le JSX)
+- Tokens Vision UI définis **scopés** dans `globals.css` sous `.vision-dashboard { --v-bg … --v-accent … }` — **seul endroit** où vivent les hex de ce thème (définition de tokens, comme `:root`). Le JSX n'utilise que `var(--v-*)`.
+  - `--v-bg:#0B1437` · `--v-surface:#111C44` · `--v-surface-2:#1A2456` · `--v-border:#2A3568` · `--v-text:#FFFFFF` · `--v-text-2:#A0AEC0` · `--v-accent:#7551FF` · `--v-accent-2:#582CFF` · `--v-cyan:#2CD9FF` · `--v-success:#01B574` · `--v-danger:#E53E3E` · `--v-grad` (violet).
+- Focus ring violet scopé (`.vision-dashboard *:focus-visible`). Hover doux scopé (`.v-hover`).
+- Grep hex sur `page.tsx` + `components/vision/*` = **0**.
+
+## Composants créés (dédiés, non partagés)
+`components/vision/` : **VisionCard** (verre dépoli : surface translucide + `backdrop-blur` + bordure + ombre), **VisionKpiCard** (pastille dégradé violet, gros chiffre count-up, variation +/-% réelle), **VisionAreaChart** (recharts, aire dégradé violet→cyan via `stopColor` var, tooltip verre, `isAnimationActive` coupé si reduced-motion), **VisionBarChart** (barres dégradé violet, coins arrondis), **VisionGauge** (jauge SVG circulaire, arc dégradé violet→cyan, count-up central).
+
+## Rendu (avant → après)
+- **Avant** : dashboard vert (KPICard/AreaChartCard/DonutChart green tokens).
+- **Après** : fond bleu nuit `--v-bg`, cartes verre dépoli, rangée de **4 KPI** count-up (variation réelle sur le CRI = dernier mois − précédent), **aire principale** CRI dégradé violet→cyan (span 2) + **jauge de score** circulaire, **barres** répartition des parcours + carte **activité récente**, section **Mes parcours** (barres de progression dégradé violet, bouton dégradé). Animations : `Reveal` (fade+translate entrée), `Stagger` (cascade cartes), `CountUp` (KPI + jauge), hover doux `.v-hover`, apparition des graphes.
+
+## Données — 100% réelles
+`/api/auth/me`, `/api/assignments/mine`, `/api/submissions/recent`, `useRiskScore` (CRI), `useRiskScoreHistory(6)`. Variation CRI calculée depuis l'historique réel. Empty states là où la donnée manque (courbe < 2 points, 0 parcours) — **aucune fausse donnée**. Les KPI sans delta réel (hors CRI) n'affichent **pas** de variation inventée (juste un hint).
+
+## Vérifications
+- [x] `npm run build` (local) → **✓ Compiled successfully** ; route `/dashboard` générée ; sert HTTP 307 (redir login normale sans session), aucune erreur runtime au log.
+- [x] **Zéro hex en dur** dans le JSX du dashboard (tokens `--v-*` uniquement ; hex seulement dans la définition scopée `globals.css`).
+- [x] Contraste AA (blanc/`#A0AEC0` sur `#0B1437`/`#111C44`) ; focus visible (ring violet) ; `prefers-reduced-motion` respecté (Reveal/Stagger/CountUp + `isAnimationActive` charts coupés).
+- [x] Aucun autre écran / composant partagé / backend touché.
+
+## Bugs fonctionnels repérés ailleurs
+(aucun rencontré durant cette passe)
+
+## DASHBOARD TEMOIN PRET — en attente de validation utilisateur avant replication
+> Ne PAS répliquer sur d'autres écrans tant que l'utilisateur n'a pas validé ce dashboard témoin (compte user, `http://localhost:3000/dashboard`). Décision à prendre aussi sur le **conflit de charte** (adopter le violet globalement = mise à jour de `CLAUDE.md`, ou garder le vert et abandonner cette piste).
