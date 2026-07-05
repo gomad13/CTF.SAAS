@@ -7,6 +7,9 @@ import { apiFetch } from "@/lib/api";
 import type { Me } from "@/lib/types";
 import ModesSettings from "@/components/admin/ModesSettings";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import CountUp from "@/components/CountUp";
 
 type Company = {
     id: string;
@@ -118,12 +121,14 @@ export default function AdminPage() {
 
     return (
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "var(--page-x) var(--page-x) 80px" }}>
-            <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--text)", margin: 0 }}>
-                Administration
-            </h1>
-            <p style={{ marginTop: 6, fontSize: 13, color: "var(--text-2)" }}>
-                {company?.name ?? "—"} · {users.length} collaborateur{users.length > 1 ? "s" : ""}
-            </p>
+            <Reveal>
+                <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--text)", margin: 0 }}>
+                    Administration
+                </h1>
+                <p style={{ marginTop: 6, fontSize: 13, color: "var(--text-2)" }}>
+                    {company?.name ?? "—"} · {users.length} collaborateur{users.length > 1 ? "s" : ""}
+                </p>
+            </Reveal>
 
             <div style={{ display: "flex", gap: 8, marginTop: 24, borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: 0, overflowX: "auto" }}>
                 <TabBtn active={tab === "users"} onClick={() => setTab("users")}>Collaborateurs</TabBtn>
@@ -191,12 +196,12 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
 
     return (
         <div style={{ marginTop: 32 }}>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
-                <Kpi label="COLLABORATEURS" value={stats?.totalUsers ?? users.length} color="var(--text)" />
-                <Kpi label="ACTIFS" value={stats?.activeUsers ?? 0} color="var(--success)" />
-                <Kpi label="FORMATIONS FAITES" value={stats?.totalCompletions ?? 0} color="var(--accent)" />
-                <Kpi label="SCORE MOYEN" value={`${stats?.averageScore ?? 0}%`} color={scoreColor(stats?.averageScore ?? 0)} />
-            </div>
+            <Stagger className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4" gap={0.06}>
+                <StaggerItem><Kpi label="COLLABORATEURS" value={stats?.totalUsers ?? users.length} color="var(--text)" /></StaggerItem>
+                <StaggerItem><Kpi label="ACTIFS" value={stats?.activeUsers ?? 0} color="var(--success)" /></StaggerItem>
+                <StaggerItem><Kpi label="FORMATIONS FAITES" value={stats?.totalCompletions ?? 0} color="var(--accent)" /></StaggerItem>
+                <StaggerItem><Kpi label="SCORE MOYEN" value={`${stats?.averageScore ?? 0}%`} color={scoreColor(stats?.averageScore ?? 0)} /></StaggerItem>
+            </Stagger>
 
             <ImportExportBar />
 
@@ -269,12 +274,13 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                 </div>
                 )}
 
+                <Stagger gap={0.03}>
                 {filtered.map(u => {
                     const initials = `${(u.firstName[0] ?? "").toUpperCase()}${(u.lastName[0] ?? "").toUpperCase()}`;
                     const progColor = scoreColor(u.progressPercent);
                     const scoreCol  = scoreColor(u.averageScore);
                     return (
-                        <div key={u.id} style={{
+                        <StaggerItem key={u.id}><div style={{
                             display: isMobile ? "flex" : "grid",
                             flexDirection: isMobile ? "column" : undefined,
                             gridTemplateColumns: "1.6fr 0.9fr 1.2fr 0.8fr 0.7fr 0.7fr 0.9fr",
@@ -313,7 +319,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                     {Array.from({ length: u.totalParcours }).map((_, i) => (
                                         <span key={i} style={{
                                             width: 6, height: 6, borderRadius: "50%",
-                                            background: i < u.completedParcours ? "var(--success)" : "#374151",
+                                            background: i < u.completedParcours ? "var(--success)" : "var(--surface-2)",
                                         }} />
                                     ))}
                                 </div>
@@ -376,9 +382,10 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                     }}
                                 >{u.isActive ? "Désactiver" : "Activer"}</button>
                             </div>
-                        </div>
+                        </div></StaggerItem>
                     );
                 })}
+                </Stagger>
 
                 {filtered.length === 0 && (
                     <div style={{ padding: 32, textAlign: "center", color: "var(--text-2)", fontSize: 13 }}>
@@ -401,7 +408,7 @@ function Kpi({ label, value, color }: { label: string; value: string | number; c
             padding: 20,
         }}>
             <div style={{ fontSize: 32, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>
-                {value}
+                {typeof value === "number" ? <CountUp value={value} /> : value}
             </div>
             <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-2)", marginTop: 4 }}>
                 {label}
@@ -444,8 +451,8 @@ function UserDetailModal({ user, onClose }: { user: CompanyUser; onClose: () => 
                             fontSize: 10,
                             padding: "2px 8px",
                             borderRadius: 4,
-                            background: "rgba(59,130,246,0.12)",
-                            border: "1px solid rgba(59,130,246,0.3)",
+                            background: "rgba(34,197,94,0.12)",
+                            border: "1px solid rgba(34,197,94,0.3)",
                             color: "var(--pr)",
                             fontFamily: "'JetBrains Mono', monospace",
                             textTransform: "uppercase",
@@ -534,7 +541,7 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                         label: "Formations",
                         data: stats.completionsByDay.map(d => d.count),
                         borderColor: "var(--pr)",
-                        backgroundColor: "rgba(59,130,246,0.08)",
+                        backgroundColor: "rgba(34,197,94,0.08)",
                         fill: true,
                         tension: 0.4,
                         pointBackgroundColor: "var(--pr-l)",
@@ -560,7 +567,7 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                     datasets: [{
                         label: "Soumissions",
                         data: stats.scoreDistribution.map(s => s.count),
-                        backgroundColor: ["var(--danger)", "var(--warning)", "#fbbf24", "var(--success)"],
+                        backgroundColor: ["var(--danger)", "var(--warning)", "var(--warning-t)", "var(--success)"],
                         borderRadius: 4,
                     }],
                 },
@@ -800,8 +807,8 @@ function ImportExportBar() {
     return (
         <div style={{ marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button onClick={() => setShowImport(true)} style={btnStyle("var(--pr)")}>📥 Importer CSV</button>
-            <button onClick={() => downloadFile("/api/admin/users/export", `utilisateurs_${new Date().toISOString().slice(0, 10)}.csv`)} style={btnStyle("#374151")}>📤 Exporter CSV</button>
-            <button onClick={() => downloadFile("/api/admin/users/template", "template_import.csv")} style={btnStyle("#374151")}>📋 Template</button>
+            <button onClick={() => downloadFile("/api/admin/users/export", `utilisateurs_${new Date().toISOString().slice(0, 10)}.csv`)} style={btnStyle("var(--surface-2)")}>📤 Exporter CSV</button>
+            <button onClick={() => downloadFile("/api/admin/users/template", "template_import.csv")} style={btnStyle("var(--surface-2)")}>📋 Template</button>
 
             {showImport && (
                 <div style={{
@@ -825,7 +832,7 @@ function ImportExportBar() {
                             marginBottom: 16,
                             cursor: "pointer",
                         }}
-                            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = "rgba(59,130,246,0.5)"; }}
+                            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = "rgba(34,197,94,0.5)"; }}
                             onDragLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
                             onDrop={e => {
                                 e.preventDefault();
@@ -900,7 +907,7 @@ function ImportExportBar() {
                         )}
 
                         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                            <button onClick={() => { setShowImport(false); setFile(null); setResult(null); }} disabled={importing} style={btnStyle("#374151")}>
+                            <button onClick={() => { setShowImport(false); setFile(null); setResult(null); }} disabled={importing} style={btnStyle("var(--surface-2)")}>
                                 Fermer
                             </button>
                             <button onClick={doImport} disabled={!file || importing} style={{
@@ -919,10 +926,11 @@ function ImportExportBar() {
 }
 
 function btnStyle(bg: string): React.CSSProperties {
+    // Boutons accent -> texte on-accent ; boutons neutres -> texte principal (contraste AA dans les 2 modes).
+    const isAccent = bg === "var(--pr)";
     return {
         background: bg,
-        // Texte blanc garantit le contraste AA sur les fonds foncés (primary, slate-700).
-        color: "#FFFFFF",
+        color: isAccent ? "var(--on-accent)" : "var(--text)",
         border: "none",
         padding: "9px 16px",
         borderRadius: 7,
