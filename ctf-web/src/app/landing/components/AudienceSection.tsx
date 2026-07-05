@@ -16,7 +16,7 @@ const PROFILES = [
 export default function AudienceSection() {
     return (
         <section id="audience" style={{
-            background: "rgba(59,130,246,0.03)",
+            background: "color-mix(in srgb, var(--accent) 3%, transparent)",
             padding: "clamp(56px, 10vw, 100px) var(--page-x)",
         }}>
             <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -24,7 +24,7 @@ export default function AudienceSection() {
                     <h2 style={{
                         fontSize: "clamp(26px, 4vw, 36px)",
                         fontWeight: 700,
-                        color: "#F1F5F9",
+                        color: "var(--text)",
                         maxWidth: 700,
                         margin: "0 auto",
                     }}>
@@ -40,21 +40,21 @@ export default function AudienceSection() {
                     {PROFILES.map((p) => (
                         <div key={p.title} style={{
                             background: "var(--bg-card)",
-                            borderLeft: "3px solid #3B82F6",
+                            borderLeft: "3px solid var(--accent)",
                             borderRadius: "0 10px 10px 0",
                             padding: 24,
                         }}>
                             <h3 style={{
                                 fontSize: 17,
                                 fontWeight: 600,
-                                color: "#1E293B",
+                                color: "var(--text)",
                                 marginBottom: 10,
                             }}>
                                 {p.title}
                             </h3>
                             <p style={{
                                 fontSize: 14,
-                                color: "#334155",
+                                color: "var(--text-2)",
                                 lineHeight: 1.65,
                             }}>
                                 {p.description}

@@ -1,10 +1,10 @@
 export default function KeyPointsSection() {
     return (
         <section style={{
-            background: "linear-gradient(180deg, transparent, rgba(59,130,246,0.04), transparent)",
+            background: "linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 4%, transparent), transparent)",
             padding: "clamp(48px, 9vw, 80px) var(--page-x)",
-            borderTop: "1px solid rgba(59,130,246,0.08)",
-            borderBottom: "1px solid rgba(59,130,246,0.08)",
+            borderTop: "1px solid color-mix(in srgb, var(--accent) 8%, transparent)",
+            borderBottom: "1px solid color-mix(in srgb, var(--accent) 8%, transparent)",
         }}>
             <div style={{
                 maxWidth: 1100,
@@ -57,7 +57,7 @@ function KeyPoint({ icon, value, label, sub }: {
                 fontWeight: 800,
                 fontSize: 42,
                 color: "var(--pr)",
-                textShadow: "0 0 20px rgba(59,130,246,0.4)",
+                textShadow: "0 0 20px color-mix(in srgb, var(--accent) 40%, transparent)",
                 lineHeight: 1,
                 marginBottom: 10,
             }}>
@@ -66,7 +66,7 @@ function KeyPoint({ icon, value, label, sub }: {
             <div style={{
                 fontSize: 11,
                 letterSpacing: "0.1em",
-                color: "#94A3B8",
+                color: "var(--text-3)",
                 fontFamily: "'JetBrains Mono', monospace",
                 marginBottom: 8,
             }}>
@@ -74,7 +74,7 @@ function KeyPoint({ icon, value, label, sub }: {
             </div>
             <div style={{
                 fontSize: 13,
-                color: "#CBD5E1",
+                color: "var(--text-2)",
                 lineHeight: 1.5,
             }}>
                 {sub}

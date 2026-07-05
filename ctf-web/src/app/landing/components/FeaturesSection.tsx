@@ -45,8 +45,8 @@ export default function FeaturesSection() {
                         letterSpacing: "0.14em",
                         color: "var(--pr)",
                         fontFamily: "'JetBrains Mono', monospace",
-                        background: "rgba(59,130,246,0.07)",
-                        border: "1px solid rgba(59,130,246,0.22)",
+                        background: "color-mix(in srgb, var(--accent) 7%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
                         borderRadius: 20,
                         padding: "4px 14px",
                         marginBottom: 16,
@@ -56,7 +56,7 @@ export default function FeaturesSection() {
                     <h2 style={{
                         fontSize: "clamp(26px, 4vw, 36px)",
                         fontWeight: 700,
-                        color: "#F1F5F9",
+                        color: "var(--text)",
                         marginTop: 16,
                     }}>
                         Une plateforme complète pour votre organisation
@@ -81,8 +81,8 @@ export default function FeaturesSection() {
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
     return (
         <div style={{
-            background: "#FFFFFF",
-            border: "1px solid #E2E8F0",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
             borderRadius: 12,
             padding: "28px 24px",
             position: "relative",
@@ -96,7 +96,7 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
                 right: 0,
                 width: 36,
                 height: 36,
-                background: "linear-gradient(225deg, rgba(59,130,246,0.20) 0%, transparent 60%)",
+                background: "linear-gradient(225deg, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 60%)",
                 clipPath: "polygon(100% 0, 0 0, 100% 100%)",
             }} />
 
@@ -107,8 +107,8 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 8,
-                background: "rgba(59,130,246,0.08)",
-                border: "1px solid rgba(59,130,246,0.18)",
+                background: "color-mix(in srgb, var(--accent) 8%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
                 color: "var(--pr)",
             }}>
                 {icon}
@@ -117,14 +117,14 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
             <h3 style={{
                 fontSize: 16,
                 fontWeight: 600,
-                color: "#1E293B",
+                color: "var(--text)",
                 marginTop: 14,
             }}>
                 {title}
             </h3>
             <p style={{
                 fontSize: 14,
-                color: "#334155",
+                color: "var(--text-2)",
                 lineHeight: 1.65,
                 marginTop: 8,
             }}>

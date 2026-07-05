@@ -34,8 +34,8 @@ export default function HeroSection() {
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 8,
-                        background: "rgba(59,130,246,0.07)",
-                        border: "1px solid rgba(59,130,246,0.22)",
+                        background: "color-mix(in srgb, var(--accent) 7%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
                         borderRadius: 20,
                         padding: "5px 14px",
                         fontFamily: "'JetBrains Mono', monospace",
@@ -48,7 +48,7 @@ export default function HeroSection() {
                             height: 6,
                             borderRadius: "50%",
                             background: "var(--pr)",
-                            boxShadow: "0 0 8px #3B82F6",
+                            boxShadow: "0 0 8px var(--accent)",
                             animation: "pulseDot 2s infinite",
                             flexShrink: 0,
                         }} />
@@ -61,7 +61,7 @@ export default function HeroSection() {
                     fontSize: "clamp(36px, 5.5vw, 68px)",
                     fontWeight: 800,
                     lineHeight: 1.08,
-                    color: "#F1F5F9",
+                    color: "var(--text)",
                     textShadow: "0 1px 2px rgba(0,0,0,0.04)",
                     marginTop: 28,
                     opacity: mounted ? 1 : 0,
@@ -72,7 +72,7 @@ export default function HeroSection() {
                     aux menaces{" "}
                     <span style={{
                         color: "var(--pr)",
-                        textShadow: "0 0 24px rgba(59,130,246,0.45)",
+                        textShadow: "0 0 24px color-mix(in srgb, var(--accent) 45%, transparent)",
                     }}>
                         cyber
                     </span>
@@ -84,7 +84,7 @@ export default function HeroSection() {
                 <p style={{
                     maxWidth: 560,
                     fontSize: 17,
-                    color: "#CBD5E1",
+                    color: "var(--text-2)",
                     lineHeight: 1.65,
                     marginTop: 24,
                     opacity: mounted ? 1 : 0,
@@ -140,12 +140,12 @@ export default function HeroSection() {
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     fontFamily: "'JetBrains Mono', monospace",
-                    color: "#94A3B8",
+                    color: "var(--text-3)",
                 }}>
                     DÉFILER
                 </span>
                 <svg
-                    style={{ animation: "bounce 2s ease-in-out infinite", color: "#94A3B8" }}
+                    style={{ animation: "bounce 2s ease-in-out infinite", color: "var(--text-3)" }}
                     width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -176,24 +176,24 @@ function HoverBtn({ href, children, primary = false }: {
 
     const style: React.CSSProperties = primary ? {
         background: hov
-            ? "linear-gradient(135deg, #60A5FA, #2563EB)"
-            : "linear-gradient(135deg, #3B82F6, #2563EB)",
-        color: "#FFFFFF",
+            ? "linear-gradient(135deg, var(--accent-hover), var(--accent))"
+            : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
+        color: "var(--on-accent)",
         fontWeight: 700,
         fontSize: 15,
         padding: "14px 32px",
         borderRadius: 8,
         border: "none",
         cursor: "pointer",
-        boxShadow: hov ? "0 0 24px rgba(59,130,246,0.5)" : "0 0 12px rgba(59,130,246,0.3)",
+        boxShadow: hov ? "0 0 24px color-mix(in srgb, var(--accent) 50%, transparent)" : "0 0 12px color-mix(in srgb, var(--accent) 30%, transparent)",
         transform: hov ? "translateY(-1px)" : "none",
         transition: "all 0.2s",
         textDecoration: "none",
         display: "inline-flex",
         alignItems: "center",
     } : {
-        background: hov ? "rgba(59,130,246,0.08)" : "transparent",
-        border: `1px solid ${hov ? "rgba(59,130,246,0.6)" : "rgba(59,130,246,0.35)"}`,
+        background: hov ? "color-mix(in srgb, var(--accent) 8%, transparent)" : "transparent",
+        border: `1px solid ${hov ? "color-mix(in srgb, var(--accent) 60%, transparent)" : "color-mix(in srgb, var(--accent) 35%, transparent)"}`,
         color: "var(--pr)",
         fontWeight: 600,
         fontSize: 15,

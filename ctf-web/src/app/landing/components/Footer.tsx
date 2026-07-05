@@ -1,8 +1,8 @@
 export default function Footer() {
     return (
         <footer style={{
-            background: "#0A0A0B",
-            borderTop: "1px solid rgba(59,130,246,0.08)",
+            background: "var(--bg)",
+            borderTop: "1px solid color-mix(in srgb, var(--accent) 8%, transparent)",
             padding: "32px var(--page-x)",
         }}>
             <div style={{
@@ -17,7 +17,7 @@ export default function Footer() {
                 {/* Gauche */}
                 <span style={{
                     fontSize: 12,
-                    color: "#94A3B8",
+                    color: "var(--text-3)",
                     fontFamily: "'JetBrains Mono', monospace",
                 }}>
                     &copy; 2026 Sentys — Tous droits réservés
@@ -36,7 +36,7 @@ export default function Footer() {
                 {/* Droite */}
                 <span style={{
                     fontSize: 12,
-                    color: "#94A3B8",
+                    color: "var(--text-3)",
                     fontFamily: "'JetBrains Mono', monospace",
                 }}>
                     Fait avec ◈ pour la cybersécurité

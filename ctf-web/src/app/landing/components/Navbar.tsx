@@ -11,10 +11,10 @@ export default function Navbar() {
             position: "sticky",
             top: 0,
             zIndex: 50,
-            background: "rgba(2,12,12,0.88)",
+            background: "color-mix(in srgb, var(--bg) 88%, transparent)",
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
-            borderBottom: "1px solid rgba(59,130,246,0.12)",
+            borderBottom: "1px solid color-mix(in srgb, var(--accent) 12%, transparent)",
         }}>
             <div style={{
                 maxWidth: 1200,
@@ -32,10 +32,10 @@ export default function Navbar() {
                             d="M2,9 C4,4 8,2 12,5 S18,12 22,9 S26,3 28,6"
                             fill="none" stroke="var(--pr)" strokeWidth="2.5"
                             strokeLinecap="round"
-                            style={{ filter: "drop-shadow(0 0 4px #3B82F6)" }}
+                            style={{ filter: "drop-shadow(0 0 4px var(--accent))" }}
                         />
-                        <circle cx="26" cy="7" r="2.5" fill="var(--pr-l)" style={{ filter: "drop-shadow(0 0 6px #60A5FA)" }} />
-                        <circle cx="4" cy="10" r="1.5" fill="rgba(59,130,246,0.5)" />
+                        <circle cx="26" cy="7" r="2.5" fill="var(--pr-l)" style={{ filter: "drop-shadow(0 0 6px var(--accent))" }} />
+                        <circle cx="4" cy="10" r="1.5" fill="color-mix(in srgb, var(--accent) 50%, transparent)" />
                     </svg>
                     <span style={{ fontWeight: 800, fontSize: 20, color: "var(--pr)", whiteSpace: "nowrap" }}>
                         Sentys
@@ -53,7 +53,7 @@ export default function Navbar() {
                 <div style={{ alignItems: "center", gap: 10 }} className="hidden md:flex">
                     <Link href="/login" style={{
                         background: "transparent",
-                        border: "1px solid rgba(59,130,246,0.35)",
+                        border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
                         color: "var(--pr)",
                         borderRadius: 7,
                         padding: "8px 18px",
@@ -61,14 +61,14 @@ export default function Navbar() {
                         textDecoration: "none",
                         transition: "background 0.15s",
                     }}
-                        onMouseOver={e => { e.currentTarget.style.background = "rgba(59,130,246,0.08)"; }}
+                        onMouseOver={e => { e.currentTarget.style.background = "color-mix(in srgb, var(--accent) 8%, transparent)"; }}
                         onMouseOut={e => { e.currentTarget.style.background = "transparent"; }}
                     >
                         Connexion
                     </Link>
                     <Link href="/login" style={{
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                        color: "#FFFFFF",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
+                        color: "var(--on-accent)",
                         fontWeight: 700,
                         fontSize: 13,
                         borderRadius: 7,
@@ -76,7 +76,7 @@ export default function Navbar() {
                         textDecoration: "none",
                         transition: "box-shadow 0.2s",
                     }}
-                        onMouseOver={e => { e.currentTarget.style.boxShadow = "0 0 16px rgba(59,130,246,0.35)"; }}
+                        onMouseOver={e => { e.currentTarget.style.boxShadow = "0 0 16px color-mix(in srgb, var(--accent) 35%, transparent)"; }}
                         onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; }}
                     >
                         Demander une démo
@@ -86,7 +86,7 @@ export default function Navbar() {
                 {/* Mobile burger */}
                 <button
                     onClick={() => setMenuOpen(o => !o)}
-                    style={{ background: "none", border: "none", color: "#CBD5E1", cursor: "pointer", width: 44, height: 44, alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                    style={{ background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", width: 44, height: 44, alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                     className="flex md:hidden"
                     aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
                 >
@@ -117,7 +117,7 @@ export default function Navbar() {
                         padding: "13px 18px",
                         minHeight: 44,
                         color: "var(--pr)",
-                        border: "1px solid rgba(59,130,246,0.35)",
+                        border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
                         borderRadius: 7,
                         textDecoration: "none",
                         fontSize: 13,
@@ -128,8 +128,8 @@ export default function Navbar() {
                         textAlign: "center",
                         padding: "13px 18px",
                         minHeight: 44,
-                        background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                        color: "#FFFFFF",
+                        background: "linear-gradient(135deg, var(--accent), var(--accent-hover))",
+                        color: "var(--on-accent)",
                         borderRadius: 7,
                         textDecoration: "none",
                         fontWeight: 700,
@@ -149,7 +149,7 @@ function NavLink({ href, children, onClick }: { href: string; children: React.Re
             href={href}
             onClick={onClick}
             style={{
-                color: "#CBD5E1",
+                color: "var(--text-2)",
                 fontSize: 16,
                 fontWeight: 500,
                 textDecoration: "none",
@@ -160,7 +160,7 @@ function NavLink({ href, children, onClick }: { href: string; children: React.Re
                 padding: "2px 2px",
             }}
             onMouseOver={e => { e.currentTarget.style.color = "var(--pr)"; }}
-            onMouseOut={e => { e.currentTarget.style.color = "#CBD5E1"; }}
+            onMouseOut={e => { e.currentTarget.style.color = "var(--text-2)"; }}
         >
             {children}
         </a>
