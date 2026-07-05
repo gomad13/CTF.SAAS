@@ -3,16 +3,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, Clock, MousePointerClick, Trophy, RotateCcw } from "lucide-react";
-import { buildShuffledDeck, MEMORY_PAIR_COUNT, type MemoryTile } from "@/lib/flashcards-memory-demo";
+import {
+    buildShuffledDeck,
+    MEMORY_PAIR_COUNT,
+    type MemoryTile,
+    type PairKind,
+} from "@/lib/flashcards-memory-demo";
 import { useSessionTimer } from "./useSessionTimer";
 import MemoryCard from "./MemoryCard";
+import MemoryVariantChoice from "./MemoryVariantChoice";
 
 type Props = { onExit: () => void };
 
-/** Mode Memory : grille de paires risque ↔ contre-mesure, flip au clic, détection de paire (juste/faux),
- *  chrono de session, compteur de coups, récap de fin. Isolé — ne touche pas aux autres modes. */
+/** Mode Memory : UNE variante d'association par partie (terme↔déf OU risque↔parade), choisie sur un écran dédié.
+ *  Flip 3D au clic, détection de paire (juste/faux), chrono, compteur de coups, récap. Isolé. */
 export default function MemoryMode({ onExit }: Props) {
     const reduce = useReducedMotion();
+    const [variant, setVariant] = useState<PairKind | null>(null);
     const [deck, setDeck] = useState<MemoryTile[]>([]);
     const [flipped, setFlipped] = useState<string[]>([]); // uids face visible (en évaluation)
     const [matched, setMatched] = useState<string[]>([]); // pairIds trouvés
@@ -22,29 +29,42 @@ export default function MemoryMode({ onExit }: Props) {
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const finished = deck.length > 0 && matched.length === MEMORY_PAIR_COUNT;
-    const timer = useSessionTimer(deck.length > 0 && !finished);
+    const { label: timerLabel, reset: resetTimer } = useSessionTimer(deck.length > 0 && !finished);
 
-    const clearPending = () => {
+    const clearPending = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
-    };
-
-    const newGame = useCallback(() => {
-        clearPending();
-        setDeck(buildShuffledDeck());
-        setFlipped([]);
-        setMatched([]);
-        setWrong(false);
-        setMoves(0);
-        setLock(false);
-        timer.reset();
-    }, [timer]);
-
-    // Mélange côté client uniquement (évite tout mismatch d'hydratation SSR).
-    useEffect(() => {
-        setDeck(buildShuffledDeck());
-        return () => clearPending();
     }, []);
+
+    // Démarre / redémarre une partie pour un type donné (deck filtré sur ce type).
+    const start = useCallback(
+        (kind: PairKind) => {
+            clearPending();
+            setDeck(buildShuffledDeck(kind));
+            setFlipped([]);
+            setMatched([]);
+            setWrong(false);
+            setMoves(0);
+            setLock(false);
+            resetTimer();
+        },
+        [clearPending, resetTimer],
+    );
+
+    // Construit la grille quand une variante est choisie ; nettoie si on revient à l'écran de choix.
+    useEffect(() => {
+        if (!variant) {
+            setDeck([]);
+            return;
+        }
+        start(variant);
+        return () => clearPending();
+    }, [variant, start, clearPending]);
+
+    const backToChoice = useCallback(() => {
+        clearPending();
+        setVariant(null);
+    }, [clearPending]);
 
     const onTile = useCallback(
         (tile: MemoryTile) => {
@@ -82,15 +102,22 @@ export default function MemoryMode({ onExit }: Props) {
         [lock, finished, matched, flipped, deck],
     );
 
+    // Écran de choix du type — rendu APRÈS tous les hooks (règles des Hooks respectées).
+    if (!variant) {
+        return <MemoryVariantChoice onPick={setVariant} onExit={onExit} />;
+    }
+
+    const isTerme = variant === "terme-def";
+
     return (
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
-            {/* Barre haut : menu, coups, chrono */}
+            {/* Barre haut : retour au choix, coups, chrono */}
             <div className="flex items-center justify-between">
                 <button
-                    onClick={onExit}
+                    onClick={backToChoice}
                     className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-[var(--text-2)] transition-colors duration-200 hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
                 >
-                    <ArrowLeft className="h-4 w-4" /> Menu
+                    <ArrowLeft className="h-4 w-4" /> Type
                 </button>
                 <div className="flex items-center gap-3">
                     <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-2 px-2.5 py-1 text-sm font-semibold tabular-nums text-[var(--text)]">
@@ -98,19 +125,27 @@ export default function MemoryMode({ onExit }: Props) {
                     </span>
                     <span
                         className="inline-flex items-center gap-1.5 rounded-lg bg-surface-2 px-2.5 py-1 text-sm font-semibold tabular-nums text-[var(--text)]"
-                        aria-label={`Temps écoulé ${timer.label}`}
+                        aria-label={`Temps écoulé ${timerLabel}`}
                     >
-                        <Clock className="h-4 w-4 text-[var(--text-3)]" /> {timer.label}
+                        <Clock className="h-4 w-4 text-[var(--text-3)]" /> {timerLabel}
                     </span>
                 </div>
             </div>
 
             <div className="text-center">
                 <p className="text-sm text-[var(--text-2)]">
-                    Retrouvez les paires{" "}
-                    <span className="font-semibold text-danger">risque</span> ↔{" "}
-                    <span className="font-semibold text-accent">parade</span> et{" "}
-                    <span className="font-semibold text-accent-2">terme</span> ↔ définition. Trouvées :{" "}
+                    {isTerme ? (
+                        <>
+                            Associez chaque <span className="font-semibold text-accent-2">terme</span> à sa{" "}
+                            <span className="font-semibold text-[var(--text)]">définition</span>.
+                        </>
+                    ) : (
+                        <>
+                            Associez chaque <span className="font-semibold text-danger">risque</span> à sa{" "}
+                            <span className="font-semibold text-accent">parade</span>.
+                        </>
+                    )}{" "}
+                    Trouvées :{" "}
                     <span className="font-semibold text-[var(--text)]">
                         {matched.length}/{MEMORY_PAIR_COUNT}
                     </span>
@@ -155,7 +190,7 @@ export default function MemoryMode({ onExit }: Props) {
                     <div className="grid w-full grid-cols-2 gap-3">
                         <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-surface-2 px-2 py-3">
                             <Clock className="h-4 w-4 text-[var(--text-2)]" />
-                            <span className="text-lg font-bold tabular-nums text-[var(--text)]">{timer.label}</span>
+                            <span className="text-lg font-bold tabular-nums text-[var(--text)]">{timerLabel}</span>
                             <span className="text-xs text-[var(--text-3)]">Temps</span>
                         </div>
                         <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-surface-2 px-2 py-3">
@@ -166,13 +201,13 @@ export default function MemoryMode({ onExit }: Props) {
                     </div>
                     <div className="flex w-full gap-3">
                         <button
-                            onClick={onExit}
+                            onClick={backToChoice}
                             className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 font-medium text-[var(--text)] transition-colors duration-200 hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
                         >
-                            <ArrowLeft className="h-4 w-4" /> Menu
+                            <ArrowLeft className="h-4 w-4" /> Type
                         </button>
                         <button
-                            onClick={newGame}
+                            onClick={() => start(variant)}
                             className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-[var(--accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                         >
                             <RotateCcw className="h-4 w-4" /> Rejouer

@@ -162,3 +162,36 @@ Flip 3D, animations JUSTE/FAUX, re-retournement, `useSessionTimer`, compteur de 
 - [x] **Zéro hex en dur** (grep = 0) ; contraste AA (tokens).
 - [x] Serveur dev `/flashcards-test` → HTTP 200.
 - [x] Révision/Épreuve et reste de l'app non touchés ; aucune BDD/push/déploiement.
+
+---
+
+# PASSE 2c — CORRECTION + SIMPLIFICATION MEMORY (une variante par partie)
+
+> Périmètre : uniquement Memory. Backup `backups/flashcards-memory-adjust-20260705/` (état déjà sauvegardé avant cette série d'ajustements).
+
+## Diagnostic (« ça ne marche pas »)
+- **Build** : propre (aucune erreur de type/lint) — `✓ Compiled successfully`.
+- **Logs serveur** : uniquement `⚠ Fast Refresh had to perform a full reload due to a runtime error` — **artefact HMR bénin** : après ~20 éditions à chaud (hooks/exports modifiés), le Fast Refresh de Next ne peut plus hot-swapper et force un reload complet. Ce n'est pas un crash de prod ; l'instance dev tournait depuis longtemps avec un **état HMR accumulé**.
+- **Revue de code** : flip 3D, logique de paires, timers → corrects, aucun crash reproductible.
+- **Vraie cause (UX)** : une seule grille **mélangeait les deux familles** d'association (terme↔définition **ET** risque↔parade). Le joueur n'a alors **aucune logique d'association unique** à suivre → les paires paraissent introuvables → ressenti « cassé / trop dur ».
+
+## Correctif
+1. **Redémarrage propre** du serveur dev (kill port 3000 + relance) → état HMR remis à zéro (`✓ Ready in 2s`, log sans erreur).
+2. **Une variante par partie** (cause racine UX) :
+   - `MemoryVariantChoice.tsx` (nouveau) : écran de choix **Terme / Définition** ou **Risque / Parade**, charte respectée, bouton « Menu » (retour au menu flashcards).
+   - `buildShuffledDeck(kind)` filtre le pool sur **un seul type** avant de tirer 6 paires.
+   - `MemoryMode` : état `variant` ; l'écran de choix est **rendu après tous les hooks** (règles des Hooks respectées) ; deck reconstruit au choix ; en-tête adapté (« terme ↔ définition » **ou** « risque ↔ parade »).
+   - Navigation : bouton « Type » (retour au choix) en haut de grille et dans le récap ; « Rejouer » remélange la même variante.
+   - Pool terme↔définition élargi à **11 paires** (variété inter-parties même en type unique). Risque↔parade : 10 paires.
+
+## Inchangé
+12 cartes (6 paires), grille 6×2, dos à motif cyber, flip 3D, animations JUSTE/FAUX, re-retournement, chrono, compteur de coups, récap, `prefers-reduced-motion`. Modes Révision/Épreuve non touchés.
+
+## Vérifications
+- [x] `npm run build` (local) → **✓ Compiled successfully** (aucun warning hooks/exhaustive-deps).
+- [x] **Zéro hex en dur** (grep = 0) ; contraste AA (tokens).
+- [x] Serveur dev **redémarré propre** : `/flashcards-test` HTTP 200, log sans erreur.
+- [x] Deux variantes jouables (Terme/Définition, Risque/Parade), une seule par partie.
+
+### Note utile pour les autres modes
+L'avertissement « Fast Refresh full reload » n'est pas un bug applicatif : c'est le comportement normal de Next quand un module modifié exporte autre chose qu'un composant (hook, constante) — le hot-reload ne peut pas préserver l'état et recharge. Sur une longue session d'édition, un redémarrage du `npm run dev` remet tout au propre.
