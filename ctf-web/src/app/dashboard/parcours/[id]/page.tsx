@@ -7,6 +7,8 @@ import { CheckCircle2, Play, RotateCcw } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import ParcoursHeader from "@/components/paths/ParcoursHeader";
 import ModuleCard from "@/components/paths/ModuleCard";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
 import type { AssignmentMine, PathDetail } from "@/lib/types";
 
 type PathProgress = {
@@ -150,17 +152,19 @@ export default function ParcoursDetail({ params }: { params: Promise<{ id: strin
 
     return (
         <div className="mx-auto flex min-w-0 max-w-5xl flex-col gap-6 px-6 py-8" style={{ flexShrink: 0 }}>
-            <ParcoursHeader
-                title={path.title}
-                description={path.description}
-                level={level}
-                type={path.type}
-                completedCount={completedCount}
-                totalCount={totalCount}
-                actions={headerActions}
-            />
+            <Reveal>
+                <ParcoursHeader
+                    title={path.title}
+                    description={path.description}
+                    level={level}
+                    type={path.type}
+                    completedCount={completedCount}
+                    totalCount={totalCount}
+                    actions={headerActions}
+                />
+            </Reveal>
 
-            <div className="flex flex-col gap-5">
+            <Stagger className="flex flex-col gap-5" gap={0.06}>
                 {modules.map((m, index) => {
                     const prevModuleChallenges = modules.slice(0, index).flatMap(pm => pm.challenges);
                     const prevAllCompleted =
@@ -169,7 +173,8 @@ export default function ParcoursDetail({ params }: { params: Promise<{ id: strin
                     const locked = !prevAllCompleted && index > 0;
 
                     return (
-                        <section key={m.id} className="flex flex-col gap-3">
+                        <StaggerItem key={m.id}>
+                        <section className="flex flex-col gap-3">
                             <div className="flex items-baseline justify-between">
                                 <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">
                                     Module {index + 1}
@@ -188,9 +193,10 @@ export default function ParcoursDetail({ params }: { params: Promise<{ id: strin
                                 />
                             </div>
                         </section>
+                        </StaggerItem>
                     );
                 })}
-            </div>
+            </Stagger>
         </div>
     );
 }
