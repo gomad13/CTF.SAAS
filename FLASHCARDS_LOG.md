@@ -230,3 +230,38 @@ Pool Risque/Parade révisé en **14 paires univoques** — chaque risque appelle
 - [x] `npm run build` (local) → **✓ Compiled successfully**. Route `/flashcards-test` HTTP 200.
 - [x] Aucune couleur touchée (fichier de données) ; 0 hex ; charte respectée.
 - [x] Reste du mode Memory inchangé (12 cartes, 6×2, flip, juste/faux, timer, coups, récap). Révision/Épreuve non touchés.
+
+---
+
+# PASSE 2e — CONTENU RISQUE/PARADE POUR PUBLIC NON TECHNIQUE
+
+> Public cible : soignants, médecins, cadres finance, chercheurs, admin — **sans vocabulaire informatique**. Périmètre : uniquement le pool Risque/Parade (données). Backup `backups/flashcards-memory-content-20260705/`.
+
+## Problème
+Le pool Risque/Parade utilisait du **jargon** incompréhensible pour le public cible : « Chiffrement du disque », « Activer la 2FA », « Utiliser un VPN », « Vérifier le HTTPS », « Rançongiciel », « Politique du bureau propre »… Une secrétaire médicale ne peut pas relier ces cartes par bon sens.
+
+## Correction
+Pool refondu en **13 paires « risque du quotidien ↔ bon réflexe simple »**, chaque parade = un **geste concret**, aucun terme technique, association univoque :
+1. Email frauduleux (faux expéditeur) ↔ Ne pas cliquer, le signaler
+2. Clé USB trouvée par terre ↔ Ne pas la brancher
+3. Virement urgent demandé par mail ↔ Confirmer de vive voix
+4. Mot de passe trop simple ↔ En choisir un plus long
+5. Ordinateur laissé déverrouillé ↔ Verrouiller l'écran en partant
+6. Appel réclamant votre mot de passe ↔ Ne jamais le communiquer
+7. Même mot de passe partout ↔ Un mot de passe par service
+8. Données patients sur un post-it ↔ Ranger les infos sensibles
+9. Téléphone pro perdu ↔ Prévenir le support tout de suite
+10. Lien reçu par SMS inattendu ↔ Supprimer sans cliquer
+11. Porte de bureau laissée ouverte ↔ Fermer à clé en partant
+12. Document confidentiel jeté entier ↔ Le déchirer avant de jeter
+13. Badge d'accès prêté ↔ Ne pas prêter son badge
+
+- **Jargon retiré** : chiffrement, 2FA, VPN, HTTPS, « rançongiciel », etc. Remplacés par des gestes du quotidien professionnel (santé/bureau).
+- **Univocité + anti-croisement** : verbes distincts pour les messages suspects (email → « signaler » ; SMS → « supprimer ») ; « virement urgent → confirmer de vive voix » distinct de « appel réclamant le mot de passe → ne jamais le communiquer » ; réflexes physiques bien séparés (écran / porte / post-it / badge / document).
+- Pool = **13 paires** (≥ 12) → aléatoire préservé. Variante Terme/Définition inchangée.
+
+## Vérifications
+- [x] `npm run build` (local) → **✓ Compiled successfully** ; route HTTP 200.
+- [x] Grep jargon (VPN/2FA/HTTPS/chiffrement/rançongiciel) sur le bloc risque-parade = **0**.
+- [x] Test « bon sens » : chaque risque relié à sa parade sans connaissance technique. 0 hex, charte respectée (données seules).
+- [x] Reste du mode Memory inchangé ; Révision/Épreuve non touchés ; aucun push/déploiement.

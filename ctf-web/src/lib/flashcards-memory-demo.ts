@@ -14,22 +14,21 @@ export type MemoryPair = {
 
 // Libellés volontairement courts (lisibilité en grille 6×2).
 export const MEMORY_POOL: MemoryPair[] = [
-    // Risque ↔ Contre-mesure — associations UNIVOQUES (chaque risque appelle une seule parade,
-    // et réciproquement ; pas deux parades interchangeables ni deux risques vers la même parade).
-    { id: "phishing-rp", kind: "risque-parade", left: "Email de phishing", right: "Ne pas cliquer, signaler" },
-    { id: "usb", kind: "risque-parade", left: "Clé USB inconnue", right: "Ne pas la brancher" },
-    { id: "virement", kind: "risque-parade", left: "Fraude au virement", right: "Valider par appel interne" },
-    { id: "vol", kind: "risque-parade", left: "Vol d'appareil", right: "Chiffrement du disque" },
-    { id: "compte", kind: "risque-parade", left: "Compte compromis", right: "Activer la 2FA" },
-    { id: "mdp", kind: "risque-parade", left: "Mot de passe faible", right: "Gestionnaire de mots de passe" },
-    { id: "wifi", kind: "risque-parade", left: "Wi-Fi public ouvert", right: "Utiliser un VPN" },
-    { id: "ransomware", kind: "risque-parade", left: "Rançongiciel", right: "Sauvegardes régulières" },
-    { id: "ecran", kind: "risque-parade", left: "Écran non verrouillé", right: "Verrouillage automatique" },
-    { id: "pj", kind: "risque-parade", left: "Pièce jointe suspecte", right: "Analyser avant d'ouvrir" },
-    { id: "maj", kind: "risque-parade", left: "Logiciel obsolète", right: "Installer les mises à jour" },
-    { id: "http", kind: "risque-parade", left: "Site en HTTP", right: "Vérifier le HTTPS" },
-    { id: "support", kind: "risque-parade", left: "Faux support technique", right: "Raccrocher, ne rien installer" },
-    { id: "bureau", kind: "risque-parade", left: "Documents sensibles visibles", right: "Politique du bureau propre" },
+    // Risque ↔ Contre-mesure — formulé pour un public NON technique (soignants, cadres, admin) :
+    // risque du quotidien ↔ bon réflexe simple, aucun jargon, association UNIVOQUE (une parade = un seul risque).
+    { id: "phishing", kind: "risque-parade", left: "Email frauduleux (faux expéditeur)", right: "Ne pas cliquer, le signaler" },
+    { id: "usb", kind: "risque-parade", left: "Clé USB trouvée par terre", right: "Ne pas la brancher" },
+    { id: "virement", kind: "risque-parade", left: "Virement urgent demandé par mail", right: "Confirmer de vive voix" },
+    { id: "mdp-simple", kind: "risque-parade", left: "Mot de passe trop simple", right: "En choisir un plus long" },
+    { id: "ecran", kind: "risque-parade", left: "Ordinateur laissé déverrouillé", right: "Verrouiller l'écran en partant" },
+    { id: "appel-mdp", kind: "risque-parade", left: "Appel réclamant votre mot de passe", right: "Ne jamais le communiquer" },
+    { id: "mdp-reuse", kind: "risque-parade", left: "Même mot de passe partout", right: "Un mot de passe par service" },
+    { id: "postit", kind: "risque-parade", left: "Données patients sur un post-it", right: "Ranger les infos sensibles" },
+    { id: "tel-perdu", kind: "risque-parade", left: "Téléphone pro perdu", right: "Prévenir le support tout de suite" },
+    { id: "sms", kind: "risque-parade", left: "Lien reçu par SMS inattendu", right: "Supprimer sans cliquer" },
+    { id: "porte", kind: "risque-parade", left: "Porte de bureau laissée ouverte", right: "Fermer à clé en partant" },
+    { id: "doc-jete", kind: "risque-parade", left: "Document confidentiel jeté entier", right: "Le déchirer avant de jeter" },
+    { id: "badge", kind: "risque-parade", left: "Badge d'accès prêté", right: "Ne pas prêter son badge" },
     // Terme ↔ Définition
     { id: "phishing-td", kind: "terme-def", left: "Phishing", right: "Usurpation par email piégé" },
     { id: "2fa", kind: "terme-def", left: "2FA", right: "Double preuve d'identité" },
