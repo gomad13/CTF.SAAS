@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (isError || !me) return null;
 
     return (
-        <div style={{ display: "flex", minHeight: "100vh", background: "#0A0A0B" }}>
+        <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
             <Sidebar me={me} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
             <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -44,8 +44,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     position: "sticky",
                     top: 0,
                     zIndex: 20,
-                    background: "#0A0A0B",
-                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    background: "var(--bg)",
+                    borderBottom: "1px solid var(--border)",
                     padding: "0 24px",
                     height: 56,
                     display: "flex",
@@ -55,8 +55,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                         <button
                             onClick={() => setMobileOpen(true)}
-                            style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", padding: 4 }}
-                            className="md:hidden"
+                            style={{ background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", padding: 4 }}
+                            className="md:hidden transition-colors duration-200 hover:text-fg-heading"
                             aria-label="Ouvrir le menu"
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 <line x1="3" y1="18" x2="21" y2="18" />
                             </svg>
                         </button>
-                        <span style={{ fontWeight: 600, color: "#F1F5F9", fontSize: 15 }}>
+                        <span style={{ fontWeight: 600, color: "var(--text)", fontSize: 15 }}>
                             Administration
                         </span>
                     </div>

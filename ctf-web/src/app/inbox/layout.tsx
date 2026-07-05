@@ -18,7 +18,7 @@ export default function InboxLayout({ children }: { children: React.ReactNode })
 
     if (isLoading) {
         return (
-            <div style={{ display: "flex", minHeight: "100svh", alignItems: "center", justifyContent: "center", background: "#0A0A0B" }}>
+            <div style={{ display: "flex", minHeight: "100svh", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
                 <div style={{ width: 32, height: 32, border: "2px solid var(--accent)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
             </div>
         );
@@ -26,19 +26,19 @@ export default function InboxLayout({ children }: { children: React.ReactNode })
     if (isError || !me) return null;
 
     return (
-        <div style={{ display: "flex", height: "100svh", background: "#0A0A0B", overflow: "hidden" }}>
+        <div style={{ display: "flex", height: "100svh", background: "var(--bg)", overflow: "hidden" }}>
             <Sidebar me={me} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
             <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
                 <header style={{
                     height: 56, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "0 24px", background: "#0A0A0B", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    padding: "0 24px", background: "var(--bg)", borderBottom: "1px solid var(--border)",
                     position: "sticky", top: 0, zIndex: 10,
                 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <button onClick={() => setMobileOpen(true)} className="md:hidden" style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", padding: 4 }} aria-label="Menu">
+                        <button onClick={() => setMobileOpen(true)} className="md:hidden transition-colors duration-200 hover:text-fg-heading" style={{ background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", padding: 4 }} aria-label="Menu">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
                         </button>
-                        <span style={{ fontWeight: 600, color: "#F1F5F9", fontSize: 14 }}>Inbox</span>
+                        <span style={{ fontWeight: 600, color: "var(--text)", fontSize: 14 }}>Inbox</span>
                     </div>
                 </header>
                 <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
