@@ -83,7 +83,7 @@ export default function MemoryMode({ onExit }: Props) {
     );
 
     return (
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
             {/* Barre haut : menu, coups, chrono */}
             <div className="flex items-center justify-between">
                 <button
@@ -107,21 +107,24 @@ export default function MemoryMode({ onExit }: Props) {
 
             <div className="text-center">
                 <p className="text-sm text-[var(--text-2)]">
-                    Associez chaque <span className="font-semibold text-danger">risque</span> à sa{" "}
-                    <span className="font-semibold text-accent">parade</span>. Paires trouvées :{" "}
+                    Retrouvez les paires{" "}
+                    <span className="font-semibold text-danger">risque</span> ↔{" "}
+                    <span className="font-semibold text-accent">parade</span> et{" "}
+                    <span className="font-semibold text-accent-2">terme</span> ↔ définition. Trouvées :{" "}
                     <span className="font-semibold text-[var(--text)]">
                         {matched.length}/{MEMORY_PAIR_COUNT}
                     </span>
                 </p>
             </div>
 
-            {/* Grille */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-3">
+            {/* Grille 6×2 sur desktop (3×4 sur mobile) */}
+            <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6 sm:gap-3">
                 {deck.map((tile) => (
                     <MemoryCard
                         key={tile.uid}
                         label={tile.label}
-                        role={tile.role}
+                        badge={tile.badge}
+                        tone={tile.tone}
                         revealed={flipped.includes(tile.uid)}
                         matched={matched.includes(tile.pairId)}
                         wrong={wrong && flipped.includes(tile.uid)}

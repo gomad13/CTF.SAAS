@@ -141,3 +141,24 @@ Memory jouable en local, flip au clic, détection paire + juste/faux, re-retourn
 
 ### Bugs fonctionnels repérés ailleurs (PASSE 2)
 (aucun rencontré)
+
+---
+
+# PASSE 2b — AJUSTEMENTS MEMORY (12 cartes 6×2 + dos à motif)
+
+> Périmètre : uniquement le mode Memory. Révision/Épreuve inchangés. Backup `backups/flashcards-memory-adjust-20260705/frontend.tgz`.
+
+### Modifications
+1. **12 cartes / 6 paires par session, tirées au hasard.** `flashcards-memory-demo.ts` refondu : `MEMORY_POOL` élargi à **16 paires** (10 risque↔parade + 6 terme↔définition). `MEMORY_PAIR_COUNT = 6`. `buildShuffledDeck()` fait **deux tirages aléatoires** : choix de 6 paires dans le pool + mélange des 12 tuiles → chaque session diffère.
+2. **Grille 6×2.** `MemoryMode` : `grid-cols-3 sm:grid-cols-6` (mobile 3×4, **desktop 6 colonnes / 2 lignes**). Conteneur mode élargi `max-w-4xl` + wrapper page `max-w-5xl` (les autres modes s'auto-limitent à `max-w-2xl` → **inchangés visuellement**). Tuiles carrées (`aspect-1/1`), libellé `line-clamp-3` text-[11px].
+3. **Dos à motif cyber (identique sur toutes les cartes).** `MemoryCard` : dos = `--surface-2` + **trame de points** en `radial-gradient(color-mix(var(--accent)…))` + **monogramme hexagonal Sentys** (icône `Hexagon` accent + « S » centré), bordure `--accent-border`. Sobre, premium, **tokens uniquement**.
+   - Bonus : badges généralisés (Risque/Parade/Terme/Définition) via `tone` mappé sur tokens (`--danger`, `--accent`, `--accent-2`, `--text-2`).
+
+### Inchangé
+Flip 3D, animations JUSTE/FAUX, re-retournement, `useSessionTimer`, compteur de coups, récap, `prefers-reduced-motion`, logique de verrou.
+
+### Vérifications
+- [x] `npm run build` (local) → **✓ Compiled successfully**.
+- [x] **Zéro hex en dur** (grep = 0) ; contraste AA (tokens).
+- [x] Serveur dev `/flashcards-test` → HTTP 200.
+- [x] Révision/Épreuve et reste de l'app non touchés ; aucune BDD/push/déploiement.

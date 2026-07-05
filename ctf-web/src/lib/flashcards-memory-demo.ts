@@ -1,44 +1,79 @@
-// Données DÉMO pour le mode Memory (association par paires) du menu isolé /flashcards-test.
-// Thématique cyber : chaque paire associe un RISQUE à sa CONTRE-MESURE. Textes courts (grille).
+// Données DÉMO pour le mode Memory du menu isolé /flashcards-test.
+// Pool complet de paires cyber : RISQUE ↔ CONTRE-MESURE et TERME ↔ DÉFINITION.
+// Chaque session tire aléatoirement MEMORY_PAIR_COUNT paires du pool → parties différentes.
 // Aucune BDD, aucun lien avec les parcours réels.
+
+export type PairKind = "risque-parade" | "terme-def";
 
 export type MemoryPair = {
     id: string;
-    risk: string; // le risque
-    counter: string; // la contre-mesure associée
+    kind: PairKind;
+    left: string; // risque OU terme
+    right: string; // contre-mesure OU définition
 };
 
-export const MEMORY_PAIRS: MemoryPair[] = [
-    { id: "mdp", risk: "Mot de passe faible", counter: "Phrase de passe + gestionnaire" },
-    { id: "phishing", risk: "Email de phishing", counter: "Vérifier l'expéditeur, ne pas cliquer" },
-    { id: "wifi", risk: "Wi-Fi public ouvert", counter: "Utiliser un VPN" },
-    { id: "ransomware", risk: "Ransomware", counter: "Sauvegardes hors-ligne" },
-    { id: "vol", risk: "Perte / vol d'appareil", counter: "Chiffrement du disque" },
-    { id: "compte", risk: "Compte compromis", counter: "Activer la 2FA" },
-    { id: "maj", risk: "Logiciel obsolète", counter: "Mises à jour régulières" },
-    { id: "usb", risk: "Clé USB inconnue", counter: "Ne pas la brancher" },
+// Libellés volontairement courts (lisibilité en grille 6×2).
+export const MEMORY_POOL: MemoryPair[] = [
+    // Risque ↔ Contre-mesure
+    { id: "mdp", kind: "risque-parade", left: "Mot de passe faible", right: "Gestionnaire + 2FA" },
+    { id: "phishing-rp", kind: "risque-parade", left: "Email de phishing", right: "Ne pas cliquer, signaler" },
+    { id: "wifi", kind: "risque-parade", left: "Wi-Fi public ouvert", right: "Utiliser un VPN" },
+    { id: "ransomware", kind: "risque-parade", left: "Ransomware", right: "Sauvegardes hors-ligne" },
+    { id: "vol", kind: "risque-parade", left: "Vol d'appareil", right: "Chiffrement du disque" },
+    { id: "compte", kind: "risque-parade", left: "Compte compromis", right: "Activer la 2FA" },
+    { id: "maj", kind: "risque-parade", left: "Logiciel obsolète", right: "Mises à jour régulières" },
+    { id: "usb", kind: "risque-parade", left: "Clé USB inconnue", right: "Ne pas la brancher" },
+    { id: "president", kind: "risque-parade", left: "Fraude au virement", right: "Valider par appel interne" },
+    { id: "fuite", kind: "risque-parade", left: "Fuite de données", right: "Accès au strict besoin" },
+    // Terme ↔ Définition
+    { id: "phishing-td", kind: "terme-def", left: "Phishing", right: "Usurpation par email piégé" },
+    { id: "2fa", kind: "terme-def", left: "2FA", right: "Double preuve d'identité" },
+    { id: "vpn", kind: "terme-def", left: "VPN", right: "Tunnel réseau chiffré" },
+    { id: "malware", kind: "terme-def", left: "Malware", right: "Logiciel malveillant" },
+    { id: "firewall", kind: "terme-def", left: "Pare-feu", right: "Filtre le trafic réseau" },
+    { id: "chiffrement", kind: "terme-def", left: "Chiffrement", right: "Illisible sans la clé" },
 ];
 
-// Nombre de paires jouées (≤ MEMORY_PAIRS.length). 8 → 16 tuiles, grille 4×4.
-export const MEMORY_PAIR_COUNT = 8;
+// Nombre de PAIRES par session → 6 paires = 12 tuiles, grille 6×2.
+export const MEMORY_PAIR_COUNT = 6;
+
+export type TileTone = "risk" | "counter" | "term" | "def";
 
 export type MemoryTile = {
-    uid: string; // identifiant unique de la tuile
+    uid: string; // identifiant unique de tuile
     pairId: string; // deux tuiles de même pairId forment une paire
     label: string; // texte affiché
-    role: "risk" | "counter";
+    badge: string; // "Risque" | "Parade" | "Terme" | "Définition"
+    tone: TileTone; // couleur du badge (token)
 };
 
-/** Construit et mélange le deck (Fisher-Yates). Appelé à chaque nouvelle partie. */
-export function buildShuffledDeck(pairCount: number = MEMORY_PAIR_COUNT): MemoryTile[] {
-    const pairs = MEMORY_PAIRS.slice(0, Math.min(pairCount, MEMORY_PAIRS.length));
-    const tiles: MemoryTile[] = pairs.flatMap((p) => [
-        { uid: `${p.id}-risk`, pairId: p.id, label: p.risk, role: "risk" as const },
-        { uid: `${p.id}-counter`, pairId: p.id, label: p.counter, role: "counter" as const },
-    ]);
-    for (let i = tiles.length - 1; i > 0; i--) {
+function sidesOf(pair: MemoryPair): [MemoryTile, MemoryTile] {
+    const leftTone: TileTone = pair.kind === "risque-parade" ? "risk" : "term";
+    const rightTone: TileTone = pair.kind === "risque-parade" ? "counter" : "def";
+    const leftBadge = pair.kind === "risque-parade" ? "Risque" : "Terme";
+    const rightBadge = pair.kind === "risque-parade" ? "Parade" : "Définition";
+    return [
+        { uid: `${pair.id}-l`, pairId: pair.id, label: pair.left, badge: leftBadge, tone: leftTone },
+        { uid: `${pair.id}-r`, pairId: pair.id, label: pair.right, badge: rightBadge, tone: rightTone },
+    ];
+}
+
+function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+        [a[i], a[j]] = [a[j], a[i]];
     }
-    return tiles;
+    return a;
+}
+
+/**
+ * Construit un deck : tire `pairCount` paires AU HASARD dans le pool, en fait des tuiles, puis mélange.
+ * Deux niveaux d'aléatoire (choix des paires + ordre des tuiles) → chaque partie diffère.
+ */
+export function buildShuffledDeck(pairCount: number = MEMORY_PAIR_COUNT): MemoryTile[] {
+    const n = Math.min(pairCount, MEMORY_POOL.length);
+    const pickedPairs = shuffle(MEMORY_POOL).slice(0, n);
+    const tiles = pickedPairs.flatMap((p) => sidesOf(p));
+    return shuffle(tiles);
 }

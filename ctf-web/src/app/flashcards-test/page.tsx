@@ -18,7 +18,7 @@ export default function FlashcardsTestPage() {
 
     return (
         <main className="min-h-screen bg-[var(--bg)] px-4 py-10 text-[var(--text)] sm:px-6">
-            <div className="mx-auto w-full max-w-3xl">
+            <div className="mx-auto w-full max-w-5xl">
                 {screen === "menu" && (
                     <FlashcardsMenu total={DEMO_FLASHCARDS.length} onPick={setScreen} />
                 )}
