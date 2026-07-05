@@ -8,6 +8,8 @@ import MailboxChallenge from "@/components/challenges/MailboxChallenge";
 import MultichoiceChallenge from "@/components/challenges/MultichoiceChallenge";
 import PasswordQuizChallenge from "@/components/challenges/PasswordQuizChallenge";
 import DemoProgress from "@/components/DemoProgress";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -17,16 +19,16 @@ const DEMO_CHALLENGES = [
         contentType: "ceo_fraud",
         title:       "Arnaque au Président",
         icon:        "🎭",
-        accent:      "#ef4444",
-        borderColor: "rgba(239,68,68,0.25)",
+        accent:      "var(--danger)",
+        borderColor: "color-mix(in srgb, var(--danger) 25%, transparent)",
     },
     {
         id:          "10000000-0000-0000-0000-000000000002",
         contentType: "mailbox",
         title:       "La Boîte Mail Piégée",
         icon:        "📬",
-        accent:      "#f97316",
-        borderColor: "rgba(249,115,22,0.25)",
+        accent:      "var(--warning)",
+        borderColor: "color-mix(in srgb, var(--warning) 25%, transparent)",
     },
     {
         id:          "10000000-0000-0000-0000-000000000003",
@@ -34,7 +36,7 @@ const DEMO_CHALLENGES = [
         title:       "Décryptez le Phishing",
         icon:        "🎣",
         accent:      "var(--pr-l)",
-        borderColor: "rgba(167,139,250,0.25)",
+        borderColor: "color-mix(in srgb, var(--accent) 25%, transparent)",
     },
     {
         id:          "10000000-0000-0000-0000-000000000004",
@@ -42,15 +44,15 @@ const DEMO_CHALLENGES = [
         title:       "RGPD en Pratique",
         icon:        "🔒",
         accent:      "var(--pr-l)",
-        borderColor: "rgba(96,165,250,0.25)",
+        borderColor: "color-mix(in srgb, var(--accent) 25%, transparent)",
     },
     {
         id:          "10000000-0000-0000-0000-000000000005",
         contentType: "password_quiz",
         title:       "Mots de Passe",
         icon:        "🔑",
-        accent:      "#34d399",
-        borderColor: "rgba(52,211,153,0.25)",
+        accent:      "var(--success)",
+        borderColor: "color-mix(in srgb, var(--success) 25%, transparent)",
     },
 ];
 
@@ -131,12 +133,13 @@ export default function DemoPage() {
         const pct    = maxPts > 0 ? Math.round((pts / maxPts) * 100) : 0;
 
         return (
-            <div style={{ minHeight: "100vh", background: "#0a0f0f", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 16px" }}>
-                <div style={{ width: "100%", maxWidth: 520, background: "#FFFFFF", border: "1px solid rgba(59,130,246,0.4)", borderRadius: 16, padding: "32px 28px" }}>
+            <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 16px" }}>
+                <Reveal>
+                <div style={{ width: "100%", maxWidth: 520, background: "var(--surface)", border: "1px solid color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 16, padding: "32px 28px" }}>
                     <div style={{ textAlign: "center", marginBottom: 24 }}>
                         <div style={{ fontSize: 48, marginBottom: 8 }}>🏆</div>
-                        <h1 style={{ color: "#1E293B", fontSize: 24, fontWeight: 700, margin: 0 }}>Parcours terminé !</h1>
-                        <p style={{ color: "#94A3B8", fontSize: 14, marginTop: 6 }}>
+                        <h1 style={{ color: "var(--text)", fontSize: 24, fontWeight: 700, margin: 0 }}>Parcours terminé !</h1>
+                        <p style={{ color: "var(--text-3)", fontSize: 14, marginTop: 6 }}>
                             {pct >= 80 ? "Excellent niveau de vigilance !" : pct >= 50 ? "Bon début — continuez à progresser." : "Quelques axes d'amélioration importants."}
                         </p>
                     </div>
@@ -144,15 +147,15 @@ export default function DemoPage() {
                     {/* Score */}
                     <div style={{ textAlign: "center", marginBottom: 20 }}>
                         <p style={{ color: "var(--pr)", fontSize: 48, fontWeight: 700, lineHeight: 1, margin: 0 }}>{pts}</p>
-                        <p style={{ color: "#94A3B8", fontSize: 14, margin: "4px 0 12px" }}>/ {maxPts} points</p>
-                        <div style={{ height: 8, background: "#1e293b", borderRadius: 99, overflow: "hidden" }}>
+                        <p style={{ color: "var(--text-3)", fontSize: 14, margin: "4px 0 12px" }}>/ {maxPts} points</p>
+                        <div style={{ height: 8, background: "var(--surface-2)", borderRadius: 99, overflow: "hidden" }}>
                             <div style={{ height: "100%", width: `${pct}%`, background: "var(--pr)", borderRadius: 99, transition: "width 0.8s ease" }} />
                         </div>
                         <p style={{ color: "var(--pr)", fontSize: 13, marginTop: 4 }}>{pct}%</p>
                     </div>
 
                     {/* Per-mission */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+                    <Stagger className="flex flex-col gap-2 mb-6" gap={0.05}>
                         {(progress?.completions ?? DEMO_CHALLENGES.map((c, i) => ({
                             challengeTitle: c.title,
                             maxPoints: [100, 150, 200, 175, 125][i],
@@ -161,27 +164,30 @@ export default function DemoPage() {
                         }))).map((c, i) => {
                             const cfg = DEMO_CHALLENGES[i];
                             return (
-                                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: "10px 14px" }}>
+                                <StaggerItem key={i}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--surface-2)", borderRadius: 8, padding: "10px 14px" }}>
                                     <span style={{ fontSize: 20 }}>{cfg.icon}</span>
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <p style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 500, margin: 0 }}>{c.challengeTitle}</p>
-                                        <div style={{ marginTop: 4, height: 3, background: "#1e293b", borderRadius: 99, overflow: "hidden" }}>
+                                        <p style={{ color: "var(--text)", fontSize: 13, fontWeight: 500, margin: 0 }}>{c.challengeTitle}</p>
+                                        <div style={{ marginTop: 4, height: 3, background: "var(--surface)", borderRadius: 99, overflow: "hidden" }}>
                                             <div style={{ height: "100%", width: `${c.maxPoints > 0 ? Math.round(c.pointsEarned / c.maxPoints * 100) : 0}%`, background: "var(--pr)", borderRadius: 99 }} />
                                         </div>
                                     </div>
-                                    <span style={{ color: c.completed ? "var(--pr)" : "#4b5563", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>
+                                    <span style={{ color: c.completed ? "var(--pr)" : "var(--text-3)", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>
                                         {c.pointsEarned} / {c.maxPoints}
                                     </span>
                                 </div>
+                                </StaggerItem>
                             );
                         })}
-                    </div>
+                    </Stagger>
 
                     {/* CTAs */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         <Link
                             href="/register"
-                            style={{ display: "block", textAlign: "center", background: "var(--pr)", color: "#fff", borderRadius: 8, padding: "13px 0", fontSize: 14, fontWeight: 600, textDecoration: "none" }}
+                            className="transition-colors duration-200"
+                            style={{ display: "block", textAlign: "center", background: "var(--pr)", color: "var(--on-accent)", borderRadius: 8, padding: "13px 0", fontSize: 14, fontWeight: 600, textDecoration: "none" }}
                         >
                             Créer un compte gratuit →
                         </Link>
@@ -190,12 +196,14 @@ export default function DemoPage() {
                                 await apiFetch("/api/progress/demo/reset", { method: "POST" });
                                 handleReset();
                             }}
-                            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8", borderRadius: 8, padding: "12px 0", fontSize: 13, cursor: "pointer" }}
+                            className="transition-colors duration-200"
+                            style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-3)", borderRadius: 8, padding: "12px 0", fontSize: 13, cursor: "pointer" }}
                         >
                             ↺ Recommencer le parcours
                         </button>
                     </div>
                 </div>
+                </Reveal>
             </div>
         );
     }
@@ -206,15 +214,15 @@ export default function DemoPage() {
     // ── Loading ────────────────────────────────────────────────────────────────
     if (!challenge) {
         return (
-            <div style={{ minHeight: "100vh", background: "#0a0f0f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {loadError ? (
                     <div style={{ textAlign: "center" }}>
-                        <p style={{ color: "#f87171", marginBottom: 12 }}>{loadError}</p>
+                        <p style={{ color: "var(--danger)", marginBottom: 12 }}>{loadError}</p>
                         <Link href="/login" style={{ color: "var(--pr)", fontSize: 13 }}>Se connecter pour accéder</Link>
                     </div>
                 ) : (
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#94A3B8" }}>
-                        <span style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #1e293b", borderTopColor: "var(--pr)", display: "inline-block", animation: "spin 1s linear infinite" }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--text-3)" }}>
+                        <span style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid var(--surface-2)", borderTopColor: "var(--pr)", display: "inline-block", animation: "spin 1s linear infinite" }} />
                         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                         <span style={{ fontSize: 14 }}>Chargement des missions…</span>
                     </div>
@@ -225,13 +233,13 @@ export default function DemoPage() {
 
     // ── Challenge step ─────────────────────────────────────────────────────────
     return (
-        <div style={{ minHeight: "100vh", background: "#0a0f0f", color: "#fff", display: "flex", flexDirection: "column" }}>
+        <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
             {/* Back link */}
             <div style={{ position: "fixed", left: 16, top: 16, zIndex: 50 }}>
                 <Link href="/landing" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
-                    <span style={{ color: "#94A3B8" }}>←</span>
+                    <span style={{ color: "var(--text-3)" }}>←</span>
                     <span style={{ color: "var(--pr)" }}>CTF</span>
-                    <span style={{ color: "#fff" }}>SaaS</span>
+                    <span style={{ color: "var(--text)" }}>SaaS</span>
                 </Link>
             </div>
 
@@ -243,37 +251,38 @@ export default function DemoPage() {
                             <div style={{
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 width: 30, height: 30, borderRadius: "50%", fontSize: 13, fontWeight: 700,
-                                border: `2px solid ${i < step ? "var(--pr)" : i === step ? cfg.accent : "#1e293b"}`,
-                                background: i < step ? "var(--pr)" : i === step ? `${cfg.accent}20` : "transparent",
-                                color: i < step ? "#fff" : i === step ? cfg.accent : "#4b5563",
+                                border: `2px solid ${i < step ? "var(--pr)" : i === step ? cfg.accent : "var(--surface-2)"}`,
+                                background: i < step ? "var(--pr)" : i === step ? `color-mix(in srgb, ${cfg.accent} 12%, transparent)` : "transparent",
+                                color: i < step ? "var(--on-accent)" : i === step ? cfg.accent : "var(--text-3)",
                                 transition: "all 0.2s",
                             }}>
                                 {i < step ? "✓" : i + 1}
                             </div>
-                            <span style={{ fontSize: 11, display: "none", color: i === step ? "#fff" : "#4b5563", fontWeight: i === step ? 600 : 400 }}
+                            <span style={{ fontSize: 11, display: "none", color: i === step ? "var(--text)" : "var(--text-3)", fontWeight: i === step ? 600 : 400 }}
                                 className="sm:block"
                             >{c.title}</span>
                             {i < DEMO_CHALLENGES.length - 1 && (
-                                <div style={{ width: 24, height: 2, borderRadius: 99, background: i < step ? "var(--pr)" : "#1e293b", transition: "background 0.3s" }} />
+                                <div style={{ width: 24, height: 2, borderRadius: 99, background: i < step ? "var(--pr)" : "var(--surface-2)", transition: "background 0.3s" }} />
                             )}
                         </div>
                     ))}
                 </div>
 
                 {/* Card */}
-                <div style={{ background: "#FFFFFF", border: `1px solid ${cfg.borderColor}`, borderRadius: 14, padding: "20px 20px 24px" }}>
+                <Reveal>
+                <div style={{ background: "var(--surface)", border: `1px solid ${cfg.borderColor}`, borderRadius: 14, padding: "20px 20px 24px" }}>
                     {/* Header */}
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 18, borderBottom: "1px solid #E2E8F0", paddingBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 18, borderBottom: "1px solid var(--border)", paddingBottom: 16 }}>
                         <span style={{ fontSize: 36 }}>{cfg.icon}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ color: "#94A3B8", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+                            <p style={{ color: "var(--text-3)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
                                 Mission {step + 1} / {DEMO_CHALLENGES.length}
                             </p>
-                            <h1 style={{ color: "#fff", fontSize: 20, fontWeight: 700, margin: "4px 0 6px" }}>{challenge.title}</h1>
-                            <p style={{ color: "#94A3B8", fontSize: 13, margin: 0, lineHeight: 1.5 }}>{challenge.instructions}</p>
+                            <h1 style={{ color: "var(--text)", fontSize: 20, fontWeight: 700, margin: "4px 0 6px" }}>{challenge.title}</h1>
+                            <p style={{ color: "var(--text-3)", fontSize: 13, margin: 0, lineHeight: 1.5 }}>{challenge.instructions}</p>
                         </div>
-                        <div style={{ flexShrink: 0, background: "rgba(255,255,255,0.04)", border: "1px solid #E2E8F0", borderRadius: 8, padding: "6px 10px", textAlign: "center" }}>
-                            <p style={{ color: "#94A3B8", fontSize: 10, margin: 0 }}>Points</p>
+                        <div style={{ flexShrink: 0, background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 10px", textAlign: "center" }}>
+                            <p style={{ color: "var(--text-3)", fontSize: 10, margin: 0 }}>Points</p>
                             <p style={{ color: "var(--pr)", fontSize: 15, fontWeight: 700, margin: 0 }}>{challenge.points}</p>
                         </div>
                     </div>
@@ -308,10 +317,11 @@ export default function DemoPage() {
                         />
                     )}
                 </div>
+                </Reveal>
 
                 {/* Running score */}
                 {scores.some(s => s !== null) && (
-                    <p style={{ textAlign: "center", color: "#94A3B8", fontSize: 12, marginTop: 10 }}>
+                    <p style={{ textAlign: "center", color: "var(--text-3)", fontSize: 12, marginTop: 10 }}>
                         Score en cours :{" "}
                         <span style={{ color: "var(--pr)", fontFamily: "monospace", fontWeight: 700 }}>
                             {scores.reduce((a, s) => a + (s?.score ?? 0), 0)}
