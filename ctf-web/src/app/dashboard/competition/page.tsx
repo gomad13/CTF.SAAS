@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Trophy, Zap } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useCompetitionStatus } from "@/hooks/useCompetitionStatus";
+import Reveal from "@/components/Reveal";
+import CountUp from "@/components/CountUp";
 import Podium from "@/components/competition/Podium";
 import ScoreboardTable from "@/components/competition/ScoreboardTable";
 import TeamLeaderboard from "@/components/competition/TeamLeaderboard";
@@ -72,7 +74,7 @@ export default function CompetitionPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface/10 text-fg-muted">
                     <Trophy size={22} />
                 </div>
-                <h1 className="mt-4 text-xl font-bold text-[#F1F5F9]">Mode Compétition désactivé</h1>
+                <h1 className="mt-4 text-xl font-bold text-fg-heading">Mode Compétition désactivé</h1>
                 <p className="mt-2 text-sm leading-relaxed text-fg-muted">
                     Le mode compétition n&apos;est pas actif pour votre organisation. Demandez à un
                     administrateur de l&apos;activer pour accéder au classement.
@@ -92,9 +94,9 @@ export default function CompetitionPage() {
 
     return (
         <div className="mx-auto flex min-w-0 max-w-5xl flex-col gap-5 px-4 py-8 sm:px-6" style={{ flexShrink: 0 }}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <Reveal className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#F1F5F9]">Classement</h1>
+                    <h1 className="text-2xl font-bold text-fg-heading">Classement</h1>
                     <p className="mt-1 text-sm text-fg-muted">
                         Compétition par équipes et classement individuel.
                     </p>
@@ -103,12 +105,12 @@ export default function CompetitionPage() {
                     <span className="h-2 w-2 rounded-full bg-success" />
                     Mode Compétition actif
                 </span>
-            </div>
+            </Reveal>
 
             {/* Bannière "mon classement" */}
             {mr && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+                <Reveal className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors duration-200 hover:border-accent">
                         <p className="text-xs uppercase tracking-wider text-fg-muted">Mon rang individuel</p>
                         <div className="mt-1 flex items-end gap-2">
                             <span className="text-2xl font-bold text-fg-heading">
@@ -117,7 +119,7 @@ export default function CompetitionPage() {
                             <span className="text-sm text-fg-muted">/ {mr.totalParticipants}</span>
                         </div>
                         <p className="mt-1 text-sm font-semibold text-primary">
-                            {mr.individualScore} pts
+                            <CountUp value={mr.individualScore} /> pts
                             {mr.individualSpeedBonus > 0 && (
                                 <span className="ml-2 inline-flex items-center gap-1 text-xs font-medium text-warning">
                                     <Zap size={12} /> +{mr.individualSpeedBonus} bonus rapidité
@@ -126,7 +128,7 @@ export default function CompetitionPage() {
                         </p>
                     </div>
                     <div
-                        className="rounded-xl border border-border bg-surface p-4 shadow-sm"
+                        className="rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors duration-200 hover:border-accent"
                         style={mr.teamColor ? { borderColor: mr.teamColor } : undefined}
                     >
                         <p className="text-xs uppercase tracking-wider text-fg-muted">Mon équipe</p>
@@ -144,7 +146,7 @@ export default function CompetitionPage() {
                             {mr.teamRank ? `#${mr.teamRank} / ${mr.totalTeams}` : "—"} · {mr.teamScore} pts
                         </p>
                     </div>
-                </div>
+                </Reveal>
             )}
 
             {/* Onglets */}
