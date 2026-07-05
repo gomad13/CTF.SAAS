@@ -10,6 +10,7 @@ import ConsentSection, {
 } from "@/components/legal/ConsentSection";
 import type { ConsentItem } from "@/lib/types/legal";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import Reveal from "@/components/Reveal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
@@ -180,7 +181,7 @@ export default function RegisterPage() {
                             href="mailto:contact@sentys.fr?subject=Demande%20d%27acc%C3%A8s%20bêta%20Sentys"
                             style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                background: "var(--accent)", color: "#FFFFFF", textDecoration: "none",
+                                background: "var(--accent)", color: "var(--on-accent)", textDecoration: "none",
                                 padding: "12px 20px", minHeight: 44, borderRadius: 10, fontSize: 14, fontWeight: 600,
                             }}
                         >
@@ -222,7 +223,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div style={{ position: "relative", zIndex: 1 }}>
-                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.25, margin: 0 }}>
+                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "var(--on-accent)", lineHeight: 1.25, margin: 0 }}>
                         Rejoignez la plateforme de formation cyber.
                     </h1>
                     <p style={{ fontSize: 14, color: "rgba(255,255,255,0.70)", marginTop: 16, lineHeight: 1.65 }}>
@@ -240,6 +241,7 @@ export default function RegisterPage() {
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
                 padding: "40px 24px", background: "var(--bg-0)",
             }}>
+                <Reveal>
                 <div style={{ width: "100%", maxWidth: 420 }}>
                     <h2 style={{ fontSize: 22, fontWeight: 700, color: "var(--tx-1)", margin: "0 0 4px" }}>
                         Créer un compte
@@ -400,6 +402,7 @@ export default function RegisterPage() {
                         </a>
                     </div>
                 </div>
+                </Reveal>
             </div>
 
             <style>{`
