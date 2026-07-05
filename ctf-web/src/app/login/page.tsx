@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import Reveal from "@/components/Reveal";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
@@ -155,6 +156,7 @@ function LoginForm() {
                 </Link>
             </div>
 
+            <Reveal>
             <div style={{
                 width: "100%",
                 maxWidth: 420,
@@ -317,7 +319,7 @@ function LoginForm() {
                         </div>
                         <button type="submit" disabled={loading} style={{
                             width: "100%", background: loading ? "var(--accent-subtle)" : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
-                            color: "#FFFFFF", fontWeight: 700, fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
+                            color: "var(--on-accent)", fontWeight: 700, fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
                             letterSpacing: "0.08em", textTransform: "uppercase", border: "none", borderRadius: 8,
                             padding: "13px 0", minHeight: 44, cursor: loading ? "not-allowed" : "pointer", marginTop: 8,
                         }}>
@@ -416,7 +418,7 @@ function LoginForm() {
                         style={{
                             width: "100%",
                             background: loading ? "var(--accent-subtle)" : "linear-gradient(135deg, var(--accent), var(--accent-hover))",
-                            color: "#FFFFFF",
+                            color: "var(--on-accent)",
                             fontWeight: 700,
                             fontSize: 14,
                             fontFamily: "'JetBrains Mono', monospace",
@@ -460,6 +462,7 @@ function LoginForm() {
                 </>
                 )}
             </div>
+            </Reveal>
         </div>
     );
 }
