@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Heart, Shield, Calculator, Banknote, Lock, Play, Square, Info } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import CountUp from "@/components/CountUp";
 
 type CatalogItem = {
     id: string;
@@ -29,11 +32,11 @@ const sectorIcon = (s: string | null): React.ReactNode => {
 };
 const sectorColor = (s: string | null): string => {
     switch (s) {
-        case "sante": return "#EF4444";
-        case "cyber-general": return "#3B82F6";
-        case "comptabilite": return "#F59E0B";
-        case "finance": return "#10B981";
-        default: return "#64748B";
+        case "sante": return "var(--danger)";
+        case "cyber-general": return "var(--accent)";
+        case "comptabilite": return "var(--warning)";
+        case "finance": return "var(--success)";
+        default: return "var(--text-2)";
     }
 };
 const sectorLabel = (s: string | null): string => {
@@ -100,14 +103,17 @@ export default function AdminCatalogPage() {
 
     return (
         <div style={{ padding: "var(--page-x)", background: "var(--bg)", minHeight: "100%" }}>
+            <Reveal>
             <div style={{ marginBottom: 16 }}>
                 <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", margin: 0 }}>Catalogue des parcours</h1>
                 <p style={{ fontSize: 13, color: "var(--text-2)", margin: "4px 0 0" }}>
                     Activez les parcours pour votre entreprise ou équipes. Les parcours 🔒 non accordés peuvent être débloqués via votre commercial.
                 </p>
             </div>
+            </Reveal>
 
             {/* Filtres */}
+            <Reveal delay={0.05}>
             <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
                 <input
                     placeholder="Rechercher..."
@@ -130,9 +136,10 @@ export default function AdminCatalogPage() {
                     <option value="advanced">Avancé</option>
                 </select>
                 <span style={{ fontSize: 12, color: "var(--text-2)", marginLeft: "auto" }}>
-                    {filtered.length} parcours
+                    <CountUp value={filtered.length} /> parcours
                 </span>
             </div>
+            </Reveal>
 
             {cat.isLoading ? (
                 <div style={{ textAlign: "center", padding: 40, color: "var(--text-2)" }}>Chargement...</div>
@@ -141,12 +148,13 @@ export default function AdminCatalogPage() {
                     Aucun parcours disponible. Contactez votre gestionnaire de compte pour accéder au catalogue.
                 </div>
             ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))", gap: 16 }}>
+                <Stagger className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr))]">
                     {filtered.map(p => {
                         const st = statusMeta(p.status);
                         const greyed = p.status === "not_granted";
                         return (
-                            <div key={p.id} style={{
+                            <StaggerItem key={p.id}>
+                            <div style={{
                                 background: "var(--surface)",
                                 border: "1px solid var(--border)",
                                 borderRadius: 12,
@@ -157,7 +165,7 @@ export default function AdminCatalogPage() {
                                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
                                     <div style={{
                                         width: 40, height: 40, borderRadius: 10,
-                                        background: sectorColor(p.sector) + "15",
+                                        background: `color-mix(in srgb, ${sectorColor(p.sector)} 12%, transparent)`,
                                         color: sectorColor(p.sector),
                                         display: "flex", alignItems: "center", justifyContent: "center"
                                     }}>{sectorIcon(p.sector)}</div>
@@ -211,7 +219,7 @@ export default function AdminCatalogPage() {
                                             style={{
                                                 padding: "6px 12px", borderRadius: 6,
                                                 background: "var(--accent)", border: "none",
-                                                color: "#fff", fontSize: 12, cursor: "pointer",
+                                                color: "var(--on-accent)", fontSize: 12, cursor: "pointer",
                                                 display: "inline-flex", alignItems: "center", gap: 4,
                                                 transition: "background 200ms",
                                             }}
@@ -232,9 +240,10 @@ export default function AdminCatalogPage() {
                                     )}
                                 </div>
                             </div>
+                            </StaggerItem>
                         );
                     })}
-                </div>
+                </Stagger>
             )}
 
             {/* Modal activation */}
@@ -248,7 +257,7 @@ export default function AdminCatalogPage() {
                             style={{
                                 padding: 14, borderRadius: 10,
                                 background: "var(--accent)", border: "none",
-                                color: "#fff", fontSize: 13, textAlign: "left", cursor: "pointer",
+                                color: "var(--on-accent)", fontSize: 13, textAlign: "left", cursor: "pointer",
                                 transition: "background 200ms"
                             }}
                         >
@@ -298,7 +307,7 @@ export default function AdminCatalogPage() {
 function Modal({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
     return (
         <div onClick={onClose} style={{
-            position: "fixed", inset: 0, background: "rgba(15,23,42,0.5)",
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
             display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16,
         }}>
             <div onClick={e => e.stopPropagation()} style={{
