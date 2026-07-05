@@ -9,6 +9,9 @@ import { useSaDialog } from "@/components/superadmin/SaDialog";
 import CatalogSection from "@/components/superadmin/CatalogSection";
 import CatalogMatrix from "@/components/superadmin/CatalogMatrix";
 import DomainsSection from "@/components/superadmin/DomainsSection";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import CountUp from "@/components/CountUp";
 
 // Contexte pour partager les modals/toasts entre toutes les sections SuperAdmin.
 type DialogApi = ReturnType<typeof useSaDialog>;
@@ -32,8 +35,8 @@ declare global {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 const card: React.CSSProperties = {
-    background: "#0d0000",
-    border: "1px solid rgba(239,68,68,0.15)",
+    background: "var(--surface)",
+    border: "1px solid color-mix(in srgb, var(--danger) 15%, transparent)",
     borderRadius: 8,
     padding: 20,
 };
@@ -64,7 +67,7 @@ export default function SuperAdminPage() {
     if (loading) return (
         <div style={{
             minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-            background: "#050505", color: "#94A3B8", fontFamily: "'JetBrains Mono', monospace",
+            background: "var(--bg)", color: "var(--text-3)", fontFamily: "'JetBrains Mono', monospace",
         }}>
             Vérification des autorisations...
         </div>
@@ -72,32 +75,32 @@ export default function SuperAdminPage() {
 
     return (
         <SaDialogContext.Provider value={dlg}>
-        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", minHeight: "100vh", background: "#050505", fontFamily: "Inter, sans-serif" }}>
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", minHeight: "100vh", background: "var(--bg)", fontFamily: "Inter, sans-serif" }}>
             {/* Sidebar */}
             <aside style={{
                 width: isMobile ? "100%" : 220,
                 flexShrink: 0,
-                background: "#080000",
-                borderRight: isMobile ? "none" : "1px solid rgba(239,68,68,0.12)",
-                borderBottom: isMobile ? "1px solid rgba(239,68,68,0.12)" : "none",
+                background: "var(--surface)",
+                borderRight: isMobile ? "none" : "1px solid color-mix(in srgb, var(--danger) 12%, transparent)",
+                borderBottom: isMobile ? "1px solid color-mix(in srgb, var(--danger) 12%, transparent)" : "none",
                 display: "flex",
                 flexDirection: "column",
                 position: isMobile ? "static" : "sticky",
                 top: 0,
                 height: isMobile ? "auto" : "100vh",
             }}>
-                <div style={{ padding: "20px 16px", borderBottom: "1px solid rgba(239,68,68,0.1)" }}>
+                <div style={{ padding: "20px 16px", borderBottom: "1px solid color-mix(in srgb, var(--danger) 10%, transparent)" }}>
                     <div style={{
                         display: "inline-flex", alignItems: "center", gap: 6,
                         padding: "4px 10px",
-                        background: "rgba(239,68,68,0.12)",
-                        border: "1px solid rgba(239,68,68,0.3)",
+                        background: "color-mix(in srgb, var(--danger) 12%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
                         borderRadius: 5,
                     }}>
-                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 6px #ef4444" }} />
-                        <span style={{ fontSize: 10, color: "#f87171", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.15em" }}>SUPERADMIN</span>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--danger)", boxShadow: "0 0 6px var(--danger)" }} />
+                        <span style={{ fontSize: 10, color: "var(--danger-t)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.15em" }}>SUPERADMIN</span>
                     </div>
-                    <div style={{ marginTop: 10, fontSize: 11, color: "#94A3B8", fontFamily: "'JetBrains Mono', monospace" }}>
+                    <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-3)", fontFamily: "'JetBrains Mono', monospace" }}>
                         {me?.email}
                     </div>
                 </div>
@@ -128,6 +131,7 @@ export default function SuperAdminPage() {
                     ] as [Section, string][]).map(([key, label]) => (
                         <button key={key}
                             onClick={() => setSection(key)}
+                            className="transition-colors duration-200"
                             style={{
                                 width: isMobile ? "auto" : "100%",
                                 flexShrink: isMobile ? 0 : undefined,
@@ -139,22 +143,23 @@ export default function SuperAdminPage() {
                                 cursor: "pointer",
                                 fontSize: 13,
                                 marginBottom: isMobile ? 0 : 2,
-                                background: section === key ? "rgba(239,68,68,0.08)" : "transparent",
-                                color: section === key ? "#f87171" : "#D1D5DB",
-                                borderLeft: section === key ? "2px solid #ef4444" : "2px solid transparent",
+                                background: section === key ? "color-mix(in srgb, var(--danger) 8%, transparent)" : "transparent",
+                                color: section === key ? "var(--danger-t)" : "var(--text-2)",
+                                borderLeft: section === key ? "2px solid var(--danger)" : "2px solid transparent",
                             }}
                         >{label}</button>
                     ))}
                 </nav>
 
-                <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(239,68,68,0.08)" }}>
+                <div style={{ padding: "12px 16px", borderTop: "1px solid color-mix(in srgb, var(--danger) 8%, transparent)" }}>
                     <button
                         onClick={() => router.push("/dashboard")}
+                        className="transition-colors duration-200"
                         style={{
                             width: "100%", padding: 8,
                             background: "transparent",
-                            border: "1px solid #E2E8F0",
-                            borderRadius: 6, color: "#94A3B8",
+                            border: "1px solid var(--border)",
+                            borderRadius: 6, color: "var(--text-3)",
                             fontSize: 12, cursor: "pointer",
                         }}
                     >← Retour dashboard</button>
@@ -164,15 +169,15 @@ export default function SuperAdminPage() {
             {/* Main */}
             <main style={{ flex: 1, minWidth: 0, overflowX: "hidden" }}>
                 <div style={{
-                    background: "#0a0000",
-                    borderBottom: "1px solid rgba(239,68,68,0.2)",
+                    background: "var(--surface)",
+                    borderBottom: "1px solid color-mix(in srgb, var(--danger) 20%, transparent)",
                     padding: isMobile ? "8px var(--page-x)" : "0 32px",
                     minHeight: 56,
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     gap: 8, flexWrap: "wrap",
                     position: "sticky", top: 0, zIndex: 10,
                 }}>
-                    <span style={{ fontSize: 13, color: "#94A3B8" }}>
+                    <span style={{ fontSize: 13, color: "var(--text-3)" }}>
                         Console Plateforme Sentys — SuperAdmin
                     </span>
                     <RealtimeWidget />
@@ -256,16 +261,18 @@ function OverviewSection() {
 
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 6 }}>Vue d&apos;ensemble</h1>
-            <p style={{ color: "#94A3B8", fontSize: 13, marginBottom: 28 }}>
-                Supervision globale de toutes les entreprises
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-                <Kpi label="ENTREPRISES"   value={overview?.totalTenants ?? 0}     color="#f87171" />
-                <Kpi label="UTILISATEURS"  value={overview?.totalUsers ?? 0}       color="#ffffff" />
-                <Kpi label="FORMATIONS"    value={overview?.totalCompletions ?? 0} color="var(--pr-l)" />
-                <Kpi label="ENVIRONNEMENT" value={system?.environment ?? "—"}       color="#4ade80" />
-            </div>
+            <Reveal>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Vue d&apos;ensemble</h1>
+                <p style={{ color: "var(--text-3)", fontSize: 13, marginBottom: 28 }}>
+                    Supervision globale de toutes les entreprises
+                </p>
+            </Reveal>
+            <Stagger className="grid grid-cols-2 xl:grid-cols-4 gap-4" gap={0.06}>
+                <StaggerItem><Kpi label="ENTREPRISES"   value={overview?.totalTenants ?? 0}     color="var(--danger-t)" /></StaggerItem>
+                <StaggerItem><Kpi label="UTILISATEURS"  value={overview?.totalUsers ?? 0}       color="var(--text)" /></StaggerItem>
+                <StaggerItem><Kpi label="FORMATIONS"    value={overview?.totalCompletions ?? 0} color="var(--pr-l)" /></StaggerItem>
+                <StaggerItem><Kpi label="ENVIRONNEMENT" value={system?.environment ?? "—"}       color="var(--success)" /></StaggerItem>
+            </Stagger>
         </div>
     );
 }
@@ -322,57 +329,64 @@ function TenantsSection() {
     return (
         <div style={{ padding: 32 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff" }}>Entreprises</h1>
-                <button onClick={() => setShowCreate(true)} style={{
-                    background: "#DC2626", color: "#ffffff", border: "none",
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)" }}>Entreprises</h1>
+                <button onClick={() => setShowCreate(true)} className="transition-colors duration-200" style={{
+                    background: "var(--accent)", color: "var(--on-accent)", border: "none",
                     padding: "9px 16px", borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: "pointer",
                 }}>+ Nouvelle entreprise</button>
             </div>
 
             {showCreate && (
                 <div style={{ ...card, marginBottom: 16 }}>
-                    <h3 style={{ fontSize: 14, color: "#ffffff", marginBottom: 12 }}>Créer une entreprise</h3>
+                    <h3 style={{ fontSize: 14, color: "var(--text)", marginBottom: 12 }}>Créer une entreprise</h3>
                     <input value={name} onChange={e => setName(e.target.value)} placeholder="Nom" style={{
-                        width: "100%", background: "#0d0000",
-                        border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6,
-                        padding: "9px 12px", color: "#ffffff", fontSize: 13, marginBottom: 12,
+                        width: "100%", background: "var(--surface-2)",
+                        border: "1px solid var(--border)", borderRadius: 6,
+                        padding: "9px 12px", color: "var(--text)", fontSize: 13, marginBottom: 12,
                     }} />
-                    {error && <div style={{ color: "#f87171", fontSize: 12, marginBottom: 12 }}>{error}</div>}
+                    {error && <div style={{ color: "var(--danger-t)", fontSize: 12, marginBottom: 12 }}>{error}</div>}
                     <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={createTenant} style={{ background: "#DC2626", color: "#fff", border: "none", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Créer</button>
-                        <button onClick={() => setShowCreate(false)} style={{ background: "transparent", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.1)", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Annuler</button>
+                        <button onClick={createTenant} className="transition-colors duration-200" style={{ background: "var(--accent)", color: "var(--on-accent)", border: "none", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Créer</button>
+                        <button onClick={() => setShowCreate(false)} className="transition-colors duration-200" style={{ background: "transparent", color: "var(--text-3)", border: "1px solid var(--border)", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Annuler</button>
                     </div>
                 </div>
             )}
 
-            <div className="resp-scroll-x" style={{ background: "#0d0000", border: "1px solid rgba(239,68,68,0.12)", borderRadius: 8 }}>
+            <div className="resp-scroll-x" style={{ background: "var(--surface)", border: "1px solid color-mix(in srgb, var(--danger) 12%, transparent)", borderRadius: 8 }}>
               <div style={{ minWidth: 640 }}>
                 <div style={{
                     display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1.4fr",
-                    padding: "10px 20px", background: "rgba(239,68,68,0.05)",
-                    borderBottom: "1px solid rgba(239,68,68,0.1)", gap: 8,
+                    padding: "10px 20px", background: "color-mix(in srgb, var(--danger) 5%, transparent)",
+                    borderBottom: "1px solid color-mix(in srgb, var(--danger) 10%, transparent)", gap: 8,
                 }}>
                     {["ENTREPRISE","USERS","ADMINS","FORMATIONS","STATUT","ACTIONS"].map(h => (
-                        <span key={h} style={{ fontSize: 10, color: "#94A3B8", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>{h}</span>
+                        <span key={h} style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>{h}</span>
                     ))}
                 </div>
+                <Stagger gap={0.03}>
                 {(overview?.tenants ?? []).map((t: Any, i: number) => (
-                    <div key={t.tenantId} style={{
+                    <StaggerItem key={t.tenantId}>
+                    <div className="transition-colors duration-200"
+                        onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        style={{
                         display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1.4fr",
                         padding: "14px 20px", alignItems: "center", gap: 8,
-                        borderBottom: i < overview.tenants.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none",
+                        borderBottom: i < overview.tenants.length - 1 ? "1px solid var(--border)" : "none",
                     }}>
-                        <span style={{ color: "#ffffff", fontWeight: 600, fontSize: 14 }}>{t.tenantName}</span>
-                        <span style={{ color: "#a3a3a3" }}>{t.totalUsers}</span>
+                        <span style={{ color: "var(--text)", fontWeight: 600, fontSize: 14 }}>{t.tenantName}</span>
+                        <span style={{ color: "var(--text-3)" }}>{t.totalUsers}</span>
                         <span style={{ color: "var(--pr-l)" }}>{t.adminCount}</span>
-                        <span style={{ color: "#a3a3a3" }}>{t.totalCompletions}</span>
+                        <span style={{ color: "var(--text-3)" }}>{t.totalCompletions}</span>
                         <StatusBadge active={t.isActive} />
                         <div style={{ display: "flex", gap: 6 }}>
                             <SmallBtn color="var(--pr-l)" onClick={() => toggleTenant(t.tenantId, t.tenantName, t.isActive)}>{t.isActive ? "Suspendre" : "Réactiver"}</SmallBtn>
-                            <SmallBtn color="#f87171" onClick={() => deleteTenant(t.tenantId, t.tenantName)}>Supprimer</SmallBtn>
+                            <SmallBtn color="var(--danger-t)" onClick={() => deleteTenant(t.tenantId, t.tenantName)}>Supprimer</SmallBtn>
                         </div>
                     </div>
+                    </StaggerItem>
                 ))}
+                </Stagger>
               </div>
             </div>
         </div>
@@ -460,7 +474,7 @@ function UsersSection() {
 
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 24 }}>Utilisateurs (global)</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Utilisateurs (global)</h1>
 
             <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
                 <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
@@ -472,46 +486,53 @@ function UsersSection() {
                 </select>
             </div>
 
-            <div className="resp-scroll-x" style={{ background: "#0d0000", border: "1px solid rgba(239,68,68,0.12)", borderRadius: 8 }}>
+            <div className="resp-scroll-x" style={{ background: "var(--surface)", border: "1px solid color-mix(in srgb, var(--danger) 12%, transparent)", borderRadius: 8 }}>
               <div style={{ minWidth: 680 }}>
                 <div style={{
                     display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.4fr",
-                    padding: "10px 20px", background: "rgba(239,68,68,0.05)",
-                    borderBottom: "1px solid rgba(239,68,68,0.1)", gap: 8,
+                    padding: "10px 20px", background: "color-mix(in srgb, var(--danger) 5%, transparent)",
+                    borderBottom: "1px solid color-mix(in srgb, var(--danger) 10%, transparent)", gap: 8,
                 }}>
                     {["EMAIL","NOM","RÔLE","STATUT","ACTIONS"].map(h => (
-                        <span key={h} style={{ fontSize: 10, color: "#94A3B8", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>{h}</span>
+                        <span key={h} style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>{h}</span>
                     ))}
                 </div>
+                <Stagger gap={0.03}>
                 {(data?.users ?? []).map((u: Any, i: number) => (
-                    <div key={u.id} style={{
+                    <StaggerItem key={u.id}>
+                    <div className="transition-colors duration-200"
+                        onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        style={{
                         display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.4fr",
                         padding: "12px 20px", alignItems: "center", gap: 8,
-                        borderBottom: i < data.users.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none",
+                        borderBottom: i < data.users.length - 1 ? "1px solid var(--border)" : "none",
                     }}>
-                        <span style={{ color: "#ffffff", fontSize: 13 }}>{u.email}</span>
-                        <span style={{ color: "#a3a3a3", fontSize: 13 }}>{u.firstName} {u.lastName}</span>
+                        <span style={{ color: "var(--text)", fontSize: 13 }}>{u.email}</span>
+                        <span style={{ color: "var(--text-3)", fontSize: 13 }}>{u.firstName} {u.lastName}</span>
                         <span style={{ color: "var(--pr-l)", fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>{u.role}</span>
                         <StatusBadge active={u.isActive} />
                         <div style={{ display: "flex", gap: 6 }}>
                             <SmallBtn color="var(--pr-l)" onClick={() => changeRole(u.id, u.email, u.role)}>Rôle</SmallBtn>
-                            <SmallBtn color="#fbbf24" onClick={() => toggleActive(u.id, u.email, u.isActive)}>{u.isActive ? "Désact." : "Réact."}</SmallBtn>
-                            <SmallBtn color="#94A3B8" onClick={() => resetPassword(u.id, u.email)}>Reset pwd</SmallBtn>
-                            <SmallBtn color="#f87171" onClick={() => deleteUser(u.id, u.email)}>Supprimer</SmallBtn>
+                            <SmallBtn color="var(--warning)" onClick={() => toggleActive(u.id, u.email, u.isActive)}>{u.isActive ? "Désact." : "Réact."}</SmallBtn>
+                            <SmallBtn color="var(--text-3)" onClick={() => resetPassword(u.id, u.email)}>Reset pwd</SmallBtn>
+                            <SmallBtn color="var(--danger-t)" onClick={() => deleteUser(u.id, u.email)}>Supprimer</SmallBtn>
                         </div>
                     </div>
+                    </StaggerItem>
                 ))}
+                </Stagger>
               </div>
             </div>
 
             {data && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
-                    <span style={{ fontSize: 12, color: "#94A3B8" }}>
+                    <span style={{ fontSize: 12, color: "var(--text-3)" }}>
                         {data.total} utilisateurs · Page {data.page}/{data.totalPages}
                     </span>
                     <div style={{ display: "flex", gap: 8 }}>
-                        <SmallBtn color="#a3a3a3" onClick={() => setPage(p => Math.max(1, p - 1))}>← Précédent</SmallBtn>
-                        <SmallBtn color="#a3a3a3" onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}>Suivant →</SmallBtn>
+                        <SmallBtn color="var(--text-3)" onClick={() => setPage(p => Math.max(1, p - 1))}>← Précédent</SmallBtn>
+                        <SmallBtn color="var(--text-3)" onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}>Suivant →</SmallBtn>
                     </div>
                 </div>
             )}
@@ -600,8 +621,8 @@ function MembershipsSection() {
 
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 6 }}>Multi-sociétés</h1>
-            <p style={{ fontSize: 13, color: "#94A3B8", marginBottom: 24, maxWidth: 640 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Multi-sociétés</h1>
+            <p style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 24, maxWidth: 640 }}>
                 Affecter un compte à plusieurs sociétés, avec un rôle propre à chaque société.
                 Réservé SuperAdmin. La société marquée « défaut » est la société active au login.
             </p>
@@ -615,16 +636,16 @@ function MembershipsSection() {
                 {results.length > 0 && (
                     <div style={{
                         position: "absolute", top: 44, left: 0, right: 0, zIndex: 5,
-                        background: "#0d0000", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, overflow: "hidden",
+                        background: "var(--surface-2)", border: "1px solid color-mix(in srgb, var(--danger) 20%, transparent)", borderRadius: 8, overflow: "hidden",
                     }}>
                         {results.map((u: Any) => (
-                            <button key={u.id} onClick={() => selectUser(u)} style={{
+                            <button key={u.id} onClick={() => selectUser(u)} className="transition-colors duration-200" style={{
                                 display: "block", width: "100%", textAlign: "left", padding: "10px 14px",
-                                background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.04)",
-                                color: "#e5e5e5", fontSize: 13, cursor: "pointer",
+                                background: "transparent", border: "none", borderBottom: "1px solid var(--border)",
+                                color: "var(--text-2)", fontSize: 13, cursor: "pointer",
                             }}>
-                                <span style={{ color: "#fff" }}>{u.email}</span>
-                                <span style={{ color: "#94A3B8" }}> — {u.firstName} {u.lastName} · {u.role}</span>
+                                <span style={{ color: "var(--text)" }}>{u.email}</span>
+                                <span style={{ color: "var(--text-3)" }}> — {u.firstName} {u.lastName} · {u.role}</span>
                             </button>
                         ))}
                     </div>
@@ -632,7 +653,7 @@ function MembershipsSection() {
             </div>
 
             {!selected && (
-                <div style={{ ...card, color: "#94A3B8", fontSize: 13 }}>
+                <div style={{ ...card, color: "var(--text-3)", fontSize: 13 }}>
                     Sélectionnez un utilisateur pour voir et gérer ses sociétés.
                 </div>
             )}
@@ -641,40 +662,47 @@ function MembershipsSection() {
                 <div style={{ ...card }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 8 }}>
                         <div>
-                            <div style={{ color: "#fff", fontSize: 15, fontWeight: 600 }}>{selected.name}</div>
-                            <div style={{ color: "#94A3B8", fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>{selected.email}</div>
+                            <div style={{ color: "var(--text)", fontSize: 15, fontWeight: 600 }}>{selected.name}</div>
+                            <div style={{ color: "var(--text-3)", fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>{selected.email}</div>
                         </div>
-                        <span style={{ fontSize: 12, color: "#94A3B8" }}>{data.tenants.length} société(s)</span>
+                        <span style={{ fontSize: 12, color: "var(--text-3)" }}>{data.tenants.length} société(s)</span>
                     </div>
 
                     <div className="resp-scroll-x">
                       <div style={{ minWidth: 560 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.6fr", padding: "10px 14px", background: "rgba(239,68,68,0.05)", borderRadius: 6, gap: 8 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.6fr", padding: "10px 14px", background: "color-mix(in srgb, var(--danger) 5%, transparent)", borderRadius: 6, gap: 8 }}>
                             {["SOCIÉTÉ", "RÔLE", "DÉFAUT", "ACTIONS"].map(h => (
-                                <span key={h} style={{ fontSize: 10, color: "#94A3B8", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>{h}</span>
+                                <span key={h} style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>{h}</span>
                             ))}
                         </div>
+                        <Stagger gap={0.03}>
                         {data.tenants.map((m) => (
-                            <div key={m.tenantId} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.6fr", padding: "12px 14px", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                                <span style={{ color: "#fff", fontSize: 13 }}>
+                            <StaggerItem key={m.tenantId}>
+                            <div className="transition-colors duration-200"
+                                onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                                style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.6fr", padding: "12px 14px", alignItems: "center", gap: 8, borderBottom: "1px solid var(--border)" }}>
+                                <span style={{ color: "var(--text)", fontSize: 13 }}>
                                     {m.tenantName}
-                                    {!m.tenantActive && <span style={{ color: "#fbbf24", fontSize: 11 }}> (inactive)</span>}
+                                    {!m.tenantActive && <span style={{ color: "var(--warning)", fontSize: 11 }}> (inactive)</span>}
                                 </span>
                                 <span style={{ color: "var(--pr-l)", fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>{m.role}</span>
                                 <span>{m.isDefault
-                                    ? <span style={{ background: "rgba(16,185,129,0.12)", color: "#34d399", fontSize: 11, padding: "2px 8px", borderRadius: 999 }}>défaut</span>
-                                    : <span style={{ color: "#64748B", fontSize: 12 }}>—</span>}</span>
+                                    ? <span style={{ background: "color-mix(in srgb, var(--success) 14%, transparent)", color: "var(--success)", fontSize: 11, padding: "2px 8px", borderRadius: 999 }}>défaut</span>
+                                    : <span style={{ color: "var(--text-2)", fontSize: 12 }}>—</span>}</span>
                                 <div style={{ display: "flex", gap: 6 }}>
                                     <SmallBtn color="var(--pr-l)" onClick={() => changeRole(m)}>Rôle</SmallBtn>
-                                    <SmallBtn color="#f87171" onClick={() => removeMembership(m)}>Retirer</SmallBtn>
+                                    <SmallBtn color="var(--danger-t)" onClick={() => removeMembership(m)}>Retirer</SmallBtn>
                                 </div>
                             </div>
+                            </StaggerItem>
                         ))}
+                        </Stagger>
                       </div>
                     </div>
 
-                    <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid rgba(239,68,68,0.1)" }}>
-                        <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 10, letterSpacing: "0.05em" }}>AJOUTER UNE SOCIÉTÉ</div>
+                    <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid color-mix(in srgb, var(--danger) 10%, transparent)" }}>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 10, letterSpacing: "0.05em" }}>AJOUTER UNE SOCIÉTÉ</div>
                         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                             <select value={addTenantId} onChange={e => setAddTenantId(e.target.value)} style={{ ...inputStyle(), minWidth: 220 }}>
                                 <option value="">Choisir une société...</option>
@@ -687,13 +715,13 @@ function MembershipsSection() {
                                 <option value="admin">admin</option>
                                 <option value="owner">owner</option>
                             </select>
-                            <button onClick={addMembership} disabled={!addTenantId} style={{
-                                background: addTenantId ? "#DC2626" : "rgba(220,38,38,0.4)", color: "#fff", border: "none",
+                            <button onClick={addMembership} disabled={!addTenantId} className="transition-colors duration-200" style={{
+                                background: addTenantId ? "var(--accent)" : "color-mix(in srgb, var(--accent) 40%, transparent)", color: "var(--on-accent)", border: "none",
                                 padding: "9px 16px", borderRadius: 6, fontSize: 13, cursor: addTenantId ? "pointer" : "not-allowed",
                             }}>+ Ajouter</button>
                         </div>
                         {availableTenants.length === 0 && (
-                            <div style={{ fontSize: 12, color: "#64748B", marginTop: 8 }}>L utilisateur est déjà membre de toutes les sociétés.</div>
+                            <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 8 }}>L utilisateur est déjà membre de toutes les sociétés.</div>
                         )}
                     </div>
                 </div>
@@ -709,21 +737,21 @@ function ContentSection() {
     useEffect(() => { apiFetch<Any>("/api/superadmin/content/overview").then(setData).catch(() => {}); }, []);
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 24 }}>Contenus</h1>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-                <Kpi label="PARCOURS" value={data?.totalPaths ?? 0} color="var(--pr-l)" />
-                <Kpi label="CHALLENGES" value={data?.totalChallenges ?? 0} color="#f87171" />
-            </div>
-            <h3 style={{ fontSize: 14, color: "#ffffff", marginBottom: 12 }}>Parcours</h3>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Contenus</h1>
+            <Stagger className="grid grid-cols-2 gap-4" gap={0.06}>
+                <StaggerItem><Kpi label="PARCOURS" value={data?.totalPaths ?? 0} color="var(--pr-l)" /></StaggerItem>
+                <StaggerItem><Kpi label="CHALLENGES" value={data?.totalChallenges ?? 0} color="var(--danger-t)" /></StaggerItem>
+            </Stagger>
+            <h3 style={{ fontSize: 14, color: "var(--text)", margin: "24px 0 12px" }}>Parcours</h3>
             <div style={{ ...card, padding: 0 }}>
                 {(data?.paths ?? []).map((p: Any, i: number) => (
                     <div key={p.id} style={{
                         display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr",
                         padding: "12px 20px", gap: 8,
-                        borderBottom: i < data.paths.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none",
+                        borderBottom: i < data.paths.length - 1 ? "1px solid var(--border)" : "none",
                     }}>
-                        <span style={{ color: "#ffffff", fontSize: 13 }}>{p.title}</span>
-                        <span style={{ color: "#a3a3a3", fontSize: 12 }}>{p.level ?? "—"}</span>
+                        <span style={{ color: "var(--text)", fontSize: 13 }}>{p.title}</span>
+                        <span style={{ color: "var(--text-3)", fontSize: 12 }}>{p.level ?? "—"}</span>
                         <span style={{ color: "var(--pr-l)", fontSize: 12 }}>{p.challengeCount} ch.</span>
                         <StatusBadge active={p.isActive} />
                     </div>
@@ -739,50 +767,55 @@ function LicensesSection() {
     useEffect(() => { apiFetch<Any[]>("/api/superadmin/licenses").then(setLicenses).catch(() => {}); }, []);
 
     function planColor(plan: string) {
-        return plan === "enterprise" ? "#f59e0b" : plan === "pro" ? "var(--pr-l)" : plan === "starter" ? "var(--pr)" : "#D1D5DB";
+        return plan === "enterprise" ? "var(--warning)" : plan === "pro" ? "var(--pr-l)" : plan === "starter" ? "var(--pr)" : "var(--text-2)";
     }
     function daysColor(days: number) {
-        return days > 30 ? "#4ade80" : days > 7 ? "#fbbf24" : "#f87171";
+        return days > 30 ? "var(--success)" : days > 7 ? "var(--warning)" : "var(--danger-t)";
     }
 
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 24 }}>Licences</h1>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Licences</h1>
+            <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" gap={0.05}>
                 {licenses.map(lic => (
-                    <div key={lic.id} style={card}>
+                    <StaggerItem key={lic.id}>
+                    <div className="transition-colors duration-200"
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--accent-border)")}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = "color-mix(in srgb, var(--danger) 15%, transparent)")}
+                        style={card}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
                             <div>
-                                <div style={{ fontSize: 15, fontWeight: 600, color: "#ffffff" }}>{lic.tenantName}</div>
-                                <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>{lic.tenantId}</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>{lic.tenantName}</div>
+                                <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>{lic.tenantId}</div>
                             </div>
                             <span style={{
                                 fontSize: 10, padding: "3px 10px", borderRadius: 4,
-                                background: `${planColor(lic.plan)}22`,
-                                border: `1px solid ${planColor(lic.plan)}55`,
+                                background: `color-mix(in srgb, ${planColor(lic.plan)} 13%, transparent)`,
+                                border: `1px solid color-mix(in srgb, ${planColor(lic.plan)} 33%, transparent)`,
                                 color: planColor(lic.plan),
                                 fontFamily: "'JetBrains Mono', monospace",
                                 textTransform: "uppercase",
                             }}>{lic.plan}</span>
                         </div>
-                        <div style={{ fontSize: 12, color: "#a3a3a3", marginBottom: 6 }}>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 6 }}>
                             {lic.currentUsers} / {lic.maxUsers} utilisateurs
                         </div>
-                        <div style={{ height: 4, background: "#FFFFFF", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
+                        <div style={{ height: 4, background: "var(--surface-2)", borderRadius: 2, overflow: "hidden", marginBottom: 12 }}>
                             <div style={{ width: `${Math.min(100, lic.usagePercent)}%`, height: "100%", background: planColor(lic.plan) }} />
                         </div>
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>
+                        <div style={{ fontSize: 11, color: "var(--text-3)" }}>
                             Expire le {new Date(lic.expiresAt).toLocaleDateString("fr-FR")}
                         </div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: daysColor(lic.daysLeft), marginTop: 4 }}>
                             {lic.daysLeft > 0 ? `${lic.daysLeft} jours restants` : "EXPIRÉ"}
                         </div>
                     </div>
+                    </StaggerItem>
                 ))}
                 {licenses.length === 0 && (
-                    <div style={{ ...card, color: "#94A3B8", fontSize: 13 }}>Aucune licence enregistrée.</div>
+                    <div style={{ ...card, color: "var(--text-3)", fontSize: 13 }}>Aucune licence enregistrée.</div>
                 )}
-            </div>
+            </Stagger>
         </div>
     );
 }
@@ -797,17 +830,17 @@ function HealthSection() {
         return () => clearInterval(t);
     }, [reload]);
 
-    if (!health) return <div style={{ padding: 32, color: "#94A3B8" }}>Chargement…</div>;
+    if (!health) return <div style={{ padding: 32, color: "var(--text-3)" }}>Chargement…</div>;
 
     return (
         <div style={{ padding: 32 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff" }}>Santé système</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)" }}>Santé système</h1>
                 <span style={{
                     fontSize: 11, padding: "4px 12px", borderRadius: 5,
-                    background: health.status === "healthy" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-                    border: `1px solid ${health.status === "healthy" ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)"}`,
-                    color: health.status === "healthy" ? "#4ade80" : "#f87171",
+                    background: health.status === "healthy" ? "color-mix(in srgb, var(--success) 10%, transparent)" : "color-mix(in srgb, var(--danger) 10%, transparent)",
+                    border: `1px solid ${health.status === "healthy" ? "color-mix(in srgb, var(--success) 35%, transparent)" : "color-mix(in srgb, var(--danger) 35%, transparent)"}`,
+                    color: health.status === "healthy" ? "var(--success)" : "var(--danger-t)",
                     fontFamily: "'JetBrains Mono', monospace",
                     textTransform: "uppercase",
                 }}>{health.status}</span>
@@ -838,7 +871,7 @@ function HealthSection() {
                 </Card2>
             </div>
 
-            <div style={{ marginTop: 16, fontSize: 11, color: "#94A3B8" }}>
+            <div style={{ marginTop: 16, fontSize: 11, color: "var(--text-3)" }}>
                 Refresh auto toutes les 30 secondes · Dernier check : {new Date(health.checkedAt).toLocaleTimeString("fr-FR")}
             </div>
 
@@ -893,14 +926,14 @@ function AriaHealthCard() {
     };
 
     const color =
-        s?.status === "ok" ? "#4ade80" :
-        s?.status === "degraded" ? "#F59E0B" :
-        "#f87171";
+        s?.status === "ok" ? "var(--success)" :
+        s?.status === "degraded" ? "var(--warning)" :
+        "var(--danger-t)";
 
     return (
         <div style={{ ...card, marginTop: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <h2 style={{ fontSize: 14, fontWeight: 600, color: "#f87171", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>
+                <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--danger-t)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>
                     Sentys Bot / OLLAMA
                 </h2>
                 <span style={{ fontSize: 11, color, fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase" }}>
@@ -909,10 +942,10 @@ function AriaHealthCard() {
             </div>
 
             {!s ? (
-                <div style={{ color: "#94A3B8", fontSize: 12 }}>Chargement…</div>
+                <div style={{ color: "var(--text-3)", fontSize: 12 }}>Chargement…</div>
             ) : (
                 <>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, fontSize: 12, color: "#94A3B8" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, fontSize: 12, color: "var(--text-3)" }}>
                         <KV k="available" v={s.available ? "true" : "false"} />
                         <KV k="ollamaReachable" v={String(s.ollamaReachable ?? "?")} />
                         <KV k="modelInstalled" v={String(s.modelInstalled ?? "?")} />
@@ -922,26 +955,26 @@ function AriaHealthCard() {
                     </div>
 
                     {s.installedModels && s.installedModels.length > 0 && (
-                        <div style={{ marginTop: 12, fontSize: 11, color: "#94A3B8" }}>
+                        <div style={{ marginTop: 12, fontSize: 11, color: "var(--text-3)" }}>
                             <strong>Installés :</strong> {s.installedModels.join(", ")}
                         </div>
                     )}
                     {s.loadedModels && s.loadedModels.length > 0 && (
-                        <div style={{ fontSize: 11, color: "#94A3B8" }}>
+                        <div style={{ fontSize: 11, color: "var(--text-3)" }}>
                             <strong>Chargés en RAM :</strong> {s.loadedModels.join(", ")}
                         </div>
                     )}
 
                     {s.suggestions && s.suggestions.length > 0 && (
-                        <div style={{ marginTop: 10, padding: 10, borderRadius: 6, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                        <div style={{ marginTop: 10, padding: 10, borderRadius: 6, background: "color-mix(in srgb, var(--warning) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--warning) 20%, transparent)" }}>
                             {s.suggestions.map((t, i) => (
-                                <div key={i} style={{ fontSize: 11, color: "#fbbf24" }}>• {t}</div>
+                                <div key={i} style={{ fontSize: 11, color: "var(--warning)" }}>• {t}</div>
                             ))}
                         </div>
                     )}
 
                     {s.lastError && (
-                        <div style={{ marginTop: 10, fontSize: 11, color: "#f87171" }}>
+                        <div style={{ marginTop: 10, fontSize: 11, color: "var(--danger-t)" }}>
                             <strong>lastError :</strong> {s.lastError}
                         </div>
                     )}
@@ -949,30 +982,32 @@ function AriaHealthCard() {
                     <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
                         <button
                             onClick={reload} disabled={loading}
-                            style={{ padding: "6px 12px", background: "transparent", color: "#94A3B8", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, fontSize: 12, cursor: "pointer" }}
+                            className="transition-colors duration-200"
+                            style={{ padding: "6px 12px", background: "transparent", color: "var(--text-3)", border: "1px solid color-mix(in srgb, var(--danger) 25%, transparent)", borderRadius: 6, fontSize: 12, cursor: "pointer" }}
                         >↻ Refresh</button>
                         <button
                             onClick={runTest}
-                            style={{ padding: "6px 12px", background: "#3B82F6", color: "#fff", border: "none", borderRadius: 6, fontSize: 12, cursor: "pointer" }}
+                            className="transition-colors duration-200"
+                            style={{ padding: "6px 12px", background: "var(--accent)", color: "var(--on-accent)", border: "none", borderRadius: 6, fontSize: 12, cursor: "pointer" }}
                         >▶ Test de génération</button>
                     </div>
 
                     {testResult && (
                         <div style={{
                             marginTop: 12, padding: 10, borderRadius: 6,
-                            background: testResult.success ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
-                            border: `1px solid ${testResult.success ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)"}`
+                            background: testResult.success ? "color-mix(in srgb, var(--success) 8%, transparent)" : "color-mix(in srgb, var(--danger) 8%, transparent)",
+                            border: `1px solid ${testResult.success ? "color-mix(in srgb, var(--success) 30%, transparent)" : "color-mix(in srgb, var(--danger) 30%, transparent)"}`
                         }}>
-                            <div style={{ fontSize: 11, color: testResult.success ? "#34d399" : "#f87171", fontFamily: "'JetBrains Mono', monospace" }}>
+                            <div style={{ fontSize: 11, color: testResult.success ? "var(--success)" : "var(--danger-t)", fontFamily: "'JetBrains Mono', monospace" }}>
                                 {testResult.success ? "✓" : "✗"} latency={testResult.latencyMs}ms
                             </div>
                             {testResult.success && testResult.response && (
-                                <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 4 }}>
+                                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 4 }}>
                                     <strong>réponse :</strong> <em>{testResult.response}</em>
                                 </div>
                             )}
                             {!testResult.success && testResult.error && (
-                                <div style={{ fontSize: 11, color: "#f87171", marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>
+                                <div style={{ fontSize: 11, color: "var(--danger-t)", marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>
                                     {testResult.error}
                                 </div>
                             )}
@@ -997,19 +1032,19 @@ function AuditSection() {
     }, [severity, page]);
 
     function sevColor(s: string) {
-        return s === "critical" ? "#f87171" : s === "warning" ? "#fbbf24" : "#D1D5DB";
+        return s === "critical" ? "var(--danger-t)" : s === "warning" ? "var(--warning)" : "var(--text-2)";
     }
 
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 24 }}>Journal d&apos;audit</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Journal d&apos;audit</h1>
 
             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
                 {["", "info", "warning", "critical"].map(s => (
-                    <button key={s || "all"} onClick={() => { setSeverity(s); setPage(1); }} style={{
-                        background: severity === s ? "rgba(239,68,68,0.12)" : "transparent",
-                        border: "1px solid #E2E8F0",
-                        color: severity === s ? "#f87171" : "#D1D5DB",
+                    <button key={s || "all"} onClick={() => { setSeverity(s); setPage(1); }} className="transition-colors duration-200" style={{
+                        background: severity === s ? "color-mix(in srgb, var(--danger) 12%, transparent)" : "transparent",
+                        border: "1px solid var(--border)",
+                        color: severity === s ? "var(--danger-t)" : "var(--text-2)",
                         padding: "6px 14px", borderRadius: 5, cursor: "pointer",
                         fontSize: 12, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace",
                     }}>{s || "TOUS"}</button>
@@ -1022,22 +1057,22 @@ function AuditSection() {
                     <div key={l.id} style={{
                         display: "grid", gridTemplateColumns: "1.2fr 1fr 2fr 1.2fr 0.8fr",
                         padding: "10px 16px", gap: 12, alignItems: "center",
-                        borderBottom: i < data.logs.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none",
+                        borderBottom: i < data.logs.length - 1 ? "1px solid var(--border)" : "none",
                         fontSize: 12,
                     }}>
-                        <span style={{ color: "#94A3B8", fontFamily: "'JetBrains Mono', monospace" }}>
+                        <span style={{ color: "var(--text-3)", fontFamily: "'JetBrains Mono', monospace" }}>
                             {new Date(l.createdAt).toLocaleString("fr-FR")}
                         </span>
                         <span style={{ color: "var(--pr-l)", fontFamily: "'JetBrains Mono', monospace", fontSize: 11 }}>{l.action}</span>
-                        <span style={{ color: "#a3a3a3" }}>{l.description}</span>
-                        <span style={{ color: "#94A3B8", fontSize: 11 }}>{l.performedBy}</span>
+                        <span style={{ color: "var(--text-3)" }}>{l.description}</span>
+                        <span style={{ color: "var(--text-3)", fontSize: 11 }}>{l.performedBy}</span>
                         <span style={{ color: sevColor(l.severity), fontFamily: "'JetBrains Mono', monospace", fontSize: 10, textTransform: "uppercase" }}>
                             {l.severity}
                         </span>
                     </div>
                 ))}
                 {(!data?.logs || data.logs.length === 0) && (
-                    <div style={{ padding: 24, textAlign: "center", color: "#94A3B8", fontSize: 13 }}>
+                    <div style={{ padding: 24, textAlign: "center", color: "var(--text-3)", fontSize: 13 }}>
                         Aucune entrée d&apos;audit.
                     </div>
                 )}
@@ -1092,9 +1127,9 @@ function AnnouncementsSection() {
     return (
         <div style={{ padding: 32 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff" }}>Annonces</h1>
-                <button onClick={() => setShowCreate(true)} style={{
-                    background: "#DC2626", color: "#ffffff", border: "none",
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)" }}>Annonces</h1>
+                <button onClick={() => setShowCreate(true)} className="transition-colors duration-200" style={{
+                    background: "var(--accent)", color: "var(--on-accent)", border: "none",
                     padding: "9px 16px", borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: "pointer",
                 }}>+ Nouvelle annonce</button>
             </div>
@@ -1110,8 +1145,8 @@ function AnnouncementsSection() {
                         <option value="update">Update</option>
                     </select>
                     <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={submit} style={{ background: "#DC2626", color: "#fff", border: "none", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>{editingId ? "Mettre à jour" : "Publier"}</button>
-                        <button onClick={() => { setShowCreate(false); setEditingId(null); setForm({ title: "", message: "", type: "info" }); }} style={{ background: "transparent", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Annuler</button>
+                        <button onClick={submit} className="transition-colors duration-200" style={{ background: "var(--accent)", color: "var(--on-accent)", border: "none", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>{editingId ? "Mettre à jour" : "Publier"}</button>
+                        <button onClick={() => { setShowCreate(false); setEditingId(null); setForm({ title: "", message: "", type: "info" }); }} className="transition-colors duration-200" style={{ background: "transparent", color: "var(--text-3)", border: "1px solid var(--border)", padding: "8px 14px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Annuler</button>
                     </div>
                 </div>
             )}
@@ -1123,24 +1158,24 @@ function AnnouncementsSection() {
                             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                                 <span style={{
                                     fontSize: 10, padding: "2px 8px", borderRadius: 4,
-                                    background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)",
+                                    background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
                                     color: "var(--pr-l)", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
                                 }}>{a.type}</span>
-                                <span style={{ color: "#ffffff", fontSize: 14, fontWeight: 600 }}>{a.title}</span>
+                                <span style={{ color: "var(--text)", fontSize: 14, fontWeight: 600 }}>{a.title}</span>
                             </div>
-                            <p style={{ color: "#a3a3a3", fontSize: 13, marginBottom: 6 }}>{a.message}</p>
-                            <span style={{ color: "#94A3B8", fontSize: 11 }}>
+                            <p style={{ color: "var(--text-3)", fontSize: 13, marginBottom: 6 }}>{a.message}</p>
+                            <span style={{ color: "var(--text-3)", fontSize: 11 }}>
                                 {a.tenantId ? `Tenant : ${a.tenantId}` : "Tous les tenants"} · {new Date(a.createdAt).toLocaleDateString("fr-FR")}
                             </span>
                         </div>
                         <div style={{ display: "flex", gap: 6 }}>
                             <SmallBtn color="var(--pr-l)" onClick={() => startEdit(a)}>Modifier</SmallBtn>
-                            <SmallBtn color="#f87171" onClick={() => deleteAnn(a.id, a.title)}>Supprimer</SmallBtn>
+                            <SmallBtn color="var(--danger-t)" onClick={() => deleteAnn(a.id, a.title)}>Supprimer</SmallBtn>
                         </div>
                     </div>
                 ))}
                 {list.length === 0 && (
-                    <div style={{ ...card, color: "#94A3B8", fontSize: 13 }}>Aucune annonce active.</div>
+                    <div style={{ ...card, color: "var(--text-3)", fontSize: 13 }}>Aucune annonce active.</div>
                 )}
             </div>
         </div>
@@ -1154,26 +1189,26 @@ function ExportsSection() {
     }
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 24 }}>Exports CSV</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Exports CSV</h1>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div style={card}>
-                    <h3 style={{ color: "#ffffff", fontSize: 14, marginBottom: 8 }}>Utilisateurs</h3>
-                    <p style={{ color: "#94A3B8", fontSize: 12, marginBottom: 14 }}>Tous les utilisateurs de toutes les entreprises.</p>
-                    <button onClick={() => exportCsv("/api/superadmin/export/users")} style={{
-                        background: "#DC2626", color: "#fff", border: "none", padding: "9px 16px",
+                    <h3 style={{ color: "var(--text)", fontSize: 14, marginBottom: 8 }}>Utilisateurs</h3>
+                    <p style={{ color: "var(--text-3)", fontSize: 12, marginBottom: 14 }}>Tous les utilisateurs de toutes les entreprises.</p>
+                    <button onClick={() => exportCsv("/api/superadmin/export/users")} className="transition-colors duration-200" style={{
+                        background: "var(--accent)", color: "var(--on-accent)", border: "none", padding: "9px 16px",
                         borderRadius: 6, fontSize: 12, cursor: "pointer", fontWeight: 600,
                     }}>Exporter CSV</button>
                 </div>
                 <div style={card}>
-                    <h3 style={{ color: "#ffffff", fontSize: 14, marginBottom: 8 }}>Formations</h3>
-                    <p style={{ color: "#94A3B8", fontSize: 12, marginBottom: 14 }}>Toutes les complétions de toutes les entreprises.</p>
-                    <button onClick={() => exportCsv("/api/superadmin/export/completions")} style={{
-                        background: "#DC2626", color: "#fff", border: "none", padding: "9px 16px",
+                    <h3 style={{ color: "var(--text)", fontSize: 14, marginBottom: 8 }}>Formations</h3>
+                    <p style={{ color: "var(--text-3)", fontSize: 12, marginBottom: 14 }}>Toutes les complétions de toutes les entreprises.</p>
+                    <button onClick={() => exportCsv("/api/superadmin/export/completions")} className="transition-colors duration-200" style={{
+                        background: "var(--accent)", color: "var(--on-accent)", border: "none", padding: "9px 16px",
                         borderRadius: 6, fontSize: 12, cursor: "pointer", fontWeight: 600,
                     }}>Exporter CSV</button>
                 </div>
             </div>
-            <p style={{ marginTop: 16, fontSize: 11, color: "#94A3B8" }}>
+            <p style={{ marginTop: 16, fontSize: 11, color: "var(--text-3)" }}>
                 Les fichiers s&apos;ouvrent directement dans le navigateur.
             </p>
         </div>
@@ -1206,6 +1241,8 @@ function ActivitySection() {
         charts.current.forEach(c => c?.destroy?.());
         charts.current = [];
 
+        // NOTE UI : Chart.js dessine sur <canvas> et ne résout PAS les CSS custom properties
+        // (var(--...)). Les couleurs de séries ci-dessous restent donc des valeurs littérales.
         const grid = "rgba(255,255,255,0.04)", tick = "#D1D5DB";
 
         if (lineRef.current) {
@@ -1223,7 +1260,7 @@ function ActivitySection() {
                 type: "bar",
                 data: {
                     labels: activity.newUsersByDay.map((d: Any) => new Date(d.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })),
-                    datasets: [{ label: "Nouveaux", data: activity.newUsersByDay.map((d: Any) => d.count), backgroundColor: "rgba(59,130,246,0.6)", borderColor: "var(--pr)", borderWidth: 1, borderRadius: 4 }],
+                    datasets: [{ label: "Nouveaux", data: activity.newUsersByDay.map((d: Any) => d.count), backgroundColor: "rgba(59,130,246,0.6)", borderColor: "#3b82f6", borderWidth: 1, borderRadius: 4 }],
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: grid }, ticks: { color: tick } }, y: { grid: { color: grid }, ticks: { color: tick, stepSize: 1 }, beginAtZero: true } } },
             }));
@@ -1233,7 +1270,7 @@ function ActivitySection() {
 
     return (
         <div style={{ padding: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff", marginBottom: 28 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginBottom: 28 }}>
                 Activité globale — 30 derniers jours
             </h1>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
@@ -1252,8 +1289,10 @@ function ActivitySection() {
 function Kpi({ label, value, color }: { label: string; value: string | number; color: string }) {
     return (
         <div style={card}>
-            <div style={{ fontSize: 32, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>{value}</div>
-            <div style={{ fontSize: 11, color: "#94A3B8", letterSpacing: "0.1em", marginTop: 6, textTransform: "uppercase" }}>{label}</div>
+            <div style={{ fontSize: 32, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color }}>
+                {typeof value === "number" ? <CountUp value={value} /> : value}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 6, textTransform: "uppercase" }}>{label}</div>
         </div>
     );
 }
@@ -1262,9 +1301,9 @@ function StatusBadge({ active }: { active: boolean }) {
     return (
         <span style={{
             fontSize: 11, padding: "2px 8px", borderRadius: 4,
-            background: active ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-            border: `1px solid ${active ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
-            color: active ? "#4ade80" : "#f87171",
+            background: active ? "color-mix(in srgb, var(--success) 10%, transparent)" : "color-mix(in srgb, var(--danger) 10%, transparent)",
+            border: `1px solid ${active ? "color-mix(in srgb, var(--success) 30%, transparent)" : "color-mix(in srgb, var(--danger) 30%, transparent)"}`,
+            color: active ? "var(--success)" : "var(--danger-t)",
             width: "fit-content",
             fontFamily: "'JetBrains Mono', monospace",
             textTransform: "uppercase",
@@ -1274,10 +1313,10 @@ function StatusBadge({ active }: { active: boolean }) {
 
 function SmallBtn({ children, onClick, color }: { children: React.ReactNode; onClick: () => void; color: string }) {
     return (
-        <button onClick={onClick} style={{
+        <button onClick={onClick} className="transition-colors duration-200" style={{
             fontSize: 11, padding: "4px 10px",
             background: "transparent",
-            border: `1px solid ${color}55`,
+            border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`,
             borderRadius: 4, color, cursor: "pointer",
         }}>{children}</button>
     );
@@ -1286,7 +1325,7 @@ function SmallBtn({ children, onClick, color }: { children: React.ReactNode; onC
 function Card2({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <div style={card}>
-            <h3 style={{ fontSize: 11, color: "#94A3B8", marginBottom: 14, letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace" }}>{title}</h3>
+            <h3 style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 14, letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace" }}>{title}</h3>
             {children}
         </div>
     );
@@ -1295,19 +1334,19 @@ function Card2({ title, children }: { title: string; children: React.ReactNode }
 function KV({ k, v }: { k: string; v: string }) {
     return (
         <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>
-            <span style={{ color: "#94A3B8" }}>{k}</span>
-            <span style={{ color: "#a3a3a3" }}>{v}</span>
+            <span style={{ color: "var(--text-3)" }}>{k}</span>
+            <span style={{ color: "var(--text-3)" }}>{v}</span>
         </div>
     );
 }
 
 function inputStyle(): React.CSSProperties {
     return {
-        background: "#0d0000",
-        border: "1px solid rgba(239,68,68,0.25)",
+        background: "var(--surface-2)",
+        border: "1px solid color-mix(in srgb, var(--danger) 25%, transparent)",
         borderRadius: 6,
         padding: "8px 12px",
-        color: "#ffffff",
+        color: "var(--text)",
         fontSize: 13,
         outline: "none",
     };
@@ -1331,8 +1370,8 @@ function RealtimeWidget() {
         gap: 4,
         padding: "3px 10px",
         borderRadius: 10,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid #E2E8F0",
+        background: "var(--surface-2)",
+        border: "1px solid var(--border)",
         fontSize: 11,
         fontFamily: "'JetBrains Mono', monospace",
     };
@@ -1340,23 +1379,23 @@ function RealtimeWidget() {
     return (
         <div style={{ display: "flex", gap: 8 }} role="group" aria-label="Indicateurs temps réel SuperAdmin">
             <span style={pill} title={`${stats.todayFormations} formations complétées aujourd'hui`} aria-label={`${stats.todayFormations} formations complétées aujourd'hui`}>
-                <span aria-hidden="true" style={{ color: "#94A3B8" }}>📚</span>
-                <span style={{ color: "#ffffff" }}>{stats.todayFormations}</span>
+                <span aria-hidden="true" style={{ color: "var(--text-3)" }}>📚</span>
+                <span style={{ color: "var(--text)" }}>{stats.todayFormations}</span>
             </span>
             <span style={pill} title={`${stats.todayNewUsers} nouveaux utilisateurs aujourd'hui`} aria-label={`${stats.todayNewUsers} nouveaux utilisateurs aujourd'hui`}>
-                <span aria-hidden="true" style={{ color: "#94A3B8" }}>👥</span>
-                <span style={{ color: "#ffffff" }}>{stats.todayNewUsers}</span>
+                <span aria-hidden="true" style={{ color: "var(--text-3)" }}>👥</span>
+                <span style={{ color: "var(--text)" }}>{stats.todayNewUsers}</span>
             </span>
             <span style={pill} title={`${stats.totalActiveSessions} sessions actives`} aria-label={`${stats.totalActiveSessions} sessions actives`}>
-                <span aria-hidden="true" style={{ color: "#94A3B8" }}>🔑</span>
-                <span style={{ color: "#ffffff" }}>{stats.totalActiveSessions}</span>
+                <span aria-hidden="true" style={{ color: "var(--text-3)" }}>🔑</span>
+                <span style={{ color: "var(--text)" }}>{stats.totalActiveSessions}</span>
             </span>
             <span
                 style={{
                     ...pill,
-                    color: stats.pendingLicenses > 0 ? "#fbbf24" : "#D1D5DB",
-                    background: stats.pendingLicenses > 0 ? "rgba(245,158,11,0.10)" : "rgba(255,255,255,0.04)",
-                    border: stats.pendingLicenses > 0 ? "1px solid rgba(245,158,11,0.35)" : "1px solid rgba(255,255,255,0.08)",
+                    color: stats.pendingLicenses > 0 ? "var(--warning)" : "var(--text-2)",
+                    background: stats.pendingLicenses > 0 ? "color-mix(in srgb, var(--warning) 10%, transparent)" : "var(--surface-2)",
+                    border: stats.pendingLicenses > 0 ? "1px solid color-mix(in srgb, var(--warning) 35%, transparent)" : "1px solid var(--border)",
                 }}
                 title={`${stats.pendingLicenses} licences en attente de validation`}
                 aria-label={`${stats.pendingLicenses} licences en attente`}
@@ -1375,25 +1414,25 @@ function StatsGlobalSection() {
 
     useEffect(() => { apiFetch<Any>("/api/superadmin/stats/global").then(setStats).catch(() => {}); }, []);
 
-    if (!stats) return <div style={{ padding: 32, color: "#94A3B8" }}>Chargement…</div>;
+    if (!stats) return <div style={{ padding: 32, color: "var(--text-3)" }}>Chargement…</div>;
 
     const p = stats.periods[period];
 
     return (
         <div style={{ padding: 32, display: "flex", flexDirection: "column", gap: 24 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#ffffff" }}>Statistiques avancées</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)" }}>Statistiques avancées</h1>
 
             {/* Tabs */}
             <div style={{ display: "flex", gap: 6 }}>
                 {(["today", "week", "month"] as const).map(k => {
                     const labels = { today: "Aujourd'hui", week: "7 jours", month: "30 jours" };
                     return (
-                        <button key={k} onClick={() => setPeriod(k)} style={{
+                        <button key={k} onClick={() => setPeriod(k)} className="transition-colors duration-200" style={{
                             padding: "6px 14px",
                             borderRadius: 6,
-                            background: period === k ? "rgba(239,68,68,0.12)" : "transparent",
-                            border: "1px solid #E2E8F0",
-                            color: period === k ? "#f87171" : "#D1D5DB",
+                            background: period === k ? "color-mix(in srgb, var(--danger) 12%, transparent)" : "transparent",
+                            border: "1px solid var(--border)",
+                            color: period === k ? "var(--danger-t)" : "var(--text-2)",
                             fontSize: 12, cursor: "pointer",
                         }}>{labels[k]}</button>
                     );
@@ -1401,57 +1440,63 @@ function StatsGlobalSection() {
             </div>
 
             {/* KPIs période */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <Stagger className="grid grid-cols-3 gap-4" gap={0.06}>
+                <StaggerItem>
                 <div style={card}>
-                    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--pr-l)" }}>{p.completions}</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8", letterSpacing: "0.1em", marginTop: 4 }}>FORMATIONS</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--pr-l)" }}><CountUp value={p.completions} /></div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 4 }}>FORMATIONS</div>
                 </div>
+                </StaggerItem>
+                <StaggerItem>
                 <div style={card}>
-                    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "#4ade80" }}>{p.newUsers}</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8", letterSpacing: "0.1em", marginTop: 4 }}>NOUVEAUX USERS</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--success)" }}><CountUp value={p.newUsers} /></div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 4 }}>NOUVEAUX USERS</div>
                 </div>
+                </StaggerItem>
+                <StaggerItem>
                 <div style={card}>
-                    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "#fbbf24" }}>{p.avgScore}%</div>
-                    <div style={{ fontSize: 11, color: "#94A3B8", letterSpacing: "0.1em", marginTop: 4 }}>SCORE MOYEN</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--warning)" }}><CountUp value={p.avgScore} suffix="%" /></div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 4 }}>SCORE MOYEN</div>
                 </div>
-            </div>
+                </StaggerItem>
+            </Stagger>
 
             {/* Top tenants */}
             <div style={card}>
-                <h3 style={{ fontSize: 14, color: "#ffffff", marginBottom: 14 }}>Top 5 entreprises actives (30j)</h3>
+                <h3 style={{ fontSize: 14, color: "var(--text)", marginBottom: 14 }}>Top 5 entreprises actives (30j)</h3>
                 {(stats.topTenants ?? []).map((t: Any, i: number) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #E2E8F0", fontSize: 13 }}>
-                        <span style={{ color: "#a3a3a3" }}>#{i + 1} {t.tenantName}</span>
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)", fontSize: 13 }}>
+                        <span style={{ color: "var(--text-3)" }}>#{i + 1} {t.tenantName}</span>
                         <span style={{ color: "var(--pr-l)", fontFamily: "'JetBrains Mono', monospace" }}>
                             {t.completions} · {t.avgScore}%
                         </span>
                     </div>
                 ))}
-                {(stats.topTenants ?? []).length === 0 && <div style={{ color: "#94A3B8", fontSize: 12 }}>Aucune activité ce mois.</div>}
+                {(stats.topTenants ?? []).length === 0 && <div style={{ color: "var(--text-3)", fontSize: 12 }}>Aucune activité ce mois.</div>}
             </div>
 
             {/* Top challenges */}
             <div style={card}>
-                <h3 style={{ fontSize: 14, color: "#ffffff", marginBottom: 14 }}>Top 10 challenges les plus joués</h3>
+                <h3 style={{ fontSize: 14, color: "var(--text)", marginBottom: 14 }}>Top 10 challenges les plus joués</h3>
                 {(stats.topChallenges ?? []).map((c: Any, i: number) => (
-                    <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 12, padding: "8px 0", borderBottom: "1px solid #E2E8F0", fontSize: 13, alignItems: "center" }}>
-                        <span style={{ color: "#a3a3a3", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 12, padding: "8px 0", borderBottom: "1px solid var(--border)", fontSize: 13, alignItems: "center" }}>
+                        <span style={{ color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
                         <span style={{ color: "var(--pr-l)", fontFamily: "'JetBrains Mono', monospace" }}>{c.completions}</span>
-                        <span style={{ color: c.avgScore >= 80 ? "#4ade80" : c.avgScore >= 50 ? "#fbbf24" : "#f87171", fontFamily: "'JetBrains Mono', monospace" }}>{c.avgScore}%</span>
+                        <span style={{ color: c.avgScore >= 80 ? "var(--success)" : c.avgScore >= 50 ? "var(--warning)" : "var(--danger-t)", fontFamily: "'JetBrains Mono', monospace" }}>{c.avgScore}%</span>
                     </div>
                 ))}
             </div>
 
             {/* Distribution scores */}
             <div style={card}>
-                <h3 style={{ fontSize: 14, color: "#ffffff", marginBottom: 14 }}>Distribution scores globale</h3>
+                <h3 style={{ fontSize: 14, color: "var(--text)", marginBottom: 14 }}>Distribution scores globale</h3>
                 <div style={{ display: "flex", gap: 8 }}>
                     {(stats.scoreDistribution ?? []).map((s: Any, i: number) => {
-                        const colors = ["#ef4444", "#f59e0b", "#fbbf24", "#10B981"];
+                        const colors = ["var(--danger)", "var(--warning)", "var(--warning)", "var(--success)"];
                         return (
                             <div key={i} style={{ flex: 1, textAlign: "center" }}>
                                 <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: colors[i] }}>{s.count}</div>
-                                <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 4 }}>{s.range}%</div>
+                                <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>{s.range}%</div>
                             </div>
                         );
                     })}
@@ -1460,26 +1505,26 @@ function StatsGlobalSection() {
 
             {/* Croissance */}
             <div style={card}>
-                <h3 style={{ fontSize: 14, color: "#ffffff", marginBottom: 6 }}>Croissance & rétention</h3>
-                <div style={{ fontSize: 13, color: "#a3a3a3", marginBottom: 4 }}>
-                    Total users : <span style={{ color: "#ffffff", fontFamily: "'JetBrains Mono', monospace" }}>{stats.growth.totalUsers}</span>
+                <h3 style={{ fontSize: 14, color: "var(--text)", marginBottom: 6 }}>Croissance & rétention</h3>
+                <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 4 }}>
+                    Total users : <span style={{ color: "var(--text)", fontFamily: "'JetBrains Mono', monospace" }}>{stats.growth.totalUsers}</span>
                 </div>
-                <div style={{ fontSize: 13, color: "#a3a3a3", marginBottom: 4 }}>
-                    Actifs (7j) : <span style={{ color: "#4ade80", fontFamily: "'JetBrains Mono', monospace" }}>{stats.growth.activeLastWeek}</span>
+                <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 4 }}>
+                    Actifs (7j) : <span style={{ color: "var(--success)", fontFamily: "'JetBrains Mono', monospace" }}>{stats.growth.activeLastWeek}</span>
                 </div>
-                <div style={{ fontSize: 13, color: "#a3a3a3" }}>
+                <div style={{ fontSize: 13, color: "var(--text-3)" }}>
                     Rétention : <span style={{ color: "var(--pr-l)", fontFamily: "'JetBrains Mono', monospace" }}>{stats.growth.retentionRate}%</span>
                 </div>
             </div>
 
             {/* Licences expirantes */}
             {(stats.expiringLicenses ?? []).length > 0 && (
-                <div style={{ ...card, borderColor: "rgba(245,158,11,0.35)" }}>
-                    <h3 style={{ fontSize: 14, color: "#fbbf24", marginBottom: 14 }}>⚠ Licences expirant dans 30 jours</h3>
+                <div style={{ ...card, borderColor: "color-mix(in srgb, var(--warning) 35%, transparent)" }}>
+                    <h3 style={{ fontSize: 14, color: "var(--warning)", marginBottom: 14 }}>⚠ Licences expirant dans 30 jours</h3>
                     {stats.expiringLicenses.map((l: Any, i: number) => (
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", fontSize: 12 }}>
-                            <span style={{ color: "#a3a3a3", fontFamily: "'JetBrains Mono', monospace" }}>{l.tenantId}</span>
-                            <span style={{ color: l.daysLeft <= 7 ? "#f87171" : "#fbbf24", fontFamily: "'JetBrains Mono', monospace" }}>
+                            <span style={{ color: "var(--text-3)", fontFamily: "'JetBrains Mono', monospace" }}>{l.tenantId}</span>
+                            <span style={{ color: l.daysLeft <= 7 ? "var(--danger-t)" : "var(--warning)", fontFamily: "'JetBrains Mono', monospace" }}>
                                 {l.plan} · {l.daysLeft}j
                             </span>
                         </div>
