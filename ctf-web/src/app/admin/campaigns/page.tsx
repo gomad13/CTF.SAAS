@@ -16,6 +16,8 @@ import {
     type CampaignContentType,
     type CampaignStatus,
 } from "@/lib/types/campaigns";
+import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
 
 type StatusFilter = "All" | CampaignStatus;
 
@@ -101,7 +103,7 @@ export default function CampaignsPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface/10 text-fg-muted">
                     <Target size={22} />
                 </div>
-                <h1 className="mt-4 text-xl font-bold text-[#F1F5F9]">Campagnes désactivées</h1>
+                <h1 className="mt-4 text-xl font-bold text-fg-heading">Campagnes désactivées</h1>
                 <p className="mt-2 text-sm text-fg-muted">
                     Activez le mode « Campagnes » depuis les paramètres pour orchestrer parcours
                     et scénarios sur une période donnée.
@@ -117,21 +119,23 @@ export default function CampaignsPage() {
 
     return (
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-            <div>
-                <h1 className="text-2xl font-bold text-[#F1F5F9]">Campagnes</h1>
-                <p className="mt-1 text-sm text-fg-muted">
-                    Programmes de sensibilisation time-boxed qui combinent parcours et scénarios.
-                </p>
-            </div>
+            <Reveal>
+                <div>
+                    <h1 className="text-2xl font-bold text-fg-heading">Campagnes</h1>
+                    <p className="mt-1 text-sm text-fg-muted">
+                        Programmes de sensibilisation time-boxed qui combinent parcours et scénarios.
+                    </p>
+                </div>
+            </Reveal>
 
             {/* ── Formulaire ───────────────────────────────────────────────── */}
-            <section className="rounded-xl border border-[#E2E8F0] bg-surface p-6 shadow-sm text-fg-heading">
+            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm text-fg-heading">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-body">Nouvelle campagne</h2>
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                     <div>
                         <label className="text-xs font-medium text-fg-body">Nom</label>
                         <input
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
+                            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
                             placeholder="Sensibilisation T2 2026"
                             value={name}
                             onChange={e => setName(e.target.value)}
@@ -141,7 +145,7 @@ export default function CampaignsPage() {
                     <div>
                         <label className="text-xs font-medium text-fg-body">Description</label>
                         <input
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
+                            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading placeholder:text-fg-muted"
                             placeholder="Optionnel — contexte / objectifs"
                             value={description}
                             onChange={e => setDescription(e.target.value)}
@@ -152,7 +156,7 @@ export default function CampaignsPage() {
                         <label className="text-xs font-medium text-fg-body">Date de début</label>
                         <input
                             type="date"
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading"
+                            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading"
                             value={startDate}
                             onChange={e => setStartDate(e.target.value)}
                         />
@@ -161,7 +165,7 @@ export default function CampaignsPage() {
                         <label className="text-xs font-medium text-fg-body">Date de fin</label>
                         <input
                             type="date"
-                            className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-surface px-3 py-2 text-sm text-fg-heading"
+                            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading"
                             value={endDate}
                             onChange={e => setEndDate(e.target.value)}
                         />
@@ -182,8 +186,8 @@ export default function CampaignsPage() {
                                     onClick={() => toggleContent({ contentType: "Parcours", contentId: p.contentId })}
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors duration-200 ${
                                         active
-                                            ? "border-[#3B82F6] bg-[#3B82F6] text-white"
-                                            : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
+                                            ? "border-primary bg-primary text-[var(--on-accent)]"
+                                            : "border-border bg-surface text-fg-body hover:bg-surface-2"
                                     }`}
                                 >
                                     <FolderOpen size={12} />
@@ -207,8 +211,8 @@ export default function CampaignsPage() {
                                     onClick={() => toggleContent({ contentType: "Scenario", contentId: s.contentId })}
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors duration-200 ${
                                         active
-                                            ? "border-[#10B981] bg-[#10B981] text-white"
-                                            : "border-[#E2E8F0] bg-surface text-fg-body hover:bg-[#F1F5F9]"
+                                            ? "border-success bg-success text-[var(--on-accent)]"
+                                            : "border-border bg-surface text-fg-body hover:bg-surface-2"
                                     }`}
                                 >
                                     <Mail size={12} />
@@ -220,7 +224,7 @@ export default function CampaignsPage() {
                 </div>
 
                 {/* Cible : toute l'entreprise ou assignation différée */}
-                <div className="mt-4 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-fg-heading">
+                <div className="mt-4 rounded-lg border border-border bg-surface-2 p-3 text-fg-heading">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
                         <input
                             type="checkbox"
@@ -237,14 +241,14 @@ export default function CampaignsPage() {
                 </div>
 
                 {!validation.ok && (name || startDate || endDate || selectedContents.length > 0) && (
-                    <p className="mt-3 text-xs text-[#B91C1C]">{validation.msg}</p>
+                    <p className="mt-3 text-xs text-danger">{validation.msg}</p>
                 )}
 
                 <button
                     type="button"
                     disabled={!validation.ok || createM.isPending}
                     onClick={handleCreate}
-                    className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <Plus size={14} />
                     {createM.isPending ? "Création…" : "Créer la campagne"}
@@ -260,8 +264,8 @@ export default function CampaignsPage() {
                         onClick={() => setFilter(f)}
                         className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200 ${
                             filter === f
-                                ? "bg-[#3B82F6] text-white"
-                                : "bg-surface text-fg-body hover:bg-[#F1F5F9]"
+                                ? "bg-primary text-[var(--on-accent)]"
+                                : "bg-surface text-fg-body hover:bg-surface-2"
                         }`}
                     >
                         {f === "All" ? "Toutes" : STATUS_STYLES[f].label}
@@ -270,22 +274,22 @@ export default function CampaignsPage() {
             </div>
 
             {/* ── Liste ────────────────────────────────────────────────────── */}
-            <section className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-surface shadow-sm text-fg-heading">
-                <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
+            <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm text-fg-heading">
+                <div className="border-b border-border bg-table-head px-4 py-3 text-xs font-semibold uppercase tracking-wider text-fg-body sm:px-6">
                     Campagnes ({list.length})
                 </div>
-                <ul className="divide-y divide-[#E2E8F0]">
+                <Stagger className="divide-y divide-border" gap={0.04}>
                     {list.map(c => {
                         const s = STATUS_STYLES[c.status] ?? STATUS_STYLES.Upcoming;
                         const pct = Math.max(0, Math.min(100, Math.round(c.globalCompletion)));
                         return (
-                            <li key={c.id} className="px-4 py-4 hover:bg-[#F8FAFC] sm:px-6">
+                            <StaggerItem key={c.id} className="px-4 py-4 transition-colors hover:bg-surface-2 sm:px-6">
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
                                             <Link
                                                 href={`/admin/campaigns/${c.id}`}
-                                                className="truncate text-sm font-semibold text-fg-heading hover:text-[#2563EB]"
+                                                className="truncate text-sm font-semibold text-fg-heading hover:text-primary"
                                             >
                                                 {c.name}
                                             </Link>
@@ -311,9 +315,9 @@ export default function CampaignsPage() {
                                             </span>
                                         </div>
                                         <div className="mt-2 flex items-center gap-2">
-                                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E2E8F0]">
+                                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
                                                 <div
-                                                    className="h-full rounded-full bg-[#3B82F6] transition-all"
+                                                    className="h-full rounded-full bg-primary transition-all"
                                                     style={{ width: `${pct}%` }}
                                                 />
                                             </div>
@@ -323,21 +327,21 @@ export default function CampaignsPage() {
                                     <button
                                         type="button"
                                         onClick={() => handleDelete(c.id, c.name)}
-                                        className="rounded-md p-1.5 text-[#EF4444] transition-colors duration-200 hover:bg-[#EF4444]/10"
+                                        className="rounded-md p-1.5 text-danger transition-colors duration-200 hover:bg-danger/10"
                                         title={c.status === "Upcoming" ? "Supprimer" : "Archiver"}
                                     >
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
-                            </li>
+                            </StaggerItem>
                         );
                     })}
                     {list.length === 0 && (
-                        <li className="px-6 py-12 text-center text-sm text-fg-muted">
+                        <div className="px-6 py-12 text-center text-sm text-fg-muted">
                             Aucune campagne pour l&apos;instant.
-                        </li>
+                        </div>
                     )}
-                </ul>
+                </Stagger>
             </section>
         </div>
     );
