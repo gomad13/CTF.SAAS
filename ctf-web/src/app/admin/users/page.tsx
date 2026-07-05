@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { RequireAuth } from "@/components/RequireAuth";
+import Reveal from "@/components/Reveal";
 import type { AdminPathListItemDto } from "@/lib/adminTypes";
 
 type ImportUsersResult = {
@@ -41,37 +42,37 @@ export default function AdminUsersImportPage() {
 
     return (
         <RequireAuth>
-            <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
-                <div className="rounded-2xl border border-neutral-800 bg-background-dark p-4">
-                    <div className="text-lg font-semibold">Import employés (CSV)</div>
-                    <div className="mt-1 text-sm text-neutral-300">
+            <Reveal className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
+                <div className="rounded-2xl border border-border bg-surface p-6">
+                    <div className="text-lg font-semibold text-fg-heading">Import employés (CSV)</div>
+                    <div className="mt-1 text-sm text-fg-muted">
                         Format attendu (virgule ou point-virgule) :{" "}
-                        <span className="text-neutral-300">lastName;firstName;email</span>
+                        <span className="text-fg-muted">lastName;firstName;email</span>
                     </div>
                 </div>
 
-                <div className="space-y-4 rounded-2xl border border-neutral-800 bg-background-dark p-4">
+                <div className="space-y-4 rounded-2xl border border-border bg-surface p-6">
                     <div className="grid gap-3 md:grid-cols-2">
                         <div>
-                            <label className="text-xs text-neutral-300">Fichier CSV</label>
+                            <label className="text-xs text-fg-muted">Fichier CSV</label>
                             <input
                                 type="file"
                                 accept=".csv"
                                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                                className="mt-1 block w-full rounded-xl border border-neutral-800 bg-background-dark px-3 py-2 text-sm"
+                                className="mt-1 block w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm transition-colors duration-200"
                             />
-                            <div className="mt-1 text-xs text-neutral-300">
+                            <div className="mt-1 text-xs text-fg-muted">
                                 Astuce : Excel FR exporte souvent en <b>;</b> — est supporté
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs text-neutral-300">
+                            <label className="text-xs text-fg-muted">
                                 Auto-assign formation (optionnel)
                             </label>
                             <select
                                 value={selectedPathId}
                                 onChange={(e) => setSelectedPathId(e.target.value)}
-                                className="mt-1 w-full rounded-xl border border-neutral-800 bg-background-dark px-3 py-2 text-sm"
+                                className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm transition-colors duration-200"
                             >
                                 <option value="">
                                     {pathsQuery.isLoading
@@ -84,7 +85,7 @@ export default function AdminUsersImportPage() {
                                     </option>
                                 ))}
                             </select>
-                            <div className="mt-1 text-xs text-neutral-300">
+                            <div className="mt-1 text-xs text-fg-muted">
                                 {selectedPathId
                                     ? `Les employés importés seront assignés : ${selectedPathLabel}`
                                     : "Si tu ne choisis rien, on importe juste les utilisateurs (sans assignment)."}
@@ -94,19 +95,19 @@ export default function AdminUsersImportPage() {
 
                     <button
                         onClick={() => importMutation.mutate()}
-                        className="rounded-xl border border-neutral-800 px-4 py-2 text-sm hover:bg-neutral-900 disabled:opacity-50"
+                        className="rounded-xl border border-border px-4 py-2 text-sm transition-colors duration-200 hover:bg-surface-2 disabled:opacity-50"
                         disabled={importMutation.isPending || !file}
                     >
                         {importMutation.isPending ? "Import en cours..." : "Importer"}
                     </button>
 
                     {importMutation.data && (
-                        <div className="rounded-xl border border-neutral-800 bg-background-dark p-3 text-sm">
+                        <div className="rounded-xl border border-border bg-surface p-3 text-sm">
                             <div>✅ Created: {importMutation.data.created}</div>
                             <div>🔄 Updated: {importMutation.data.updated}</div>
                             <div>⏭ Skipped: {importMutation.data.skipped}</div>
                             {importMutation.data.errors?.length > 0 && (
-                                <div className="mt-2 text-red-300">
+                                <div className="mt-2 text-danger">
                                     <div className="font-semibold">Erreurs :</div>
                                     <ul className="list-disc pl-5">
                                         {importMutation.data.errors.slice(0, 20).map((e, i) => (
@@ -119,12 +120,12 @@ export default function AdminUsersImportPage() {
                     )}
 
                     {importMutation.error && (
-                        <div className="text-sm text-red-300">
+                        <div className="text-sm text-danger">
                             Erreur : {(importMutation.error as Error).message}
                         </div>
                     )}
                 </div>
-            </div>
+            </Reveal>
         </RequireAuth>
     );
 }
