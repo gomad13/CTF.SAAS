@@ -38,7 +38,7 @@ export default function TeamLeaderboard({
         <div className="flex flex-col gap-2.5">
             {teams.map(t => {
                 const isPodium = t.rank <= 3;
-                const accent = t.color || "#22C55E";
+                const accent = t.color || "#7551FF";
                 return (
                     <div
                         key={t.teamId}

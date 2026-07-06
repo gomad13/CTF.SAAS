@@ -368,3 +368,22 @@ img,svg,video,canvas{max-width:100%;height:auto}
   --warning:#FFB547; --warning-t:#FFB547; --warning-subtle:color-mix(in srgb,#FFB547 14%,transparent);
   --info:#3965FF;
 }
+
+/* ============================================================================ */
+/* THÈME UNIQUE Vision UI — VIOLET GLOBAL (charte section 2).                    */
+/* Override des tokens CŒUR ; tous les alias (--pr,--primary,--bg-card,--c-*…)   */
+/* pointent vers ces tokens → tout le site bascule en violet. Placé après       */
+/* :root et html.dark pour gagner la cascade. Seul endroit des hex (tokens).     */
+/* ============================================================================ */
+:root, html.dark, [data-theme="dark"], [data-theme="light"], html {
+  --bg:#0B1437; --surface:#111C44; --surface-2:#1A2456; --border:#2A3568;
+  --text:#FFFFFF; --text-2:#A0AEC0; --text-3:#718096;
+  --accent:#7551FF; --accent-hover:#582CFF; --on-accent:#FFFFFF; --accent-2:#2CD9FF;
+  --accent-subtle:rgba(117,81,255,0.16); --accent-border:rgba(117,81,255,0.40);
+  --success:#01B574; --danger:#EE5D50; --warning:#FFB547; --info:#3965FF;
+  --success-subtle:rgba(1,181,116,0.14); --danger-subtle:rgba(238,93,80,0.16);
+  --warning-subtle:rgba(255,181,71,0.16); --info-subtle:rgba(57,101,255,0.16);
+  --success-t:#01B574; --danger-t:#EE5D50; --warning-t:#FFB547; --info-t:#3965FF;
+  --pr-t:#7551FF; --er-l:#EE5D50; --wa-l:#FFB547;
+  --sh-card:0 8px 30px rgba(0,0,0,0.30); --sh-sm:0 1px 3px rgba(0,0,0,0.35); --sh-lg:0 20px 50px rgba(0,0,0,0.45);
+}

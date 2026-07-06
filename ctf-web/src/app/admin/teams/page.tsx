@@ -64,7 +64,7 @@ export default function TeamsPage() {
     const [search, setSearch] = useState("");
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [color, setColor] = useState("#22C55E");
+    const [color, setColor] = useState("#7551FF");
     const [icon, setIcon] = useState("Users");
     const [maxMembers, setMaxMembers] = useState("");
     const [formError, setFormError] = useState<string | null>(null);
@@ -80,7 +80,7 @@ export default function TeamsPage() {
         }),
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ["teams", "list"] });
-            setShowCreate(false); setName(""); setDescription(""); setColor("#22C55E"); setIcon("Users"); setMaxMembers("");
+            setShowCreate(false); setName(""); setDescription(""); setColor("#7551FF"); setIcon("Users"); setMaxMembers("");
             setFormError(null);
         },
         onError: (e: Error) => setFormError(e.message || "Erreur"),

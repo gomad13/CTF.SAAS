@@ -10,8 +10,8 @@ import { RISK_LEVEL_LABELS } from "@/lib/types/riskScore";
 // (danger/warning/success + accent vert cyber à la place de l'ancien bleu).
 const COLOR_DANGER = "#EF4444"; // = var(--danger)
 const COLOR_WARNING = "#F59E0B"; // = var(--warning)
-const COLOR_SUCCESS = "#16A34A"; // = var(--success)
-const COLOR_PRIMARY = "#22C55E"; // accent vert cyber (ex-#3B82F6 bleu, interdit par la charte)
+const COLOR_SUCCESS = "#582CFF"; // = var(--success)
+const COLOR_PRIMARY = "#7551FF"; // accent vert cyber (ex-#3B82F6 bleu, interdit par la charte)
 const COLOR_TRACK = "#E2E8F0"; // piste neutre (SVG, ne suit pas le thème)
 
 // Jauge SVG native — aucune dépendance ajoutée. Cercle de 200×200,

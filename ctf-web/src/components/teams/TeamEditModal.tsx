@@ -32,7 +32,7 @@ export default function TeamEditModal({
 }) {
     const [name, setName] = useState(team.name);
     const [description, setDescription] = useState(team.description ?? "");
-    const [color, setColor] = useState(team.color ?? "#22C55E");
+    const [color, setColor] = useState(team.color ?? "#7551FF");
     const [icon, setIcon] = useState(team.icon ?? "Users");
     const [maxMembers, setMaxMembers] = useState<string>(team.maxMembers != null ? String(team.maxMembers) : "");
     const [isOpen, setIsOpen] = useState<boolean>(team.isOpen ?? false);
