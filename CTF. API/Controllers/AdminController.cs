@@ -969,4 +969,62 @@ public class AdminController : ControllerBase
 
         return Ok(new { id = user.Id, isActive = user.IsActive });
     }
+
+    // =========================================================
+    // VUE D'ENSEMBLE — blocs Vision UI (VRAIES données du tenant, aucune donnée inventée)
+    // =========================================================
+
+    /// <summary>Activité de formation agrégée par mois (N derniers mois) pour le tenant connecté.</summary>
+    [HttpGet("stats/activity-monthly")]
+    public async Task<ActionResult<List<AdminMonthlyPointDto>>> GetActivityMonthly([FromQuery] int months = 6)
+    {
+        var tenantId = GetEffectiveTenantId();
+        if (tenantId == Guid.Empty) return Unauthorized();
+        if (months < 1) months = 1;
+        if (months > 24) months = 24;
+
+        // Utilisateurs réels du tenant (jamais le tenant démo) — filtrage strict.
+        var tenantUserIds = await _db.Users.AsNoTracking()
+            .Where(u => u.TenantId == tenantId)
+            .Select(u => u.Id)
+            .ToListAsync();
+
+        var since = DateTime.UtcNow.Date.AddMonths(-(months - 1));
+        var start = new DateTime(since.Year, since.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        // Agrégation par mois EN MÉMOIRE (le groupement par date ne se traduit pas proprement en SQL).
+        var dates = await _db.ChallengeCompletions.AsNoTracking()
+            .Where(cc => tenantUserIds.Contains(cc.UserId) && cc.CompletedAt >= start)
+            .Select(cc => cc.CompletedAt)
+            .ToListAsync();
+
+        string[] moisFr = { "janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc." };
+        var points = Enumerable.Range(0, months)
+            .Select(i => start.AddMonths(i))
+            .Select(m => new AdminMonthlyPointDto(
+                moisFr[m.Month - 1],
+                dates.Count(d => d.Year == m.Year && d.Month == m.Month)))
+            .ToList();
+
+        return Ok(points);
+    }
+
+    /// <summary>Répartition des utilisateurs du tenant par statut RÉEL (actif / suspendu / jamais connecté).</summary>
+    [HttpGet("stats/users-by-status")]
+    public async Task<ActionResult<AdminUsersByStatusDto>> GetUsersByStatus()
+    {
+        var tenantId = GetEffectiveTenantId();
+        if (tenantId == Guid.Empty) return Unauthorized();
+
+        var users = await _db.Users.AsNoTracking()
+            .Where(u => u.TenantId == tenantId)
+            .Select(u => new { u.IsActive, u.LastLoginAt })
+            .ToListAsync();
+
+        var actifs = users.Count(u => u.IsActive && u.LastLoginAt != null);
+        var jamaisConnectes = users.Count(u => u.IsActive && u.LastLoginAt == null);
+        var suspendus = users.Count(u => !u.IsActive);
+
+        return Ok(new AdminUsersByStatusDto(actifs, suspendus, jamaisConnectes, users.Count));
+    }
 }

@@ -10,6 +10,19 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import Reveal from "@/components/Reveal";
 import { Stagger, StaggerItem } from "@/components/Stagger";
 import CountUp from "@/components/CountUp";
+import PremiumChartCard from "@/components/premium/ChartCard";
+import AreaChartCard from "@/components/premium/AreaChartCard";
+import DonutChart from "@/components/premium/DonutChart";
+
+// Blocs Vision UI (VRAIES données) — types + états chargement/vide
+type AdminMonthlyPoint = { label: string; value: number };
+type AdminUsersByStatus = { actifs: number; suspendus: number; jamaisConnectes: number; total: number };
+function OverviewSkel({ h }: { h: number }) {
+    return <div style={{ height: h, borderRadius: 12, background: "var(--surface-2)", opacity: 0.6 }} />;
+}
+function OverviewEmpty({ label }: { label: string }) {
+    return <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 13, color: "var(--text-3)", padding: 16 }}>{label}</div>;
+}
 
 type Company = {
     id: string;
@@ -346,8 +359,8 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                 fontSize: 10,
                                 padding: "2px 8px",
                                 borderRadius: 4,
-                                background: u.isActive ? "rgba(34,197,94,0.10)" : "rgba(239,68,68,0.10)",
-                                border: `1px solid ${u.isActive ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)"}`,
+                                background: u.isActive ? "rgba(117,81,255,0.10)" : "rgba(239,68,68,0.10)",
+                                border: `1px solid ${u.isActive ? "rgba(117,81,255,0.35)" : "rgba(239,68,68,0.35)"}`,
                                 color: u.isActive ? "var(--success-t)" : "var(--danger-t)",
                                 fontFamily: "'JetBrains Mono', monospace",
                                 width: "fit-content",
@@ -373,7 +386,7 @@ function UsersTab({ users, stats, onToggle, isMobile }: {
                                     onClick={() => onToggle(u.id)}
                                     style={{
                                         background: "transparent",
-                                        border: `1px solid ${u.isActive ? "rgba(239,68,68,0.3)" : "rgba(34,197,94,0.3)"}`,
+                                        border: `1px solid ${u.isActive ? "rgba(239,68,68,0.3)" : "rgba(117,81,255,0.3)"}`,
                                         color: u.isActive ? "var(--danger)" : "var(--success)",
                                         fontSize: 11,
                                         padding: "5px 10px",
@@ -451,8 +464,8 @@ function UserDetailModal({ user, onClose }: { user: CompanyUser; onClose: () => 
                             fontSize: 10,
                             padding: "2px 8px",
                             borderRadius: 4,
-                            background: "rgba(34,197,94,0.12)",
-                            border: "1px solid rgba(34,197,94,0.3)",
+                            background: "rgba(117,81,255,0.12)",
+                            border: "1px solid rgba(117,81,255,0.3)",
                             color: "var(--pr)",
                             fontFamily: "'JetBrains Mono', monospace",
                             textTransform: "uppercase",
@@ -514,6 +527,18 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chartsRef = useRef<any[]>([]);
 
+    // Blocs Vision UI — VRAIES données du tenant (activité mensuelle + répartition par statut)
+    const activityQ = useQuery<AdminMonthlyPoint[]>({ queryKey: ["admin", "activity-monthly"], queryFn: () => apiFetch<AdminMonthlyPoint[]>("/api/admin/stats/activity-monthly?months=6") });
+    const statusQ = useQuery<AdminUsersByStatus>({ queryKey: ["admin", "users-by-status"], queryFn: () => apiFetch<AdminUsersByStatus>("/api/admin/stats/users-by-status") });
+    const activityData = activityQ.data ?? [];
+    const activityHasData = activityData.some(p => p.value > 0);
+    const activityMax = Math.max(4, ...activityData.map(p => p.value), 0);
+    const statusDonut = statusQ.data ? [
+        { name: "Actifs", value: statusQ.data.actifs },
+        { name: "Suspendus", value: statusQ.data.suspendus },
+        { name: "Jamais connectés", value: statusQ.data.jamaisConnectes },
+    ].filter(d => d.value > 0) : [];
+
     useEffect(() => {
         if (window.Chart) { setChartReady(true); return; }
         const script = document.createElement("script");
@@ -541,7 +566,7 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
                         label: "Formations",
                         data: stats.completionsByDay.map(d => d.count),
                         borderColor: "var(--pr)",
-                        backgroundColor: "rgba(34,197,94,0.08)",
+                        backgroundColor: "rgba(117,81,255,0.08)",
                         fill: true,
                         tension: 0.4,
                         pointBackgroundColor: "var(--pr-l)",
@@ -616,6 +641,24 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
 
     return (
         <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
+            {/* Blocs Vision UI — vraies données (activité de formation mensuelle + utilisateurs par statut) */}
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr", gap: 24 }}>
+                <PremiumChartCard title="Activité de formation" subtitle="6 derniers mois">
+                    {activityQ.isLoading
+                        ? <OverviewSkel h={260} />
+                        : activityHasData
+                            ? <AreaChartCard data={activityData} domainMax={activityMax} height={260} />
+                            : <OverviewEmpty label="Pas encore de données d'activité sur la période." />}
+                </PremiumChartCard>
+                <PremiumChartCard title="Utilisateurs par statut" subtitle={statusQ.data ? `${statusQ.data.total} collaborateur${statusQ.data.total > 1 ? "s" : ""}` : undefined}>
+                    {statusQ.isLoading
+                        ? <OverviewSkel h={260} />
+                        : (statusQ.data && statusQ.data.total > 0)
+                            ? <DonutChart data={statusDonut} centerLabel="collaborateurs" height={260} />
+                            : <OverviewEmpty label="Aucun utilisateur à afficher pour le moment." />}
+                </PremiumChartCard>
+            </div>
+
             <ChartCard title="Formations complétées — 7 derniers jours">
                 <div style={{ height: 240 }}>
                     <canvas ref={lineRef} />
@@ -832,7 +875,7 @@ function ImportExportBar() {
                             marginBottom: 16,
                             cursor: "pointer",
                         }}
-                            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = "rgba(34,197,94,0.5)"; }}
+                            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = "rgba(117,81,255,0.5)"; }}
                             onDragLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
                             onDrop={e => {
                                 e.preventDefault();

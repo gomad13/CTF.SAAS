@@ -55,3 +55,7 @@ public record AdminPathListItemDto(
     string Status,
     DateTime? PublishedAt
 );
+
+// Vue d'ensemble Administration — blocs Vision UI (vraies données du tenant)
+public record AdminMonthlyPointDto(string Label, int Value);
+public record AdminUsersByStatusDto(int Actifs, int Suspendus, int JamaisConnectes, int Total);
