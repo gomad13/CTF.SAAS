@@ -13,7 +13,7 @@ export function Stagger({ children, className, gap = 0.05 }: { children: ReactNo
     const reduce = useReducedMotion();
     if (reduce) return <div className={className}>{children}</div>;
     return (
-        <motion.div className={className} variants={staggerContainer(gap)} initial="initial" whileInView="animate" viewport={{ once: true, margin: "-40px" }}>
+        <motion.div className={className} variants={staggerContainer(gap)} initial="initial" animate="animate">
             {children}
         </motion.div>
     );
