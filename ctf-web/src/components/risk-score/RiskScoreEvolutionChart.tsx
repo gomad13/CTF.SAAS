@@ -17,9 +17,9 @@ import type { RiskScoreHistoryPoint } from "@/lib/types/riskScore";
 // nouvelle dépendance ajoutée. Ces littéraux hex sont passés en attributs SVG
 // (stroke/fill/tick) de recharts qui NE résolvent PAS var(--x) : on garde donc
 // des hex reflétant les tokens de la charte (accent vert cyber, grille/texte neutres).
-const COLOR_PRIMARY = "#7551FF"; // accent vert cyber (ex-#3B82F6 bleu, interdit par la charte)
-const COLOR_GRID = "#E2E8F0"; // grille SVG neutre (ne suit pas le thème)
-const COLOR_TEXT_MUTED = "#64748B"; // texte des axes SVG (ne suit pas le thème)
+const COLOR_PRIMARY = "#7551FF"; // accent vert cyber (ex-#2CD9FF bleu, interdit par la charte)
+const COLOR_GRID = "#2A3568"; // grille SVG neutre (ne suit pas le thème)
+const COLOR_TEXT_MUTED = "#718096"; // texte des axes SVG (ne suit pas le thème)
 
 type Props = {
     data: RiskScoreHistoryPoint[] | undefined;
