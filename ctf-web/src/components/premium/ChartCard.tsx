@@ -5,7 +5,7 @@ export default function ChartCard({ title, subtitle, action, children }: {
     title: string; subtitle?: string; action?: ReactNode; children: ReactNode;
 }) {
     return (
-        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface/80 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-md">
             <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
                     <h3 className="text-sm font-semibold" style={{ color: "var(--text)" }}>{title}</h3>
