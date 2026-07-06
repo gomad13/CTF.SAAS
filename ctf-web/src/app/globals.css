@@ -353,3 +353,18 @@ img,svg,video,canvas{max-width:100%;height:auto}
 .vision-dashboard *:focus-visible{outline:2px solid var(--v-accent);outline-offset:2px}
 .vision-dashboard .v-hover{transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
 .vision-dashboard .v-hover:hover{border-color:color-mix(in srgb,var(--v-accent) 55%,var(--v-border));transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+
+/* .vision-theme : REDÉFINIT les tokens standard en violet, SCOPÉ à son sous-arbre (sidebar). */
+/* Les composants utilisant --bg/--surface/--accent… deviennent violets ici SANS réécriture ; */
+/* les pages sans cette classe gardent le thème actuel. Seul endroit des hex (définition tokens). */
+.vision-theme{
+  --bg:#0B1437; --surface:#111C44; --surface-2:#1A2456; --border:#2A3568;
+  --text:#FFFFFF; --text-2:#A0AEC0; --text-3:#718096;
+  --accent:#7551FF; --accent-hover:#582CFF; --on-accent:#FFFFFF;
+  --accent-subtle:color-mix(in srgb,#7551FF 16%,transparent);
+  --accent-border:color-mix(in srgb,#7551FF 40%,transparent);
+  --danger:#EE5D50; --danger-t:#EE5D50; --danger-subtle:color-mix(in srgb,#EE5D50 14%,transparent);
+  --success:#01B574; --success-t:#01B574; --success-subtle:color-mix(in srgb,#01B574 14%,transparent);
+  --warning:#FFB547; --warning-t:#FFB547; --warning-subtle:color-mix(in srgb,#FFB547 14%,transparent);
+  --info:#3965FF;
+}

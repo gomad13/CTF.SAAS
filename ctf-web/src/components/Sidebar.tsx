@@ -27,15 +27,16 @@ function Item({ href, icon, label, badge, exact = false, danger = false }: {
             padding: "0 12px", borderRadius: "8px", textDecoration: "none",
             fontSize: "13.5px", userSelect: "none", marginBottom: "2px",
             fontWeight: active ? "600" : "400",
-            color: danger ? "var(--danger-t)" : active ? "var(--text)" : "var(--text-3)",
-            background: danger ? "var(--danger-subtle)" : active ? "var(--accent-subtle)" : "transparent",
-            borderLeft: danger ? "2px solid var(--danger)" : active ? "2px solid var(--accent)" : "2px solid transparent",
+            color: danger ? "var(--danger-t)" : active ? "var(--on-accent)" : "var(--text-3)",
+            background: danger ? "var(--danger-subtle)" : active ? "linear-gradient(135deg, var(--accent), var(--accent-hover))" : "transparent",
+            borderLeft: danger ? "2px solid var(--danger)" : "2px solid transparent",
+            boxShadow: active && !danger ? "0 4px 14px color-mix(in srgb, var(--accent) 38%, transparent)" : "none",
             transition: "all 0.15s ease",
         }}
-            onMouseEnter={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "var(--surface-2)"; (e.currentTarget as HTMLElement).style.color = "var(--text-2)"; } }}
-            onMouseLeave={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--text-3)"; } }}
+            onMouseEnter={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "var(--surface-2)"; (e.currentTarget as HTMLElement).style.color = "var(--text-2)"; (e.currentTarget as HTMLElement).style.transform = "translateX(2px)"; } }}
+            onMouseLeave={e => { if (!active && !danger) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--text-3)"; (e.currentTarget as HTMLElement).style.transform = "translateX(0)"; } }}
         >
-            <span style={{ color: danger ? "var(--danger)" : active ? "var(--accent)" : "var(--text-2)", display: "flex", flexShrink: 0 }}>{icon}</span>
+            <span style={{ color: danger ? "var(--danger)" : active ? "var(--on-accent)" : "var(--text-2)", display: "flex", flexShrink: 0 }}>{icon}</span>
             <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
             {badge && <span style={{ fontSize: "10px", padding: "1px 7px", background: "var(--surface-2)", color: "var(--text-3)", borderRadius: "99px" }}>{badge}</span>}
         </Link>
@@ -81,12 +82,12 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                 width: "220px", flexShrink: 0, height: "100vh", top: 0,
                 display: "flex", flexDirection: "column", background: "var(--bg)",
                 borderRight: "1px solid var(--border)", zIndex: 40, transition: "transform 0.2s",
-            }} className={sidebarClass}>
+            }} className={`vision-theme ${sidebarClass}`}>
 
                 {/* Logo */}
                 <div style={{ height: "60px", display: "flex", alignItems: "center", gap: "10px", padding: "0 16px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-                    <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,var(--accent-hover),var(--accent))", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 12px rgba(34,197,94,0.4)" }}>
-                        <Shield size={16} color="white" strokeWidth={2} />
+                    <div style={{ width: "32px", height: "32px", background: "linear-gradient(135deg,var(--accent-hover),var(--accent))", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "var(--on-accent)", boxShadow: "0 0 14px color-mix(in srgb, var(--accent) 45%, transparent)" }}>
+                        <Shield size={16} strokeWidth={2} />
                     </div>
                     <div>
                         <div style={{ fontSize: "15px", fontWeight: "800", color: "var(--text)", lineHeight: "1.1", letterSpacing: "-0.02em" }}>Sentys</div>
@@ -142,7 +143,7 @@ export default function Sidebar({ me: meProp, mobileOpen, onClose }: {
                         border: "1px solid var(--border)", borderRadius: "8px",
                         color: "var(--text-3)", fontSize: "12.5px", cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
                     }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--danger-t)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(239,68,68,0.3)"; (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.08)"; }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--danger-t)"; (e.currentTarget as HTMLElement).style.borderColor = "color-mix(in srgb, var(--danger) 35%, transparent)"; (e.currentTarget as HTMLElement).style.background = "var(--danger-subtle)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-3)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
                         <LogOut size={13} strokeWidth={1.75} />
