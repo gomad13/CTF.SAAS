@@ -13,6 +13,8 @@ import CountUp from "@/components/CountUp";
 import PremiumChartCard from "@/components/premium/ChartCard";
 import AreaChartCard from "@/components/premium/AreaChartCard";
 import DonutChart from "@/components/premium/DonutChart";
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, PieChart, Pie, Legend } from "recharts";
+import { SERIES } from "@/lib/chart-colors";
 
 // Blocs Vision UI (VRAIES données) — types + états chargement/vide
 type AdminMonthlyPoint = { label: string; value: number };
@@ -520,12 +522,14 @@ function DetailStat({ label, value, color = "var(--text)" }: { label: string; va
 
 // ── ONGLET STATISTIQUES ─────────────────────────────────────────────────────
 function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean }) {
-    const [chartReady, setChartReady] = useState(false);
-    const lineRef = useRef<HTMLCanvasElement>(null);
-    const barRef  = useRef<HTMLCanvasElement>(null);
-    const donutRef = useRef<HTMLCanvasElement>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const chartsRef = useRef<any[]>([]);
+    // Datasets recharts (local, sans dépendance CDN Chart.js) pour les 3 graphes de stats
+    const completions7 = stats.completionsByDay.map(d => ({ label: d.date.slice(5), value: d.count }));
+    const completions7Max = Math.max(4, ...completions7.map(d => d.value), 0);
+    const scoreDist = stats.scoreDistribution.map(s => ({ label: `${s.range}%`, value: s.count }));
+    const scoreHasData = scoreDist.some(d => d.value > 0);
+    const parcoursDonut = stats.parcoursStats.map(p => ({ name: p.title, value: p.completionRate }));
+    // recharts Cell/fill = attribut SVG -> hex requis (danger / ambre / cyan / succès)
+    const SCORE_FILLS = ["#EE5D50", "#FFB547", "#2CD9FF", "#01B574"];
 
     // Blocs Vision UI — VRAIES données du tenant (activité mensuelle + répartition par statut)
     const activityQ = useQuery<AdminMonthlyPoint[]>({ queryKey: ["admin", "activity-monthly"], queryFn: () => apiFetch<AdminMonthlyPoint[]>("/api/admin/stats/activity-monthly?months=6") });
@@ -538,104 +542,6 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
         { name: "Suspendus", value: statusQ.data.suspendus },
         { name: "Jamais connectés", value: statusQ.data.jamaisConnectes },
     ].filter(d => d.value > 0) : [];
-
-    useEffect(() => {
-        if (window.Chart) { setChartReady(true); return; }
-        const script = document.createElement("script");
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js";
-        script.onload = () => setChartReady(true);
-        document.head.appendChild(script);
-    }, []);
-
-    useEffect(() => {
-        if (!chartReady || !window.Chart) return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const Chart = window.Chart as any;
-        chartsRef.current.forEach(c => c?.destroy?.());
-        chartsRef.current = [];
-
-        const gridColor = "rgba(255,255,255,0.05)";
-        const tickColor = "var(--text-3)";
-
-        if (lineRef.current) {
-            chartsRef.current.push(new Chart(lineRef.current, {
-                type: "line",
-                data: {
-                    labels: stats.completionsByDay.map(d => d.date.slice(5)),
-                    datasets: [{
-                        label: "Formations",
-                        data: stats.completionsByDay.map(d => d.count),
-                        borderColor: "var(--pr)",
-                        backgroundColor: "rgba(117,81,255,0.08)",
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: "var(--pr-l)",
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: gridColor }, ticks: { color: tickColor } },
-                        y: { grid: { color: gridColor }, ticks: { color: tickColor, stepSize: 1 }, beginAtZero: true },
-                    },
-                },
-            }));
-        }
-
-        if (barRef.current) {
-            chartsRef.current.push(new Chart(barRef.current, {
-                type: "bar",
-                data: {
-                    labels: stats.scoreDistribution.map(s => `${s.range}%`),
-                    datasets: [{
-                        label: "Soumissions",
-                        data: stats.scoreDistribution.map(s => s.count),
-                        backgroundColor: ["var(--danger)", "var(--warning)", "var(--warning-t)", "var(--success)"],
-                        borderRadius: 4,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: gridColor }, ticks: { color: tickColor } },
-                        y: { grid: { color: gridColor }, ticks: { color: tickColor, stepSize: 1 }, beginAtZero: true },
-                    },
-                },
-            }));
-        }
-
-        if (donutRef.current && stats.parcoursStats.length > 0) {
-            chartsRef.current.push(new Chart(donutRef.current, {
-                type: "doughnut",
-                data: {
-                    labels: stats.parcoursStats.map(p => p.title),
-                    datasets: [{
-                        data: stats.parcoursStats.map(p => p.completionRate),
-                        backgroundColor: ["var(--pr)", "var(--success)", "var(--warning)", "var(--danger)"],
-                        borderColor: "var(--surface)",
-                        borderWidth: 2,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: "65%",
-                    plugins: {
-                        legend: {
-                            position: "bottom",
-                            labels: { color: "var(--text-2)", font: { size: 11 } },
-                        },
-                    },
-                },
-            }));
-        }
-
-        return () => { chartsRef.current.forEach(c => c?.destroy?.()); chartsRef.current = []; };
-    }, [chartReady, stats]);
 
     const medals = ["🥇", "🥈", "🥉"];
 
@@ -660,21 +566,39 @@ function StatsTab({ stats, isMobile }: { stats: CompanyStats; isMobile: boolean 
             </div>
 
             <ChartCard title="Formations complétées — 7 derniers jours">
-                <div style={{ height: 240 }}>
-                    <canvas ref={lineRef} />
-                </div>
+                {completions7.some(d => d.value > 0)
+                    ? <AreaChartCard data={completions7} domainMax={completions7Max} height={240} />
+                    : <OverviewEmpty label="Aucune formation complétée sur les 7 derniers jours." />}
             </ChartCard>
 
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 24 }}>
                 <ChartCard title="Distribution des scores">
-                    <div style={{ height: 240 }}>
-                        <canvas ref={barRef} />
-                    </div>
+                    {scoreHasData ? (
+                        <ResponsiveContainer width="100%" height={240}>
+                            <BarChart data={scoreDist} margin={{ top: 10, right: 8, left: -14, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                                <XAxis dataKey="label" tick={{ fill: "var(--text-3)", fontSize: 12 }} tickLine={false} axisLine={{ stroke: "var(--border)" }} />
+                                <YAxis tick={{ fill: "var(--text-3)", fontSize: 12 }} tickLine={false} axisLine={false} width={30} allowDecimals={false} />
+                                <RTooltip cursor={{ fill: "color-mix(in srgb, var(--accent) 12%, transparent)" }} contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12, color: "var(--text)" }} />
+                                <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={54}>
+                                    {scoreDist.map((_, i) => <Cell key={i} fill={SCORE_FILLS[i % SCORE_FILLS.length]} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : <OverviewEmpty label="Pas encore de scores enregistrés." />}
                 </ChartCard>
                 <ChartCard title="Avancement par parcours">
-                    <div style={{ height: 240 }}>
-                        <canvas ref={donutRef} />
-                    </div>
+                    {parcoursDonut.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={240}>
+                            <PieChart>
+                                <Pie data={parcoursDonut} dataKey="value" nameKey="name" innerRadius="55%" outerRadius="80%" paddingAngle={2} stroke="var(--surface)" strokeWidth={2}>
+                                    {parcoursDonut.map((_, i) => <Cell key={i} fill={SERIES[i % SERIES.length]} />)}
+                                </Pie>
+                                <RTooltip contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12, color: "var(--text)" }} />
+                                <Legend wrapperStyle={{ fontSize: 11 }} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : <OverviewEmpty label="Aucun parcours à afficher." />}
                 </ChartCard>
             </div>
 
