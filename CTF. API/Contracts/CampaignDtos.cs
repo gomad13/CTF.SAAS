@@ -136,3 +136,25 @@ public record EmployeeCampaignDto(
     double MyCompletionPercentage,
     List<EmployeeCampaignContentDto> Contents
 );
+
+// ── Efficacité des campagnes (lecture seule, agrégation ; VRAIES données tenant) ──
+public record CampaignEfficacyPointDto(string Label, int Value);
+/// <summary>Résultats scénarios (phishing) d'une campagne : e-mails d'attaque, clics, signalements.</summary>
+public record CampaignScenarioResultDto(int ScenariosEvaluated, int AttackEmails, int Clicked, int Reported, int ClickRate, int ReportRate);
+/// <summary>Efficacité détaillée d'une campagne.</summary>
+public record CampaignEfficacyDto(
+    Guid CampaignId,
+    string Name,
+    string Status,
+    int TotalAssigned,
+    int Started,
+    int CompletedUsers,
+    int ParticipationRate,   // % d'assignés ayant démarré
+    int CompletionRate,      // % d'assignés ayant tout terminé
+    int AverageSuccessRate,  // % de contenus réussis (IsSuccess)
+    List<CampaignEfficacyPointDto> CompletionTrend,
+    CampaignScenarioResultDto? Scenario
+);
+/// <summary>Ligne de synthèse pour comparer les campagnes.</summary>
+public record CampaignEfficacyRowDto(Guid CampaignId, string Name, string Status, int TotalAssigned, int ParticipationRate, int CompletionRate);
+public record CampaignsEfficacyDto(List<CampaignEfficacyRowDto> Campaigns);

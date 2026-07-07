@@ -132,3 +132,36 @@ export const STATUS_STYLES: Record<CampaignStatus, { label: string; bg: string; 
     Active: { label: "En cours", bg: "var(--success-subtle)", color: "var(--success-t)", border: "color-mix(in srgb, var(--success) 30%, transparent)" },
     Completed: { label: "Terminée", bg: "var(--info-subtle)", color: "var(--info-t)", border: "color-mix(in srgb, var(--info) 30%, transparent)" },
 };
+
+// ── Efficacité (graphes, lecture seule) ──
+export type CampaignEfficacyPoint = { label: string; value: number };
+export type CampaignScenarioResult = {
+    scenariosEvaluated: number;
+    attackEmails: number;
+    clicked: number;
+    reported: number;
+    clickRate: number;
+    reportRate: number;
+};
+export type CampaignEfficacy = {
+    campaignId: string;
+    name: string;
+    status: CampaignStatus;
+    totalAssigned: number;
+    started: number;
+    completedUsers: number;
+    participationRate: number;
+    completionRate: number;
+    averageSuccessRate: number;
+    completionTrend: CampaignEfficacyPoint[];
+    scenario: CampaignScenarioResult | null;
+};
+export type CampaignEfficacyRow = {
+    campaignId: string;
+    name: string;
+    status: CampaignStatus;
+    totalAssigned: number;
+    participationRate: number;
+    completionRate: number;
+};
+export type CampaignsEfficacy = { campaigns: CampaignEfficacyRow[] };

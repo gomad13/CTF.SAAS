@@ -7,6 +7,8 @@ import type {
     AvailableContent,
     CampaignDashboard,
     CampaignDetail,
+    CampaignEfficacy,
+    CampaignsEfficacy,
     CampaignStatus,
     CampaignSummary,
     CreateCampaignPayload,
@@ -52,6 +54,22 @@ export function useCampaignDashboard(id: string | null) {
         queryFn: () => apiFetch<CampaignDashboard>(`/api/admin/campaigns/${id}/dashboard`),
         enabled: !!id,
         staleTime: SOMETIMES,
+    });
+}
+
+export function useCampaignsEfficacy(enabled: boolean) {
+    return useQuery<CampaignsEfficacy>({
+        queryKey: ["campaigns", "efficacy", "summary"],
+        queryFn: () => apiFetch<CampaignsEfficacy>("/api/admin/campaigns/efficacy"),
+        enabled,
+    });
+}
+
+export function useCampaignEfficacy(id: string | null) {
+    return useQuery<CampaignEfficacy>({
+        queryKey: ["campaigns", "efficacy", "detail", id],
+        queryFn: () => apiFetch<CampaignEfficacy>(`/api/admin/campaigns/${id}/efficacy`),
+        enabled: !!id,
     });
 }
 
