@@ -25,7 +25,7 @@ type Risk = { globalScore: number | null; band: string; trend: RiskPoint[]; user
 type Engagement = { totalUsers: number; active7d: number; active30d: number; neverConnected: number; participationRate: number; totalCompletions: number; avgCompletionsPerActiveUser: number };
 type GroupRow = { teamId: string; team: string; memberCount: number; mastery: number; avgScore: number; completionRate: number; avgRisk: number | null; riskBand: string; participationRate: number };
 type Groups = { groups: GroupRow[] };
-type AnalyticsUser = { userId: string; name: string };
+type AnalyticsUser = { userId: string; name: string; risk: number | null };
 type Users = { users: AnalyticsUser[] };
 type Profile = { name: string; completions: number; avgScore: number; themesAttempted: number; lastActivityAt: string | null; lastLoginAt: string | null; createdAt: string };
 type FinancialPoint = { label: string; completions: number; cumulativeParticipation: number; cri: number; coverage: number };
@@ -48,6 +48,24 @@ function SkelBlock({ h }: { h: number }) {
     return <div style={{ height: h, borderRadius: 16, background: "var(--v-surface-2)", opacity: 0.6 }} />;
 }
 function masteryColor(m: number) { return m < 40 ? "var(--danger)" : m < 60 ? "var(--warning)" : "var(--v-accent)"; }
+
+// Niveau de risque d'une personne d'après son score de résilience (CRI, haut = mieux). null = non évalué.
+function riskTier(score: number | null): { color: string; label: string } | null {
+    if (score == null) return null;
+    if (score >= 60) return { color: "var(--success)", label: "Faible risque" };
+    if (score >= 40) return { color: "var(--warning)", label: "Risque modéré" };
+    if (score >= 25) return { color: "color-mix(in srgb, var(--warning) 45%, var(--danger))", label: "À risque" };
+    return { color: "var(--danger)", label: "Gros risque — à traiter" };
+}
+function RiskPill({ score }: { score: number | null }) {
+    const t = riskTier(score);
+    if (!t) return <span style={{ fontSize: 11, color: "var(--v-text-3)", flexShrink: 0 }}>Non évalué</span>;
+    return (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: "color-mix(in srgb, " + t.color + " 15%, transparent)", color: t.color, flexShrink: 0, whiteSpace: "nowrap" }}>
+            <span style={{ width: 7, height: 7, borderRadius: 999, background: t.color }} /> {t.label}
+        </span>
+    );
+}
 
 export default function AnalyticsPage() {
     const [tab, setTab] = useState<"entreprise" | "groupe" | "individuel" | "financier">("entreprise");
@@ -373,7 +391,10 @@ function IndividuelTab() {
                 <button onClick={() => setSelected(null)} style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: "var(--v-text-2)", background: "transparent", border: "1px solid var(--v-border)", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}>
                     <ArrowLeft size={15} /> Tous les collaborateurs
                 </button>
-                <h2 style={{ fontSize: 20, fontWeight: 700, color: "var(--v-text)" }}>{selected.name}</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 700, color: "var(--v-text)" }}>{selected.name}</h2>
+                    <RiskPill score={selected.risk} />
+                </div>
                 <AnalyticsDetail basePath={`/api/analytics/users/${selected.userId}`} keyPrefix={`usr-${selected.userId}`} engagementOverride={<ProfileBlock loading={profileQ.isLoading} p={profileQ.data} />} />
             </div>
         );
@@ -395,7 +416,8 @@ function IndividuelTab() {
                                 return (
                                     <button key={u.userId} onClick={() => setSelected(u)} className="v-hover" style={{ textAlign: "left", display: "flex", alignItems: "center", gap: 12, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 12, padding: "10px 14px", cursor: "pointer", width: "100%" }}>
                                         <span style={{ flexShrink: 0, width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>{initials}</span>
-                                        <span style={{ flex: 1, fontSize: 14, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</span>
+                                        <span style={{ flex: 1, minWidth: 0, fontSize: 14, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</span>
+                                        <RiskPill score={u.risk} />
                                         <ChevronRight size={16} style={{ color: "var(--v-text-3)", flexShrink: 0 }} />
                                     </button>
                                 );

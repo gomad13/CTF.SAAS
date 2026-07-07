@@ -226,7 +226,16 @@ public class EnterpriseAnalyticsController : ControllerBase
             .OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
             .Select(u => new { u.Id, u.FirstName, u.LastName })
             .ToListAsync(ct);
-        var users = raw.Select(u => new AnalyticsUserDto(u.Id.ToString(), $"{u.FirstName} {u.LastName}".Trim())).ToList();
+
+        var riskRows = await _db.RiskScoreHistories.AsNoTracking()
+            .Where(r => r.TenantId == tenantId && r.Score != null)
+            .Select(r => new { r.UserId, Score = r.Score!.Value, r.ComputedAt }).ToListAsync(ct);
+        var lastRisk = riskRows.GroupBy(r => r.UserId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.ComputedAt).First().Score);
+
+        var users = raw.Select(u => new AnalyticsUserDto(
+            u.Id.ToString(), $"{u.FirstName} {u.LastName}".Trim(),
+            lastRisk.TryGetValue(u.Id, out var s) ? s : (int?)null)).ToList();
         return Ok(new AnalyticsUsersDto(users));
     }
 
