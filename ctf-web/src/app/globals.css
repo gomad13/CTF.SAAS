@@ -344,6 +344,7 @@ img,svg,video,canvas{max-width:100%;height:auto}
   --v-accent-2:#582CFF;
   --v-cyan:#2CD9FF;
   --v-success:#01B574;
+  --v-warning:#FFB547;
   --v-danger:#E53E3E;
   --v-grad:linear-gradient(135deg,#7551FF 0%,#582CFF 100%);
   background:var(--v-bg);
@@ -361,6 +362,11 @@ img,svg,video,canvas{max-width:100%;height:auto}
 .vision-dashboard .v-link:hover{color:color-mix(in srgb,var(--v-accent) 72%,var(--v-text))}
 .vision-dashboard .v-row{transition:background-color .15s ease}
 .vision-dashboard .v-row:hover{background:var(--v-surface-2)}
+/* Boutons d'action de tableau (Voir/Éditer/Supprimer) — hover non adressable en inline. */
+.vision-dashboard .v-act{transition:background-color .15s ease,border-color .15s ease,color .15s ease}
+.vision-dashboard .v-act:hover{background:var(--v-surface-2);border-color:color-mix(in srgb,var(--v-accent) 55%,var(--v-border));color:var(--v-accent)}
+.vision-dashboard .v-act-danger{transition:background-color .15s ease}
+.vision-dashboard .v-act-danger:hover{background:color-mix(in srgb,var(--v-danger) 15%,transparent)}
 
 /* .vision-theme : REDÉFINIT les tokens standard en violet, SCOPÉ à son sous-arbre (sidebar). */
 /* Les composants utilisant --bg/--surface/--accent… deviennent violets ici SANS réécriture ; */
