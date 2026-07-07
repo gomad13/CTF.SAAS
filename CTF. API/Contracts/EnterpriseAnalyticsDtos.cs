@@ -46,3 +46,16 @@ public record GroupRowDto(
     int ParticipationRate
 );
 public record GroupsComparisonDto(List<GroupRowDto> Groups);
+
+// ── Onglet INDIVIDUEL (analytics par utilisateur) ─────────────────────────
+public record AnalyticsUserDto(string UserId, string Name);
+public record AnalyticsUsersDto(List<AnalyticsUserDto> Users);
+public record IndividualProfileDto(
+    string Name,
+    int Completions,
+    int AvgScore,
+    int ThemesAttempted,
+    string? LastActivityAt,
+    string? LastLoginAt,
+    string CreatedAt
+);

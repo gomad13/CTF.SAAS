@@ -23,6 +23,9 @@ type Risk = { globalScore: number | null; band: string; trend: RiskPoint[]; user
 type Engagement = { totalUsers: number; active7d: number; active30d: number; neverConnected: number; participationRate: number; totalCompletions: number; avgCompletionsPerActiveUser: number };
 type GroupRow = { teamId: string; team: string; memberCount: number; mastery: number; avgScore: number; completionRate: number; avgRisk: number | null; riskBand: string; participationRate: number };
 type Groups = { groups: GroupRow[] };
+type AnalyticsUser = { userId: string; name: string };
+type Users = { users: AnalyticsUser[] };
+type Profile = { name: string; completions: number; avgScore: number; themesAttempted: number; lastActivityAt: string | null; lastLoginAt: string | null; createdAt: string };
 
 function GlassCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
     return (
@@ -84,13 +87,7 @@ export default function AnalyticsPage() {
 
                 {tab === "entreprise" && <AnalyticsDetail basePath="/api/analytics/enterprise" keyPrefix="ent" showExport />}
                 {tab === "groupe" && <GroupeTab />}
-                {tab === "individuel" && (
-                    <GlassCard style={{ textAlign: "center", padding: 56 }}>
-                        <Activity size={26} style={{ color: "var(--v-text-3)" }} />
-                        <h2 style={{ marginTop: 12, fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Vue Individuelle</h2>
-                        <p style={{ marginTop: 6, fontSize: 14, color: "var(--v-text-2)" }}>Bientôt disponible.</p>
-                    </GlassCard>
-                )}
+                {tab === "individuel" && <IndividuelTab />}
             </div>
         </div>
     );
@@ -154,13 +151,13 @@ function GroupRowCard({ rank, g, onClick }: { rank: number; g: GroupRow; onClick
 }
 
 // ── Blocs analytics réutilisables (Entreprise OU équipe scopée) ───────────────
-function AnalyticsDetail({ basePath, keyPrefix, showExport = false }: { basePath: string; keyPrefix: string; showExport?: boolean }) {
+function AnalyticsDetail({ basePath, keyPrefix, showExport = false, engagementOverride }: { basePath: string; keyPrefix: string; showExport?: boolean; engagementOverride?: React.ReactNode }) {
     const [months, setMonths] = useState(6);
     const [exporting, setExporting] = useState(false);
 
     const weakQ = useQuery<WeakTopics>({ queryKey: [keyPrefix, "weak"], queryFn: () => apiFetch(`${basePath}/weak-topics?top=5`) });
     const riskQ = useQuery<Risk>({ queryKey: [keyPrefix, "risk", months], queryFn: () => apiFetch(`${basePath}/risk?months=${months}`) });
-    const engQ = useQuery<Engagement>({ queryKey: [keyPrefix, "eng"], queryFn: () => apiFetch(`${basePath}/engagement`) });
+    const engQ = useQuery<Engagement>({ queryKey: [keyPrefix, "eng"], queryFn: () => apiFetch(`${basePath}/engagement`), enabled: !engagementOverride });
 
     async function handleExport() {
         setExporting(true);
@@ -251,20 +248,22 @@ function AnalyticsDetail({ basePath, keyPrefix, showExport = false }: { basePath
                 </div>
             </Reveal>
 
-            {/* Engagement */}
-            <Reveal>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 12 }}>Engagement</h2>
-                {engQ.isLoading ? (
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[0, 1, 2, 3].map(i => <SkelBlock key={i} h={112} />)}</div>
-                ) : (
-                    <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4" gap={0.06}>
-                        <StaggerItem><VisionKpiCard value={eng?.active7d ?? 0} label="Actifs 7 jours" icon={UserCheck} hint={eng ? `sur ${eng.totalUsers}` : ""} /></StaggerItem>
-                        <StaggerItem><VisionKpiCard value={eng?.active30d ?? 0} label="Actifs 30 jours" icon={Users2} /></StaggerItem>
-                        <StaggerItem><VisionKpiCard value={eng?.participationRate ?? 0} suffix="%" label="Participation" icon={CheckCircle2} hint="ont complété ≥1 challenge" /></StaggerItem>
-                        <StaggerItem><VisionKpiCard value={eng?.neverConnected ?? 0} label="Jamais connectés" icon={UserX} /></StaggerItem>
-                    </Stagger>
-                )}
-            </Reveal>
+            {/* Engagement (ou bloc surchargé — ex. profil individuel) */}
+            {engagementOverride ? <Reveal>{engagementOverride}</Reveal> : (
+                <Reveal>
+                    <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 12 }}>Engagement</h2>
+                    {engQ.isLoading ? (
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[0, 1, 2, 3].map(i => <SkelBlock key={i} h={112} />)}</div>
+                    ) : (
+                        <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4" gap={0.06}>
+                            <StaggerItem><VisionKpiCard value={eng?.active7d ?? 0} label="Actifs 7 jours" icon={UserCheck} hint={eng ? `sur ${eng.totalUsers}` : ""} /></StaggerItem>
+                            <StaggerItem><VisionKpiCard value={eng?.active30d ?? 0} label="Actifs 30 jours" icon={Users2} /></StaggerItem>
+                            <StaggerItem><VisionKpiCard value={eng?.participationRate ?? 0} suffix="%" label="Participation" icon={CheckCircle2} hint="ont complété ≥1 challenge" /></StaggerItem>
+                            <StaggerItem><VisionKpiCard value={eng?.neverConnected ?? 0} label="Jamais connectés" icon={UserX} /></StaggerItem>
+                        </Stagger>
+                    )}
+                </Reveal>
+            )}
         </div>
     );
 }
@@ -288,6 +287,79 @@ function WeakRow({ rank, t }: { rank: number; t: WeakTopic }) {
                     <span>{t.completions} complétion{t.completions > 1 ? "s" : ""}</span>
                 </div>
             </div>
+        </div>
+    );
+}
+
+// ── Onglet INDIVIDUEL : sélecteur d'utilisateur + détail perso ────────────────
+function IndividuelTab() {
+    const [search, setSearch] = useState("");
+    const [selected, setSelected] = useState<AnalyticsUser | null>(null);
+
+    const usersQ = useQuery<Users>({ queryKey: ["an-users"], queryFn: () => apiFetch("/api/analytics/users") });
+    const profileQ = useQuery<Profile>({ queryKey: ["an-profile", selected?.userId], queryFn: () => apiFetch(`/api/analytics/users/${selected!.userId}/profile`), enabled: !!selected });
+
+    if (selected) {
+        return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <button onClick={() => setSelected(null)} style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: "var(--v-text-2)", background: "transparent", border: "1px solid var(--v-border)", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}>
+                    <ArrowLeft size={15} /> Tous les collaborateurs
+                </button>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: "var(--v-text)" }}>{selected.name}</h2>
+                <AnalyticsDetail basePath={`/api/analytics/users/${selected.userId}`} keyPrefix={`usr-${selected.userId}`} engagementOverride={<ProfileBlock loading={profileQ.isLoading} p={profileQ.data} />} />
+            </div>
+        );
+    }
+
+    const list = (usersQ.data?.users ?? []).filter(u => u.name.toLowerCase().includes(search.trim().toLowerCase()));
+    return (
+        <Reveal>
+            <GlassCard>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Analytics par collaborateur</h2>
+                <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 14 }}>Choisissez une personne pour voir ses points faibles, son risque et son profil.</p>
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un collaborateur…"
+                    style={{ width: "100%", marginBottom: 14, padding: "10px 14px", fontSize: 14, borderRadius: 10, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", color: "var(--v-text)", outline: "none" }} />
+                {usersQ.isLoading ? <SkelBlock h={200} />
+                    : list.length > 0
+                        ? <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {list.map(u => {
+                                const initials = u.name.split(" ").filter(Boolean).map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+                                return (
+                                    <button key={u.userId} onClick={() => setSelected(u)} className="v-hover" style={{ textAlign: "left", display: "flex", alignItems: "center", gap: 12, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 12, padding: "10px 14px", cursor: "pointer", width: "100%" }}>
+                                        <span style={{ flexShrink: 0, width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>{initials}</span>
+                                        <span style={{ flex: 1, fontSize: 14, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</span>
+                                        <ChevronRight size={16} style={{ color: "var(--v-text-3)", flexShrink: 0 }} />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        : <EmptyState label="Aucun collaborateur trouvé." />}
+            </GlassCard>
+        </Reveal>
+    );
+}
+
+function ProfileBlock({ loading, p }: { loading: boolean; p?: Profile }) {
+    const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleDateString("fr-FR") : "—";
+    return (
+        <div>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 12 }}>Profil</h2>
+            {loading ? (
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">{[0, 1, 2].map(i => <SkelBlock key={i} h={112} />)}</div>
+            ) : (
+                <>
+                    <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-3" gap={0.06}>
+                        <StaggerItem><VisionKpiCard value={p?.completions ?? 0} label="Challenges complétés" icon={CheckCircle2} /></StaggerItem>
+                        <StaggerItem><VisionKpiCard value={p?.avgScore ?? 0} suffix="%" label="Score moyen" icon={BarChart3} /></StaggerItem>
+                        <StaggerItem><VisionKpiCard value={p?.themesAttempted ?? 0} label="Thèmes abordés" icon={Activity} /></StaggerItem>
+                    </Stagger>
+                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginTop: 14, fontSize: 12, color: "var(--v-text-3)" }}>
+                        <span>Dernière activité&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{fmt(p?.lastActivityAt)}</b></span>
+                        <span>Dernière connexion&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{fmt(p?.lastLoginAt)}</b></span>
+                        <span>Membre depuis&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{fmt(p?.createdAt)}</b></span>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

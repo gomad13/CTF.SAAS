@@ -192,12 +192,83 @@ public class EnterpriseAnalyticsController : ControllerBase
         return Ok(await ComputeEngagementAsync(tenantId, ct, members));
     }
 
+    // ═══════════════════════════ INDIVIDUEL ═══════════════════════════════════
+
+    /// <summary>Liste des utilisateurs du tenant (pour le sélecteur individuel).</summary>
+    [HttpGet("/api/analytics/users")]
+    public async Task<ActionResult<AnalyticsUsersDto>> GetUsersList(CancellationToken ct = default)
+    {
+        var (error, tenantId) = await GuardAsync(ct);
+        if (error != null) return error;
+
+        var raw = await _db.Users.AsNoTracking()
+            .Where(u => u.TenantId == tenantId)
+            .OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
+            .Select(u => new { u.Id, u.FirstName, u.LastName })
+            .ToListAsync(ct);
+        var users = raw.Select(u => new AnalyticsUserDto(u.Id.ToString(), $"{u.FirstName} {u.LastName}".Trim())).ToList();
+        return Ok(new AnalyticsUsersDto(users));
+    }
+
+    [HttpGet("/api/analytics/users/{userId:guid}/weak-topics")]
+    public async Task<ActionResult<EnterpriseWeakTopicsDto>> GetUserWeakTopics(Guid userId, [FromQuery] int top = 5, CancellationToken ct = default)
+    {
+        var (error, tenantId) = await GuardAsync(ct);
+        if (error != null) return error;
+        if (!await _db.Users.AsNoTracking().AnyAsync(u => u.Id == userId && u.TenantId == tenantId, ct)) return NotFound();
+        // Échelle individuelle : seuil de fiabilité abaissé à ≥1 complétion.
+        return Ok(await ComputeWeakTopicsAsync(tenantId, top, ct, new HashSet<Guid> { userId }, minCompletions: 1));
+    }
+
+    [HttpGet("/api/analytics/users/{userId:guid}/risk")]
+    public async Task<ActionResult<EnterpriseRiskDto>> GetUserRisk(Guid userId, [FromQuery] int months = 6, CancellationToken ct = default)
+    {
+        var (error, tenantId) = await GuardAsync(ct);
+        if (error != null) return error;
+        if (!await _db.Users.AsNoTracking().AnyAsync(u => u.Id == userId && u.TenantId == tenantId, ct)) return NotFound();
+        return Ok(await ComputeRiskAsync(tenantId, months, ct, new HashSet<Guid> { userId }));
+    }
+
+    /// <summary>Profil individuel : compléments perso (complétions, score, activité, ancienneté).</summary>
+    [HttpGet("/api/analytics/users/{userId:guid}/profile")]
+    public async Task<ActionResult<IndividualProfileDto>> GetUserProfile(Guid userId, CancellationToken ct = default)
+    {
+        var (error, tenantId) = await GuardAsync(ct);
+        if (error != null) return error;
+
+        var user = await _db.Users.AsNoTracking()
+            .Where(u => u.Id == userId && u.TenantId == tenantId)
+            .Select(u => new { u.FirstName, u.LastName, u.CreatedAt, u.LastActivityAt, u.LastLoginAt })
+            .FirstOrDefaultAsync(ct);
+        if (user == null) return NotFound();
+
+        var comps = await (
+            from cc in _db.ChallengeCompletions.AsNoTracking()
+            join ch in _db.Challenges.AsNoTracking() on cc.ChallengeId equals ch.Id
+            where cc.TenantId == tenantId && cc.UserId == userId && !cc.IsDemo
+            select new { cc.ScorePercent, ch.Category }
+        ).ToListAsync(ct);
+
+        var completions = comps.Count;
+        var avgScore = completions > 0 ? (int)Math.Round(comps.Average(c => c.ScorePercent)) : 0;
+        var themesAttempted = comps.Where(c => !string.IsNullOrWhiteSpace(c.Category))
+            .Select(c => Norm(c.Category!)).Distinct().Count();
+
+        return Ok(new IndividualProfileDto(
+            $"{user.FirstName} {user.LastName}".Trim(),
+            completions, avgScore, themesAttempted,
+            user.LastActivityAt?.ToString("o"),
+            user.LastLoginAt?.ToString("o"),
+            user.CreatedAt.ToString("o")));
+    }
+
     // ═══════════════════════ Calculs partagés (scope optionnel équipe) ═════════
 
-    private async Task<EnterpriseWeakTopicsDto> ComputeWeakTopicsAsync(Guid tenantId, int top, CancellationToken ct, HashSet<Guid>? memberIds = null)
+    private async Task<EnterpriseWeakTopicsDto> ComputeWeakTopicsAsync(Guid tenantId, int top, CancellationToken ct, HashSet<Guid>? memberIds = null, int minCompletions = 3)
     {
         if (top < 1) top = 5;
         if (top > 20) top = 20;
+        if (minCompletions < 1) minCompletions = 1;
 
         var query =
             from cc in _db.ChallengeCompletions.AsNoTracking()
@@ -230,7 +301,7 @@ public class EnterpriseAnalyticsController : ControllerBase
                 var label = labelPerTheme.TryGetValue(g.Key, out var l) ? l : g.First().Cat.Trim();
                 return new WeakTopicDto(label, avgScore, completionRate, mastery, completions);
             })
-            .Where(t => t.Completions >= 3)
+            .Where(t => t.Completions >= minCompletions)
             .OrderBy(t => t.Mastery)
             .ToList();
 

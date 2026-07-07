@@ -122,4 +122,33 @@ Onglet Entreprise complet sur **vraies données** (points faibles combinés, ris
 - [x] Sécurité/RGPD : tenant JWT, scope équipe = membres du tenant uniquement (jointure TeamMemberships filtrée tenant), pas de N+1, pas de démo. Charte violet.
 - ⚠️ Test données réelles non faisable en local (équipes sans membres) — à valider une fois connecté sur un tenant avec équipes peuplées.
 
-## STOP — Individuel non traité (à faire dans une passe ultérieure).
+---
+
+# PASSE 3 — Onglet INDIVIDUEL
+
+## Inventaire
+- Individu = `User` du tenant. Données perso : `ChallengeCompletions` (score + catégorie via challenge), `RiskScoreHistories` (score/date), `LastLoginAt`/`LastActivityAt`/`CreatedAt`.
+- ✅ **Testable en local** : les 14 users de CyberMed ont des complétions + historique de risque (contrairement aux équipes vides).
+
+## Décisions validées
+- **Structure** : sélecteur de collaborateur → points faibles + risque + **profil perso**.
+- **Seuil points faibles individuel** = **≥ 1 complétion** (vs ≥3 en entreprise — échelle individuelle).
+- **Bloc profil** (au lieu de l'engagement org) : challenges complétés, score moyen, thèmes abordés, dernière activité, dernière connexion, membre depuis.
+
+## Journal
+1. ✅ **Backend** (`EnterpriseAnalyticsController` + DTOs `AnalyticsUserDto`/`IndividualProfileDto`) :
+   - `GET /api/analytics/users` → liste des users du tenant (id + nom) pour le sélecteur.
+   - `GET /api/analytics/users/{userId}/weak-topics` → réutilise `ComputeWeakTopicsAsync` avec `memberIds={userId}` et **`minCompletions:1`** (nouveau paramètre). `404` si user hors tenant.
+   - `GET /api/analytics/users/{userId}/risk` → `ComputeRiskAsync` scopé au user.
+   - `GET /api/analytics/users/{userId}/profile` → `IndividualProfileDto` (complétions, score moyen, nb thèmes distincts, dates). Filtré `TenantId + UserId`, jointure challenges pour la catégorie.
+   - `ComputeWeakTopicsAsync` refactoré : paramètre `minCompletions` (défaut 3).
+2. ✅ **Frontend** (`admin/analytics/page.tsx`) : onglet **Individuel** = sélecteur (recherche + liste avatars) → détail via `AnalyticsDetail` (points faibles + risque, mêmes composants) avec **`engagementOverride`** = bloc **Profil** (KPI perso + ligne dates). `AnalyticsDetail` rendu surchargeable pour le bloc engagement (skip du fetch org si override). États chargement/données/vide, charte violet, 0 hex.
+
+## Vérifications (passe Individuel)
+- [x] Build backend (Debug) **réussi** ; build frontend **✓ Compiled successfully** ; 0 hex.
+- [x] Runtime : 4 routes `api/analytics/users*` → **401 sans auth** (existent + protégées).
+- [x] Sécurité/RGPD : tenant JWT, scope user = user du tenant uniquement (`404` sinon), pas de N+1, pas de démo. Charte violet.
+
+## RAPPORT FINAL — 3 onglets Analytics
+Les **3 onglets** sont livrés sur vraies données : **Entreprise** (points faibles, risque, engagement, export CSV), **Groupe** (classement des équipes + drill-down), **Individuel** (sélecteur + points faibles + risque + profil). Logique factorisée (`Compute*Async` scopables par `memberIds`, `AnalyticsDetail` réutilisé partout). Sécurité (JWT/[Authorize]/DTO/pas de N+1/pas de démo), charte violet, RGPD respectés. 2 builds OK. 100% LOCAL, pas de push.
+- ⚠️ Reste : validation visuelle sur vraies données connecté (Individuel testable local ; Groupe nécessite des équipes peuplées). PDF export = TODO. Doublon ancien `/api/analytics/overview` à rationaliser.
