@@ -62,7 +62,7 @@ Perte potentielle évitée (estimation) /an = N × p × C × h × r × t
 | Param | Défaut | Source / justification |
 |---|---|---|
 | p | **0,10** (10 %/an) | Proxy prudent par salarié (rapports FR : ~½ des entreprises touchées/an ; facteur humain dominant). |
-| C | **50 000 €** | PME France (Hiscox Cyber Readiness, ANSSI panorama). IBM Cost of a Data Breach 2024 = 4,88 M$ = grands comptes → écarté comme défaut PME. |
+| C | **466 000 €** _(maj 2026-07-07)_ | Coût moyen d'une cyberattaque pour une PME française ≈ 466 000 € (études sectorielles France, tous coûts confondus). Remplace l'ancien défaut prudent 50 000 €. Reste éditable en UI. |
 | h | **68 %** | Verizon DBIR 2024 : 68 % des compromissions impliquent un élément humain non malveillant. |
 | r | **25 %** | Fourchette basse des études sur la baisse de susceptibilité au phishing post-formation. Disclaimer : indicatif, non garanti. |
 | t | *calculé* | participation (% users ≥1 complétion) × (CRI moyen/100). Vraie donnée du tenant. |
