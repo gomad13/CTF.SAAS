@@ -15,7 +15,7 @@ import VisionGauge from "@/components/vision/VisionGauge";
 import {
     AlertTriangle, Users2, UserCheck, UserX, CheckCircle2, Activity,
     Download, BarChart3, Lock, ArrowLeft, ChevronRight,
-    ShieldCheck, ShieldAlert, Euro, Settings2, Info, RotateCcw, GraduationCap,
+    ShieldCheck, ShieldAlert, Euro, Settings2, Info, RotateCcw, GraduationCap, Fingerprint,
 } from "lucide-react";
 
 type WeakTopic = { theme: string; avgScore: number; completionRate: number; mastery: number; completions: number };
@@ -31,6 +31,8 @@ type Profile = { name: string; completions: number; avgScore: number; themesAtte
 type FinancialPoint = { label: string; completions: number; cumulativeParticipation: number; cri: number; coverage: number };
 type FinancialData = { employeeCount: number; participationRate: number; avgCri: number; coverage: number; totalCompletions: number; trend: FinancialPoint[] };
 type Hypotheses = { p: number; C: number; h: number; r: number };
+type BehaviorRow = { behavior: string; errorRate: number; avgScore: number; attempts: number; failedAttempts: number };
+type BehaviorErrors = { behaviors: BehaviorRow[]; totalAttempts: number };
 
 function GlassCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
     return (
@@ -90,10 +92,70 @@ export default function AnalyticsPage() {
                     ))}
                 </div>
 
-                {tab === "entreprise" && <AnalyticsDetail basePath="/api/analytics/enterprise" keyPrefix="ent" showExport />}
+                {tab === "entreprise" && <EntrepriseTab />}
                 {tab === "groupe" && <GroupeTab />}
                 {tab === "individuel" && <IndividuelTab />}
                 {tab === "financier" && <FinancialTab />}
+            </div>
+        </div>
+    );
+}
+
+// ── Onglet ENTREPRISE : détail standard + erreurs par comportement à risque ───
+function EntrepriseTab() {
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <AnalyticsDetail basePath="/api/analytics/enterprise" keyPrefix="ent" showExport />
+            <BehaviorBlock />
+        </div>
+    );
+}
+
+function behaviorColor(e: number) { return e >= 60 ? "var(--danger)" : e >= 40 ? "var(--warning)" : "var(--v-accent)"; }
+
+function BehaviorBlock() {
+    const q = useQuery<BehaviorErrors>({ queryKey: ["behaviors"], queryFn: () => apiFetch("/api/analytics/enterprise/behaviors") });
+    const data = q.data;
+    return (
+        <Reveal>
+            <GlassCard>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                    <span style={{ display: "inline-flex", width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", background: "var(--v-accent-subtle)", color: "var(--v-cyan)" }}>
+                        <Fingerprint size={18} />
+                    </span>
+                    <div>
+                        <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Erreurs par comportement à risque</h2>
+                        <p style={{ fontSize: 12, color: "var(--v-text-3)" }}>Où vos équipes se trompent le plus (taux d&apos;échec = complétions sous 50&nbsp;%)</p>
+                    </div>
+                </div>
+                {q.isLoading ? <div style={{ marginTop: 16 }}><SkelBlock h={200} /></div>
+                    : (data && data.behaviors.length > 0)
+                        ? <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+                            {data.behaviors.map(b => <BehaviorRowCard key={b.behavior} b={b} />)}
+                        </div>
+                        : <EmptyState label="Pas encore de complétions rattachées à un comportement pour établir un classement." />}
+            </GlassCard>
+        </Reveal>
+    );
+}
+
+function BehaviorRowCard({ b }: { b: BehaviorRow }) {
+    const color = behaviorColor(b.errorRate);
+    return (
+        <div style={{ display: "flex", alignItems: "center", gap: 14, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 14, padding: "12px 16px" }}>
+            <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 10, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, background: "color-mix(in srgb, " + color + " 16%, transparent)", color }}>{b.errorRate}%</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.behavior}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color, flexShrink: 0 }}>{b.errorRate >= 60 ? "Critique" : b.errorRate >= 40 ? "À surveiller" : "Maîtrisé"}</span>
+                </div>
+                <div style={{ height: 6, background: "var(--v-surface)", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ width: `${b.errorRate}%`, height: "100%", background: color, borderRadius: 999 }} />
+                </div>
+                <div style={{ display: "flex", gap: 14, marginTop: 6, fontSize: 11, color: "var(--v-text-3)", flexWrap: "wrap" }}>
+                    <span>Score moyen&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{b.avgScore}%</b></span>
+                    <span><b style={{ color: "var(--v-text-2)" }}>{b.failedAttempts}</b>/{b.attempts} échec{b.failedAttempts > 1 ? "s" : ""}</span>
+                </div>
             </div>
         </div>
     );

@@ -125,4 +125,33 @@ Pas de champ dédié. Proposition : **regrouper `Challenge.Category` en buckets 
 
 **Vérifs** : build backend **OK** (0 err/warn) ; frontend `tsc --noEmit` **OK**, `npm run build` **OK**, `eslint` **0** ; **0 hex en dur** ; runtime : `/api/analytics/enterprise/financial` → **401** sans auth, health 200, aucune erreur de démarrage. Sécurité/charte/RGPD OK. → **commit local**.
 
-**Reste** : Part B (erreurs par comportement, mapping validé → à coder).
+### PASSE B — Bloc « Erreurs par comportement à risque » (TERMINÉ)
+**Backend** :
+- DTOs `BehaviorRowDto` + `BehaviorErrorsDto`.
+- Endpoint `GET /api/analytics/enterprise/behaviors` + `ComputeBehaviorsAsync` (join complétions→challenges, tenant JWT, `!IsDemo`, `AsNoTracking`, pas de N+1).
+- **Mapping en code** `BehaviorOf(category)` par **mots-clés** (robuste aux ~59 variantes) → buckets : Phishing / e-mails piégés · Mots de passe & authentification · Ingénierie sociale & fraude · Sécurité physique / poste de travail · Données sensibles & conformité · Autres.
+- **Taux d'échec** = complétions `ScorePercent < 50` / total, par comportement. Tri décroissant (pire d'abord).
+- ⚠️ Limite documentée : USB / verrouillage session non tracés séparément → mots-clés `usb`/`verrouill`/`session` rattachés au bucket « Sécurité physique / poste de travail » (pas de bucket distinct sans nouveau champ en base).
+
+**Frontend** (onglet **Entreprise**, sous le détail standard) :
+- Bloc « Erreurs par comportement à risque » : lignes triées pire→meilleur, badge taux d'échec + barre **code couleur charte** (danger ≥60 / alerte ≥40 / accent <40), libellé Critique/À surveiller/Maîtrisé, score moyen + n échecs. Lisible en 3 s. 3 états, animé (Reveal).
+
+**Vérifs** : build backend **OK** ; `tsc`/`build`/`eslint` **OK** ; 0 hex ; route `/behaviors` → **401**. Sécurité/charte/RGPD OK.
+
+---
+
+## 6. RAPPORT FINAL (§5)
+Les **2 ajouts** demandés sont livrés en local, séparément et testés :
+- **A. Onglet « Rapport financier »** : KPI phare *perte potentielle évitée (estimation)* (compteur € animé), 3 graphes animés, panneau hypothèses **p/C/h/r éditable** (recalcul live), **encart méthodo + disclaimer** (sources citées), **export CSV** avec hypothèses. Modèle `N×p×C×h×r×t` — **N & t = vraies données**, p/C/h/r = **hypothèses clairement étiquetées** (jamais présentées comme des faits). Vocabulaire prudent partout.
+- **B. Erreurs par comportement à risque** : taux d'échec réel par comportement (mapping `Category`→bucket en code, validé), code couleur charte, décisionnel, onglet Entreprise.
+
+**Conformité** : `[Authorize(admin,SuperAdmin)]` + tenant JWT + DTO + `AsNoTracking` + pas de N+1 + `!IsDemo` (pas de fallback démo) ; charte violet stricte, **0 hex en dur**, **0 vert cyber**, animations sobres (`prefers-reduced-motion`), contraste AA, **3 états** partout ; RGPD (isolation tenant, aucune donnée perso hors périmètre). 2 builds OK à chaque passe. **100 % LOCAL — aucun push, aucun déploiement.**
+
+**Notes / réserves** :
+- Validation visuelle sur vraies données à faire **connecté** (CyberMed a des complétions + CRI). Le calcul financier bouge avec l'effectif et la couverture réelle.
+- Hypothèses financières **in-memory** (réinit au reload) — persistance serveur = évolution possible (migration).
+- USB / verrouillage session non isolables sans champ `RiskBehavior` en base (migration + backfill) — à décider ultérieurement.
+- **PDF** = TODO (CSV livré).
+
+## 7. Journal (suite)
+- 2026-07-07 : Part A commitée (`8ccceab`). Part B codée + testée → commit. **STOP** (critère d'arrêt atteint).

@@ -47,6 +47,17 @@ public record GroupRowDto(
 );
 public record GroupsComparisonDto(List<GroupRowDto> Groups);
 
+// ── Onglet ENTREPRISE — erreurs par COMPORTEMENT à risque (décisionnel) ───
+/// <summary>Un comportement à risque (bucket de Challenge.Category) et son taux d'échec réel.</summary>
+public record BehaviorRowDto(
+    string Behavior,
+    int ErrorRate,       // % de complétions échouées (score < 50) sur ce comportement
+    int AvgScore,        // score moyen (0-100)
+    int Attempts,        // nb de complétions rattachées
+    int FailedAttempts
+);
+public record BehaviorErrorsDto(List<BehaviorRowDto> Behaviors, int TotalAttempts);
+
 // ── Onglet RAPPORT FINANCIER (estimation de pertes potentielles ÉVITÉES) ──
 /// <summary>Un point mensuel : activité réelle + couverture réelle de formation (base d'ancrage de l'estimation).</summary>
 public record FinancialTrendPointDto(

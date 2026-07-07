@@ -106,6 +106,15 @@ public class EnterpriseAnalyticsController : ControllerBase
         return File(bytes, "text/csv", $"analytics-entreprise-{DateTime.UtcNow:yyyyMMdd}.csv");
     }
 
+    /// <summary>Taux d'échec par COMPORTEMENT à risque (buckets de Challenge.Category). VRAIES données du tenant.</summary>
+    [HttpGet("behaviors")]
+    public async Task<ActionResult<BehaviorErrorsDto>> GetBehaviors(CancellationToken ct = default)
+    {
+        var (error, tenantId) = await GuardAsync(ct);
+        if (error != null) return error;
+        return Ok(await ComputeBehaviorsAsync(tenantId, ct));
+    }
+
     // ═══════════════════════════ RAPPORT FINANCIER ════════════════════════════
 
     /// <summary>Base RÉELLE du rapport financier (effectif, participation, CRI mensuel). Les hypothèses p/C/h/r sont appliquées côté client.</summary>
@@ -356,6 +365,49 @@ public class EnterpriseAnalyticsController : ControllerBase
         }
 
         return new FinancialAnalyticsDto(employeeCount, participationRate, avgCri, coverage, comps.Count, trend);
+    }
+
+    /// <summary>Rattache une Category (texte libre) à un comportement à risque, par mots-clés (robuste aux variantes).</summary>
+    private static string BehaviorOf(string category)
+    {
+        var c = category.Trim().ToLowerInvariant();
+        bool Has(params string[] ks) => ks.Any(k => c.Contains(k));
+        if (Has("phish", "email", "e-mail", "mail", "macro", "pièce jointe", "piece jointe", "domaine", "conversation", "arnaque web"))
+            return "Phishing / e-mails piégés";
+        if (Has("mot de passe", "password", "authentif", "mfa", "2fa", "passkey", "credential"))
+            return "Mots de passe & authentification";
+        if (Has("ingénierie", "ingenierie", "social", "président", "president", "fovi", "facture", "deepfake", "wire", "swift", "fraude", "usurpation"))
+            return "Ingénierie sociale & fraude";
+        if (Has("physique", "hygiène", "hygiene", "atm", "usb", "verrouill", "session"))
+            return "Sécurité physique / poste de travail";
+        if (Has("rgpd", "hds", "téléconsultation", "teleconsultation", "aml", "lcb", "kyc", "données", "donnees", "politique", "procédure", "procedure", "sensible"))
+            return "Données sensibles & conformité";
+        return "Autres / non classé";
+    }
+
+    /// <summary>Taux d'échec (score &lt; 50) par comportement, du plus faible au plus fort. Aucune donnée démo.</summary>
+    private async Task<BehaviorErrorsDto> ComputeBehaviorsAsync(Guid tenantId, CancellationToken ct)
+    {
+        var rows = await (
+            from cc in _db.ChallengeCompletions.AsNoTracking()
+            join ch in _db.Challenges.AsNoTracking() on cc.ChallengeId equals ch.Id
+            where cc.TenantId == tenantId && !cc.IsDemo && ch.Category != null && ch.Category != ""
+            select new { cc.ScorePercent, Cat = ch.Category! }
+        ).ToListAsync(ct);
+
+        var behaviors = rows.GroupBy(r => BehaviorOf(r.Cat))
+            .Select(g =>
+            {
+                var attempts = g.Count();
+                var failed = g.Count(x => x.ScorePercent < 50);
+                var avg = (int)Math.Round(g.Average(x => x.ScorePercent));
+                var errorRate = (int)Math.Round(100.0 * failed / attempts);
+                return new BehaviorRowDto(g.Key, errorRate, avg, attempts, failed);
+            })
+            .OrderByDescending(b => b.ErrorRate).ThenByDescending(b => b.Attempts)
+            .ToList();
+
+        return new BehaviorErrorsDto(behaviors, rows.Count);
     }
 
     private async Task<EnterpriseRiskDto> ComputeRiskAsync(Guid tenantId, int months, CancellationToken ct, HashSet<Guid>? memberIds = null)
