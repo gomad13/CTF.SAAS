@@ -1,150 +1,235 @@
 "use client";
 
+// Analytics admin — 3 onglets Entreprise / Groupe / Individuel.
+// Cette passe : onglet ENTREPRISE uniquement (vraies données du tenant). Groupe/Individuel = placeholder.
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, TrendingUp, Users2, CheckCircle2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import Reveal from "@/components/Reveal";
 import { Stagger, StaggerItem } from "@/components/Stagger";
-import CountUp from "@/components/CountUp";
+import VisionKpiCard from "@/components/vision/VisionKpiCard";
+import VisionAreaChart from "@/components/vision/VisionAreaChart";
+import VisionGauge from "@/components/vision/VisionGauge";
+import {
+    AlertTriangle, Users2, UserCheck, UserX, CheckCircle2, Activity,
+    Download, BarChart3, Lock,
+} from "lucide-react";
 
-type Kpis = {
-    activeUsers7d: number;
-    activeUsers30d: number;
-    totalCompletions: number;
-    averageScore: number;
-    averageCompletionPercent: number;
-};
-type ActivityPoint = { date: string; completions: number };
-type PathStat = { pathId: string; title: string; completions: number; averageScore: number };
-type TypeStat = { type: string; completions: number };
-type Overview = {
-    kpis: Kpis;
-    activity: ActivityPoint[];
-    byPath: PathStat[];
-    byType: TypeStat[];
-};
+type WeakTopic = { theme: string; avgScore: number; completionRate: number; mastery: number; completions: number };
+type WeakTopics = { topics: WeakTopic[]; themesEvaluated: number };
+type RiskPoint = { label: string; value: number };
+type Risk = { globalScore: number | null; band: string; trend: RiskPoint[]; usersScored: number };
+type Engagement = { totalUsers: number; active7d: number; active30d: number; neverConnected: number; participationRate: number; totalCompletions: number; avgCompletionsPerActiveUser: number };
 
-const TYPE_LABELS: Record<string, string> = {
-    multichoice: "Multichoice",
-    ceo_fraud: "CEO Fraud",
-    mailbox: "Mailbox",
-    password_quiz: "Password Quiz",
-    phishing_ai: "Phishing AI",
-    free_text: "Texte libre",
-};
+function GlassCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+    return (
+        <div style={{ background: "color-mix(in srgb, var(--v-surface) 82%, transparent)", backdropFilter: "blur(14px)", border: "1px solid var(--v-border)", borderRadius: 20, boxShadow: "0 8px 30px rgba(0,0,0,0.25)", padding: 24, ...style }}>
+            {children}
+        </div>
+    );
+}
+
+function EmptyState({ label }: { label: string }) {
+    return <div style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 13, color: "var(--v-text-3)", padding: 16 }}>{label}</div>;
+}
+function SkelBlock({ h }: { h: number }) {
+    return <div style={{ height: h, borderRadius: 16, background: "var(--v-surface-2)", opacity: 0.6 }} />;
+}
 
 export default function AnalyticsPage() {
-    const [days, setDays] = useState(30);
+    const [tab, setTab] = useState<"entreprise" | "groupe" | "individuel">("entreprise");
+
     const statusQ = useQuery<{ isEnabled: boolean }>({
         queryKey: ["analytics", "status"],
         queryFn: () => apiFetch("/api/analytics/status"),
-        staleTime: 30_000,
-    });
-    const overviewQ = useQuery<Overview>({
-        queryKey: ["analytics", "overview", days],
-        queryFn: () => apiFetch<Overview>(`/api/analytics/overview?days=${days}`),
-        enabled: statusQ.data?.isEnabled === true,
-        staleTime: 60_000,
     });
 
-    if (statusQ.isLoading) {
-        return <div className="mx-auto max-w-6xl px-6 py-8"><div className="h-40 animate-pulse rounded-xl bg-surface/5" /></div>;
-    }
-    if (!statusQ.data?.isEnabled) {
+    if (statusQ.data && !statusQ.data.isEnabled) {
         return (
-            <div className="mx-auto max-w-3xl px-6 py-12 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface/10 text-fg-muted">
-                    <BarChart3 size={22} />
+            <div className="vision-dashboard" style={{ minHeight: "100%" }}>
+                <div style={{ maxWidth: 1160, margin: "0 auto", padding: "48px 20px" }}>
+                    <GlassCard style={{ textAlign: "center", padding: 48 }}>
+                        <Lock size={28} style={{ color: "var(--v-text-3)" }} />
+                        <h1 style={{ marginTop: 12, fontSize: 20, fontWeight: 700, color: "var(--v-text)" }}>Analytics désactivés</h1>
+                        <p style={{ marginTop: 6, fontSize: 14, color: "var(--v-text-2)" }}>Ce module n&apos;est pas activé pour votre organisation.</p>
+                    </GlassCard>
                 </div>
-                <h1 className="mt-4 text-xl font-bold text-fg-heading">Analytics désactivés</h1>
-                <p className="mt-2 text-sm text-fg-muted">Activez le mode « Analytics avancés » depuis les paramètres d&apos;administration.</p>
             </div>
         );
     }
 
-    const o = overviewQ.data;
-    const maxActivity = Math.max(1, ...(o?.activity?.map(a => a.completions) ?? [0]));
-
     return (
-        <Reveal className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h1 className="text-2xl font-bold text-fg-heading">Analytics</h1>
-                    <p className="mt-1 text-sm text-fg-muted">Usage détaillé de la plateforme par votre organisation.</p>
-                </div>
-                <select
-                    value={days}
-                    onChange={e => setDays(parseInt(e.target.value, 10))}
-                    className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-body transition-colors duration-200"
-                >
-                    <option value={7}>7 jours</option>
-                    <option value={30}>30 jours</option>
-                    <option value={90}>90 jours</option>
-                </select>
-            </div>
+        <div className="vision-dashboard" style={{ minHeight: "100%" }}>
+            <div style={{ maxWidth: 1160, margin: "0 auto", padding: "24px 20px 80px" }}>
+                <Reveal>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                        <BarChart3 size={22} style={{ color: "var(--v-accent)" }} />
+                        <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--v-text)", letterSpacing: "-0.02em" }}>Analytics</h1>
+                    </div>
+                </Reveal>
 
-            <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <StaggerItem><Kpi label="Actifs 7j" value={o ? <CountUp value={o.kpis.activeUsers7d} /> : "—"} icon={<Users2 size={16} />} /></StaggerItem>
-                <StaggerItem><Kpi label="Actifs 30j" value={o ? <CountUp value={o.kpis.activeUsers30d} /> : "—"} icon={<Users2 size={16} />} /></StaggerItem>
-                <StaggerItem><Kpi label="Complétions" value={o ? <CountUp value={o.kpis.totalCompletions} /> : "—"} icon={<CheckCircle2 size={16} />} /></StaggerItem>
-                <StaggerItem><Kpi label="Score moyen" value={o?.kpis.averageScore ? <CountUp value={o.kpis.averageScore} suffix="%" /> : "—"} icon={<TrendingUp size={16} />} /></StaggerItem>
-            </Stagger>
-
-            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">Activité ({days} jours)</h2>
-                <div className="mt-4 flex h-40 items-end gap-1">
-                    {(o?.activity ?? []).map((p, i) => (
-                        <div key={i} className="flex-1 rounded-t bg-primary transition-colors duration-200"
-                            style={{ height: `${Math.max(4, (p.completions / maxActivity) * 100)}%` }}
-                            title={`${new Date(p.date).toLocaleDateString("fr-FR")} — ${p.completions}`}
-                        />
+                <div style={{ display: "flex", gap: 8, marginBottom: 24, borderBottom: "1px solid var(--v-border)", overflowX: "auto" }}>
+                    {([["entreprise", "Entreprise"], ["groupe", "Groupe"], ["individuel", "Individuel"]] as const).map(([key, label]) => (
+                        <button key={key} onClick={() => setTab(key)} style={{
+                            padding: "10px 18px", marginBottom: "-1px", fontSize: 14, background: "transparent", border: "none", cursor: "pointer",
+                            fontWeight: tab === key ? 600 : 500,
+                            color: tab === key ? "var(--v-cyan)" : "var(--v-text-3)",
+                            borderBottom: tab === key ? "2px solid var(--v-cyan)" : "2px solid transparent",
+                        }}>{label}</button>
                     ))}
-                    {(!o || o.activity.length === 0) && (
-                        <p className="m-auto text-sm text-fg-muted">Aucune donnée sur la période.</p>
-                    )}
                 </div>
-            </section>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-                    <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">Complétions par parcours</h2>
-                    <ul className="mt-4 flex flex-col gap-3">
-                        {(o?.byPath ?? []).map(p => (
-                            <li key={p.pathId} className="flex items-center justify-between text-sm transition-colors hover:bg-surface-2">
-                                <span className="truncate text-fg-heading">{p.title}</span>
-                                <span className="ml-3 shrink-0 font-semibold text-primary">{p.completions}</span>
-                            </li>
-                        ))}
-                        {(o?.byPath?.length ?? 0) === 0 && <li className="text-sm text-fg-muted">Aucune donnée.</li>}
-                    </ul>
-                </section>
-
-                <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-                    <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">Répartition par type</h2>
-                    <ul className="mt-4 flex flex-col gap-3">
-                        {(o?.byType ?? []).map(t => (
-                            <li key={t.type} className="flex items-center justify-between text-sm transition-colors hover:bg-surface-2">
-                                <span className="text-fg-heading">{TYPE_LABELS[t.type] ?? t.type}</span>
-                                <span className="ml-3 shrink-0 font-semibold text-primary">{t.completions}</span>
-                            </li>
-                        ))}
-                        {(o?.byType?.length ?? 0) === 0 && <li className="text-sm text-fg-muted">Aucune donnée.</li>}
-                    </ul>
-                </section>
+                {tab === "entreprise" && <EntrepriseTab />}
+                {tab !== "entreprise" && (
+                    <GlassCard style={{ textAlign: "center", padding: 56 }}>
+                        <Activity size={26} style={{ color: "var(--v-text-3)" }} />
+                        <h2 style={{ marginTop: 12, fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Vue {tab === "groupe" ? "Groupe" : "Individuelle"}</h2>
+                        <p style={{ marginTop: 6, fontSize: 14, color: "var(--v-text-2)" }}>Bientôt disponible.</p>
+                    </GlassCard>
+                )}
             </div>
-        </Reveal>
+        </div>
     );
 }
 
-function Kpi({ label, value, icon }: { label: string; value: React.ReactNode; icon: React.ReactNode }) {
+function EntrepriseTab() {
+    const [months, setMonths] = useState(6);
+    const [exporting, setExporting] = useState(false);
+
+    const weakQ = useQuery<WeakTopics>({ queryKey: ["ent", "weak"], queryFn: () => apiFetch("/api/analytics/enterprise/weak-topics?top=5") });
+    const riskQ = useQuery<Risk>({ queryKey: ["ent", "risk", months], queryFn: () => apiFetch(`/api/analytics/enterprise/risk?months=${months}`) });
+    const engQ = useQuery<Engagement>({ queryKey: ["ent", "eng"], queryFn: () => apiFetch("/api/analytics/enterprise/engagement") });
+
+    async function handleExport() {
+        setExporting(true);
+        try {
+            const res = await fetch(`/api/analytics/enterprise/export?months=${months}`, { credentials: "include" });
+            if (!res.ok) throw new Error("export");
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = "analytics-entreprise.csv"; a.click();
+            URL.revokeObjectURL(url);
+        } catch { /* silencieux */ } finally { setExporting(false); }
+    }
+
+    const risk = riskQ.data;
+    const eng = engQ.data;
+
     return (
-        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-medium uppercase tracking-wider text-fg-muted">{label}</span>
-                <span className="text-fg-muted" aria-hidden>{icon}</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Barre période + export */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <span style={{ fontSize: 12, color: "var(--v-text-3)" }}>Période :</span>
+                    {[3, 6, 12].map(m => (
+                        <button key={m} onClick={() => setMonths(m)} style={{
+                            fontSize: 12, padding: "5px 12px", borderRadius: 8, cursor: "pointer",
+                            border: "1px solid " + (months === m ? "var(--v-accent)" : "var(--v-border)"),
+                            background: months === m ? "var(--v-accent-subtle)" : "transparent",
+                            color: months === m ? "var(--v-cyan)" : "var(--v-text-2)",
+                        }}>{m} mois</button>
+                    ))}
+                </div>
+                <button onClick={handleExport} disabled={exporting} style={{
+                    display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600,
+                    padding: "8px 16px", borderRadius: 10, cursor: exporting ? "default" : "pointer",
+                    background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)",
+                    border: "none", boxShadow: "0 6px 16px color-mix(in srgb, var(--v-accent) 40%, transparent)", opacity: exporting ? 0.7 : 1,
+                }}>
+                    <Download size={15} /> {exporting ? "Export…" : "Exporter (CSV)"}
+                </button>
             </div>
-            <div className="mt-2 text-2xl font-bold text-fg-heading">{value}</div>
+
+            {/* BLOC PHARE — Points faibles à renforcer */}
+            <Reveal>
+                <GlassCard style={{ borderColor: "color-mix(in srgb, var(--danger) 40%, var(--v-border))" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                        <span style={{ display: "inline-flex", width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", background: "var(--danger-subtle)", color: "var(--danger)" }}>
+                            <AlertTriangle size={18} />
+                        </span>
+                        <div>
+                            <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Points faibles à renforcer</h2>
+                            <p style={{ fontSize: 12, color: "var(--v-text-3)" }}>Thèmes où votre organisation est la plus faible (score × taux de complétion)</p>
+                        </div>
+                    </div>
+                    {weakQ.isLoading ? <div style={{ marginTop: 16 }}><SkelBlock h={180} /></div>
+                        : (weakQ.data && weakQ.data.topics.length > 0)
+                            ? <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+                                {weakQ.data.topics.map((t, i) => <WeakRow key={t.theme} rank={i + 1} t={t} />)}
+                            </div>
+                            : <EmptyState label="Pas encore assez de données par thème (≥ 3 complétions requises) pour identifier des points faibles." />}
+                </GlassCard>
+            </Reveal>
+
+            {/* Risque cyber global + courbe */}
+            <Reveal>
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <div className="lg:col-span-1">
+                        <GlassCard>
+                            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 4 }}>Risque cyber global</h2>
+                            <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 8 }}>{risk ? `${risk.usersScored} utilisateur${risk.usersScored > 1 ? "s" : ""} évalué${risk.usersScored > 1 ? "s" : ""}` : " "}</p>
+                            {riskQ.isLoading ? <SkelBlock h={200} />
+                                : (risk && risk.globalScore != null)
+                                    ? <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+                                        <VisionGauge value={risk.globalScore} band={risk.band} />
+                                    </div>
+                                    : <EmptyState label="Aucun score de risque calculé pour le moment." />}
+                        </GlassCard>
+                    </div>
+                    <div className="lg:col-span-2">
+                        <GlassCard>
+                            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 4 }}>Progression du risque</h2>
+                            <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 8 }}>{months} derniers mois</p>
+                            {riskQ.isLoading ? <SkelBlock h={220} />
+                                : (risk && risk.trend.length >= 2)
+                                    ? <VisionAreaChart data={risk.trend} domainMax={100} height={220} />
+                                    : <EmptyState label="Historique insuffisant pour tracer une courbe." />}
+                        </GlassCard>
+                    </div>
+                </div>
+            </Reveal>
+
+            {/* Engagement */}
+            <Reveal>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 12 }}>Engagement</h2>
+                {engQ.isLoading ? (
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        {[0, 1, 2, 3].map(i => <SkelBlock key={i} h={112} />)}
+                    </div>
+                ) : (
+                    <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4" gap={0.06}>
+                        <StaggerItem><VisionKpiCard value={eng?.active7d ?? 0} label="Actifs 7 jours" icon={UserCheck} hint={eng ? `sur ${eng.totalUsers}` : ""} /></StaggerItem>
+                        <StaggerItem><VisionKpiCard value={eng?.active30d ?? 0} label="Actifs 30 jours" icon={Users2} /></StaggerItem>
+                        <StaggerItem><VisionKpiCard value={eng?.participationRate ?? 0} suffix="%" label="Participation" icon={CheckCircle2} hint="ont complété ≥1 challenge" /></StaggerItem>
+                        <StaggerItem><VisionKpiCard value={eng?.neverConnected ?? 0} label="Jamais connectés" icon={UserX} /></StaggerItem>
+                    </Stagger>
+                )}
+            </Reveal>
+        </div>
+    );
+}
+
+function WeakRow({ rank, t }: { rank: number; t: WeakTopic }) {
+    const color = t.mastery < 40 ? "var(--danger)" : t.mastery < 60 ? "var(--warning)" : "var(--v-accent)";
+    return (
+        <div style={{ display: "flex", alignItems: "center", gap: 14, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 14, padding: "12px 16px" }}>
+            <span style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, background: "color-mix(in srgb, " + color + " 16%, transparent)", color }}>{rank}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.theme}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color, flexShrink: 0 }}>{t.mastery}<span style={{ fontSize: 11, color: "var(--v-text-3)" }}> /100 maîtrise</span></span>
+                </div>
+                <div style={{ height: 6, background: "var(--v-surface)", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ width: `${t.mastery}%`, height: "100%", background: color, borderRadius: 999 }} />
+                </div>
+                <div style={{ display: "flex", gap: 14, marginTop: 6, fontSize: 11, color: "var(--v-text-3)" }}>
+                    <span>Score moyen&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{t.avgScore}%</b></span>
+                    <span>Complétion&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{t.completionRate}%</b></span>
+                    <span>{t.completions} complétion{t.completions > 1 ? "s" : ""}</span>
+                </div>
+            </div>
         </div>
     );
 }
