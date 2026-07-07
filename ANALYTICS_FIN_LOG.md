@@ -63,7 +63,7 @@ Perte potentielle évitée (estimation) /an = N × p × C × h × r × t
 |---|---|---|
 | p | **0,10** (10 %/an) | Proxy prudent par salarié (rapports FR : ~½ des entreprises touchées/an ; facteur humain dominant). |
 | C | **466 000 €** _(maj 2026-07-07)_ | Coût moyen d'une cyberattaque pour une PME française ≈ 466 000 € (études sectorielles France, tous coûts confondus). Remplace l'ancien défaut prudent 50 000 €. Reste éditable en UI. |
-| h | **68 %** | Verizon DBIR 2024 : 68 % des compromissions impliquent un élément humain non malveillant. |
+| h | **95 %** _(maj 2026-07-07)_ | World Economic Forum : ~95 % des violations de données ont une origine humaine. Remplace l'ancien défaut 68 % (Verizon DBIR). Reste éditable en UI. |
 | r | **25 %** | Fourchette basse des études sur la baisse de susceptibilité au phishing post-formation. Disclaimer : indicatif, non garanti. |
 | t | *calculé* | participation (% users ≥1 complétion) × (CRI moyen/100). Vraie donnée du tenant. |
 

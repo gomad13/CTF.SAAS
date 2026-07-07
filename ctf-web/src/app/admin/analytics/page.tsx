@@ -409,7 +409,7 @@ function IndividuelTab() {
 
 // ── Onglet RAPPORT FINANCIER : perte potentielle évitée (ESTIMATION) ──────────
 // N/t = vraies données du tenant ; p/C/h/r = hypothèses éditables (jamais présentées comme des faits).
-const FIN_DEFAULTS: Hypotheses = { p: 10, C: 466000, h: 68, r: 25 };
+const FIN_DEFAULTS: Hypotheses = { p: 10, C: 466000, h: 95, r: 25 };
 const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 
 /** Compteur animé formaté (respecte prefers-reduced-motion). */
@@ -621,10 +621,10 @@ function MethodoNote() {
                 </p>
                 <ul style={{ margin: "0 0 8px 0", paddingLeft: 18, listStyle: "disc" }}>
                     <li><b style={{ color: "var(--v-text)" }}>N</b> = salariés enregistrés, <b style={{ color: "var(--v-text)" }}>t</b> = couverture réelle de formation (participation × CRI) — <b style={{ color: "var(--v-cyan)" }}>vraies données de votre organisation</b>.</li>
-                    <li><b style={{ color: "var(--v-text)" }}>p, C, h, r</b> = hypothèses que vous ajustez ci-dessus. Valeurs par défaut : p&nbsp;10&nbsp;%/an, C&nbsp;466&nbsp;000&nbsp;€, h&nbsp;68&nbsp;%, r&nbsp;25&nbsp;%.</li>
+                    <li><b style={{ color: "var(--v-text)" }}>p, C, h, r</b> = hypothèses que vous ajustez ci-dessus. Valeurs par défaut : p&nbsp;10&nbsp;%/an, C&nbsp;466&nbsp;000&nbsp;€, h&nbsp;95&nbsp;%, r&nbsp;25&nbsp;%.</li>
                 </ul>
                 <p style={{ marginBottom: 8, fontSize: 12, color: "var(--v-text-3)" }}>
-                    Repères publics indicatifs&nbsp;: coût moyen d&apos;une cyberattaque pour une <b style={{ color: "var(--v-text-2)" }}>PME française ≈ 466&nbsp;000&nbsp;€</b> (études sectorielles France, ordre de grandeur tous coûts confondus) ; Verizon <i>DBIR 2024</i> (~68&nbsp;% des compromissions impliquent le facteur humain) ; IBM <i>Cost of a Data Breach 2024</i>. Ajustez à votre secteur et à votre taille.
+                    Repères publics indicatifs&nbsp;: coût moyen d&apos;une cyberattaque pour une <b style={{ color: "var(--v-text-2)" }}>PME française ≈ 466&nbsp;000&nbsp;€</b> (études sectorielles France, tous coûts confondus) ; <b style={{ color: "var(--v-text-2)" }}>World Economic Forum ≈ 95&nbsp;%</b> des violations de données ont une origine humaine ; IBM <i>Cost of a Data Breach 2024</i>. Ajustez à votre secteur et à votre taille.
                 </p>
                 <p style={{ fontSize: 12, color: "var(--warning)", fontWeight: 500 }}>
                     ⚠ Il s&apos;agit d&apos;une <b>estimation indicative</b> destinée à objectiver un ordre de grandeur, <b>pas d&apos;une mesure comptable ni d&apos;une garantie</b> d&apos;économies réalisées.
