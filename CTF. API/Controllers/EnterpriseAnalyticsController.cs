@@ -233,9 +233,19 @@ public class EnterpriseAnalyticsController : ControllerBase
         var lastRisk = riskRows.GroupBy(r => r.UserId)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.ComputedAt).First().Score);
 
+        var modRows = await (
+            from cc in _db.ChallengeCompletions.AsNoTracking()
+            join ch in _db.Challenges.AsNoTracking() on cc.ChallengeId equals ch.Id
+            where cc.TenantId == tenantId && !cc.IsDemo
+            select new { cc.UserId, ch.ModuleId }
+        ).ToListAsync(ct);
+        var modulesByUser = modRows.GroupBy(x => x.UserId)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.ModuleId).Distinct().Count());
+
         var users = raw.Select(u => new AnalyticsUserDto(
             u.Id.ToString(), $"{u.FirstName} {u.LastName}".Trim(),
-            lastRisk.TryGetValue(u.Id, out var s) ? s : (int?)null)).ToList();
+            lastRisk.TryGetValue(u.Id, out var s) ? s : (int?)null,
+            modulesByUser.TryGetValue(u.Id, out var m) ? m : 0)).ToList();
         return Ok(new AnalyticsUsersDto(users));
     }
 

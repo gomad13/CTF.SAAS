@@ -25,7 +25,8 @@ type Risk = { globalScore: number | null; band: string; trend: RiskPoint[]; user
 type Engagement = { totalUsers: number; active7d: number; active30d: number; neverConnected: number; participationRate: number; totalCompletions: number; avgCompletionsPerActiveUser: number };
 type GroupRow = { teamId: string; team: string; memberCount: number; mastery: number; avgScore: number; completionRate: number; avgRisk: number | null; riskBand: string; participationRate: number };
 type Groups = { groups: GroupRow[] };
-type AnalyticsUser = { userId: string; name: string; risk: number | null };
+type AnalyticsUser = { userId: string; name: string; risk: number | null; modules: number };
+type UserSort = "risk-desc" | "risk-asc" | "name-asc" | "name-desc" | "mod-desc" | "mod-asc";
 type Users = { users: AnalyticsUser[] };
 type Profile = { name: string; completions: number; avgScore: number; themesAttempted: number; lastActivityAt: string | null; lastLoginAt: string | null; createdAt: string };
 type FinancialPoint = { label: string; completions: number; cumulativeParticipation: number; cri: number; coverage: number };
@@ -65,6 +66,34 @@ function RiskPill({ score }: { score: number | null }) {
             <span style={{ width: 7, height: 7, borderRadius: 999, background: t.color }} /> {t.label}
         </span>
     );
+}
+
+const USER_SORTS: [UserSort, string][] = [
+    ["risk-desc", "Risque : élevé → faible"],
+    ["risk-asc", "Risque : faible → élevé"],
+    ["name-asc", "Nom : A → Z"],
+    ["name-desc", "Nom : Z → A"],
+    ["mod-desc", "Modules : + → −"],
+    ["mod-asc", "Modules : − → +"],
+];
+// CRI haut = moins à risque. Les non-évalués (risk null) sont toujours renvoyés en fin de liste sur un tri par risque.
+function sortUsers(list: AnalyticsUser[], sort: UserSort): AnalyticsUser[] {
+    const byName = (a: AnalyticsUser, b: AnalyticsUser) => a.name.localeCompare(b.name, "fr");
+    const cmpRisk = (a: AnalyticsUser, b: AnalyticsUser, mostFirst: boolean) => {
+        if (a.risk == null && b.risk == null) return byName(a, b);
+        if (a.risk == null) return 1;
+        if (b.risk == null) return -1;
+        return mostFirst ? a.risk - b.risk : b.risk - a.risk;
+    };
+    const copy = [...list];
+    switch (sort) {
+        case "risk-desc": return copy.sort((a, b) => cmpRisk(a, b, true));
+        case "risk-asc": return copy.sort((a, b) => cmpRisk(a, b, false));
+        case "name-desc": return copy.sort((a, b) => byName(b, a));
+        case "mod-desc": return copy.sort((a, b) => b.modules - a.modules || byName(a, b));
+        case "mod-asc": return copy.sort((a, b) => a.modules - b.modules || byName(a, b));
+        default: return copy.sort(byName);
+    }
 }
 
 export default function AnalyticsPage() {
@@ -380,6 +409,7 @@ function WeakRow({ rank, t }: { rank: number; t: WeakTopic }) {
 // ── Onglet INDIVIDUEL : sélecteur d'utilisateur + détail perso ────────────────
 function IndividuelTab() {
     const [search, setSearch] = useState("");
+    const [sort, setSort] = useState<UserSort>("risk-desc");
     const [selected, setSelected] = useState<AnalyticsUser | null>(null);
 
     const usersQ = useQuery<Users>({ queryKey: ["an-users"], queryFn: () => apiFetch("/api/analytics/users") });
@@ -400,14 +430,20 @@ function IndividuelTab() {
         );
     }
 
-    const list = (usersQ.data?.users ?? []).filter(u => u.name.toLowerCase().includes(search.trim().toLowerCase()));
+    const list = sortUsers((usersQ.data?.users ?? []).filter(u => u.name.toLowerCase().includes(search.trim().toLowerCase())), sort);
     return (
         <Reveal>
             <GlassCard>
                 <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Analytics par collaborateur</h2>
                 <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 14 }}>Choisissez une personne pour voir ses points faibles, son risque et son profil.</p>
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un collaborateur…"
-                    style={{ width: "100%", marginBottom: 14, padding: "10px 14px", fontSize: 14, borderRadius: 10, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", color: "var(--v-text)", outline: "none" }} />
+                <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un collaborateur…"
+                        style={{ flex: "1 1 220px", minWidth: 0, padding: "10px 14px", fontSize: 14, borderRadius: 10, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", color: "var(--v-text)", outline: "none" }} />
+                    <select value={sort} onChange={e => setSort(e.target.value as UserSort)}
+                        style={{ flexShrink: 0, padding: "10px 14px", fontSize: 13, borderRadius: 10, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", color: "var(--v-text)", outline: "none", cursor: "pointer" }}>
+                        {USER_SORTS.map(([k, label]) => <option key={k} value={k} style={{ background: "var(--v-surface-2)", color: "var(--v-text)" }}>{`Trier : ${label}`}</option>)}
+                    </select>
+                </div>
                 {usersQ.isLoading ? <SkelBlock h={200} />
                     : list.length > 0
                         ? <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -417,6 +453,7 @@ function IndividuelTab() {
                                     <button key={u.userId} onClick={() => setSelected(u)} className="v-hover" style={{ textAlign: "left", display: "flex", alignItems: "center", gap: 12, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 12, padding: "10px 14px", cursor: "pointer", width: "100%" }}>
                                         <span style={{ flexShrink: 0, width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>{initials}</span>
                                         <span style={{ flex: 1, minWidth: 0, fontSize: 14, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</span>
+                                        <span style={{ flexShrink: 0, fontSize: 11, color: "var(--v-text-3)", whiteSpace: "nowrap" }}>{u.modules} module{u.modules > 1 ? "s" : ""}</span>
                                         <RiskPill score={u.risk} />
                                         <ChevronRight size={16} style={{ color: "var(--v-text-3)", flexShrink: 0 }} />
                                     </button>

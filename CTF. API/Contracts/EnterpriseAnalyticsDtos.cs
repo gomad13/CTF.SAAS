@@ -78,8 +78,8 @@ public record FinancialAnalyticsDto(
 );
 
 // ── Onglet INDIVIDUEL (analytics par utilisateur) ─────────────────────────
-/// <summary>Risk = dernier score de résilience (CRI, 0-100) de l'utilisateur, null si non évalué. Sert à la pastille de risque.</summary>
-public record AnalyticsUserDto(string UserId, string Name, int? Risk);
+/// <summary>Risk = dernier CRI (0-100, null si non évalué) ; Modules = nb de modules distincts abordés. Servent aux pastilles et au tri.</summary>
+public record AnalyticsUserDto(string UserId, string Name, int? Risk, int Modules);
 public record AnalyticsUsersDto(List<AnalyticsUserDto> Users);
 public record IndividualProfileDto(
     string Name,

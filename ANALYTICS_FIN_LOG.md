@@ -156,4 +156,5 @@ Les **2 ajouts** demandés sont livrés en local, séparément et testés :
 ## 7. Journal (suite)
 - 2026-07-07 : Part A commitée (`8ccceab`). Part B codée + testée → commit. **STOP** (critère d'arrêt atteint).
 - 2026-07-07 : maj défauts financiers déployée (C=466 000 €, h=95 %).
+- 2026-07-07 : **tri de la liste Individuel** (6 options : risque élevé→faible / faible→élevé, nom A→Z / Z→A, modules +→− / −→+). Backend : `AnalyticsUserDto` expose `Modules` (nb de modules distincts abordés). Front : `<select>` de tri + `sortUsers` (non-évalués renvoyés en fin sur tri par risque) + nb de modules affiché par ligne. Builds OK, route 401.
 - 2026-07-07 : **pastille de risque** dans l'onglet Individuel. Backend : `AnalyticsUserDto` expose `Risk` (dernier CRI). Front : `RiskPill` selon le CRI (haut=mieux) — 🟢 Faible (≥60) · 🟡 Modéré (40-59) · 🟠 À risque (25-39) · 🔴 Gros risque à traiter (<25) · gris « Non évalué ». Affichée dans la liste des collaborateurs + en-tête du détail. Tokens charte (success/warning/danger + color-mix pour l'orange), 0 hex. Builds OK, route 401.
