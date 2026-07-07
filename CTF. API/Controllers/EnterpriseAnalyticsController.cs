@@ -106,6 +106,17 @@ public class EnterpriseAnalyticsController : ControllerBase
         return File(bytes, "text/csv", $"analytics-entreprise-{DateTime.UtcNow:yyyyMMdd}.csv");
     }
 
+    // ═══════════════════════════ RAPPORT FINANCIER ════════════════════════════
+
+    /// <summary>Base RÉELLE du rapport financier (effectif, participation, CRI mensuel). Les hypothèses p/C/h/r sont appliquées côté client.</summary>
+    [HttpGet("financial")]
+    public async Task<ActionResult<FinancialAnalyticsDto>> GetFinancial([FromQuery] int months = 6, CancellationToken ct = default)
+    {
+        var (error, tenantId) = await GuardAsync(ct);
+        if (error != null) return error;
+        return Ok(await ComputeFinancialAsync(tenantId, months, ct));
+    }
+
     // ═══════════════════════════ GROUPE ═══════════════════════════════════════
 
     /// <summary>Classement des équipes du tenant (de la plus faible à la plus forte en maîtrise).</summary>
@@ -306,6 +317,45 @@ public class EnterpriseAnalyticsController : ControllerBase
             .ToList();
 
         return new EnterpriseWeakTopicsDto(evaluated.Take(top).ToList(), evaluated.Count);
+    }
+
+    /// <summary>Agrège la base réelle du calcul financier (aucune donnée démo, aucune hypothèse ici — seulement du réel).</summary>
+    private async Task<FinancialAnalyticsDto> ComputeFinancialAsync(Guid tenantId, int months, CancellationToken ct)
+    {
+        if (months < 1) months = 1;
+        if (months > 24) months = 24;
+
+        var employeeCount = await _db.Users.AsNoTracking().CountAsync(u => u.TenantId == tenantId, ct);
+        var comps = await _db.ChallengeCompletions.AsNoTracking()
+            .Where(cc => cc.TenantId == tenantId && !cc.IsDemo)
+            .Select(cc => new { cc.UserId, cc.CompletedAt }).ToListAsync(ct);
+        var firstByUser = comps.GroupBy(c => c.UserId).ToDictionary(g => g.Key, g => g.Min(x => x.CompletedAt));
+        var participationRate = employeeCount > 0 ? (int)Math.Round(100.0 * firstByUser.Count / employeeCount) : 0;
+
+        var riskRows = await _db.RiskScoreHistories.AsNoTracking()
+            .Where(r => r.TenantId == tenantId && r.Score != null)
+            .Select(r => new { r.UserId, Score = r.Score!.Value, r.ComputedAt }).ToListAsync(ct);
+        var latestPerUser = riskRows.GroupBy(x => x.UserId).Select(g => g.OrderByDescending(x => x.ComputedAt).First().Score).ToList();
+        var avgCri = latestPerUser.Count > 0 ? (int)Math.Round(latestPerUser.Average()) : 0;
+        var coverage = Math.Round(participationRate / 100.0 * avgCri / 100.0, 4);
+
+        var since = DateTime.UtcNow.Date.AddMonths(-(months - 1));
+        var start = new DateTime(since.Year, since.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        int? lastCri = null;
+        var trend = new List<FinancialTrendPointDto>();
+        foreach (var i in Enumerable.Range(0, months))
+        {
+            var m = start.AddMonths(i);
+            var monthEnd = m.AddMonths(1);
+            var monthComps = comps.Count(c => c.CompletedAt.Year == m.Year && c.CompletedAt.Month == m.Month);
+            var cumPart = employeeCount > 0 ? (int)Math.Round(100.0 * firstByUser.Count(kv => kv.Value < monthEnd) / employeeCount) : 0;
+            var monthScores = riskRows.Where(x => x.ComputedAt.Year == m.Year && x.ComputedAt.Month == m.Month).ToList();
+            if (monthScores.Count > 0) lastCri = (int)Math.Round(monthScores.Average(x => x.Score));
+            var cri = lastCri ?? 0;
+            trend.Add(new FinancialTrendPointDto(MoisFr[m.Month - 1], monthComps, cumPart, cri, Math.Round(cumPart / 100.0 * cri / 100.0, 4)));
+        }
+
+        return new FinancialAnalyticsDto(employeeCount, participationRate, avgCri, coverage, comps.Count, trend);
     }
 
     private async Task<EnterpriseRiskDto> ComputeRiskAsync(Guid tenantId, int months, CancellationToken ct, HashSet<Guid>? memberIds = null)

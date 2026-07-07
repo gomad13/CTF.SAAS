@@ -1,19 +1,21 @@
 "use client";
 
-// Analytics admin — 3 onglets Entreprise / Groupe / Individuel.
-// Entreprise + Groupe implémentés (vraies données du tenant). Individuel = placeholder.
+// Analytics admin — 4 onglets Entreprise / Groupe / Individuel / Rapport financier.
+// Rapport financier = estimation de pertes potentielles évitées (N & couverture réels, hypothèses p/C/h/r éditables).
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import Reveal from "@/components/Reveal";
 import { Stagger, StaggerItem } from "@/components/Stagger";
 import VisionKpiCard from "@/components/vision/VisionKpiCard";
 import VisionAreaChart from "@/components/vision/VisionAreaChart";
+import VisionBarChart from "@/components/vision/VisionBarChart";
 import VisionGauge from "@/components/vision/VisionGauge";
 import {
     AlertTriangle, Users2, UserCheck, UserX, CheckCircle2, Activity,
     Download, BarChart3, Lock, ArrowLeft, ChevronRight,
+    ShieldCheck, ShieldAlert, Euro, Settings2, Info, RotateCcw, GraduationCap,
 } from "lucide-react";
 
 type WeakTopic = { theme: string; avgScore: number; completionRate: number; mastery: number; completions: number };
@@ -26,6 +28,9 @@ type Groups = { groups: GroupRow[] };
 type AnalyticsUser = { userId: string; name: string };
 type Users = { users: AnalyticsUser[] };
 type Profile = { name: string; completions: number; avgScore: number; themesAttempted: number; lastActivityAt: string | null; lastLoginAt: string | null; createdAt: string };
+type FinancialPoint = { label: string; completions: number; cumulativeParticipation: number; cri: number; coverage: number };
+type FinancialData = { employeeCount: number; participationRate: number; avgCri: number; coverage: number; totalCompletions: number; trend: FinancialPoint[] };
+type Hypotheses = { p: number; C: number; h: number; r: number };
 
 function GlassCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
     return (
@@ -43,7 +48,7 @@ function SkelBlock({ h }: { h: number }) {
 function masteryColor(m: number) { return m < 40 ? "var(--danger)" : m < 60 ? "var(--warning)" : "var(--v-accent)"; }
 
 export default function AnalyticsPage() {
-    const [tab, setTab] = useState<"entreprise" | "groupe" | "individuel">("entreprise");
+    const [tab, setTab] = useState<"entreprise" | "groupe" | "individuel" | "financier">("entreprise");
 
     const statusQ = useQuery<{ isEnabled: boolean }>({
         queryKey: ["analytics", "status"],
@@ -75,7 +80,7 @@ export default function AnalyticsPage() {
                 </Reveal>
 
                 <div style={{ display: "flex", gap: 8, marginBottom: 24, borderBottom: "1px solid var(--v-border)", overflowX: "auto" }}>
-                    {([["entreprise", "Entreprise"], ["groupe", "Groupe"], ["individuel", "Individuel"]] as const).map(([key, label]) => (
+                    {([["entreprise", "Entreprise"], ["groupe", "Groupe"], ["individuel", "Individuel"], ["financier", "Rapport financier"]] as const).map(([key, label]) => (
                         <button key={key} onClick={() => setTab(key)} style={{
                             padding: "10px 18px", marginBottom: "-1px", fontSize: 14, background: "transparent", border: "none", cursor: "pointer",
                             fontWeight: tab === key ? 600 : 500,
@@ -88,6 +93,7 @@ export default function AnalyticsPage() {
                 {tab === "entreprise" && <AnalyticsDetail basePath="/api/analytics/enterprise" keyPrefix="ent" showExport />}
                 {tab === "groupe" && <GroupeTab />}
                 {tab === "individuel" && <IndividuelTab />}
+                {tab === "financier" && <FinancialTab />}
             </div>
         </div>
     );
@@ -336,6 +342,233 @@ function IndividuelTab() {
                         : <EmptyState label="Aucun collaborateur trouvé." />}
             </GlassCard>
         </Reveal>
+    );
+}
+
+// ── Onglet RAPPORT FINANCIER : perte potentielle évitée (ESTIMATION) ──────────
+// N/t = vraies données du tenant ; p/C/h/r = hypothèses éditables (jamais présentées comme des faits).
+const FIN_DEFAULTS: Hypotheses = { p: 10, C: 50000, h: 68, r: 25 };
+const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+
+/** Compteur animé formaté (respecte prefers-reduced-motion). */
+function useAnimatedNumber(value: number, duration = 900) {
+    const [n, setN] = useState(0);
+    const raf = useRef<number | undefined>(undefined);
+    useEffect(() => {
+        const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        if (reduce) { const id = requestAnimationFrame(() => setN(value)); return () => cancelAnimationFrame(id); }
+        const startT = performance.now();
+        const tick = (t: number) => {
+            const prog = Math.min((t - startT) / duration, 1);
+            const eased = 1 - Math.pow(1 - prog, 3);
+            setN(Math.round(value * eased));
+            if (prog < 1) raf.current = requestAnimationFrame(tick);
+        };
+        raf.current = requestAnimationFrame(tick);
+        return () => { if (raf.current) cancelAnimationFrame(raf.current); };
+    }, [value, duration]);
+    return n;
+}
+
+function FinancialTab() {
+    const [months, setMonths] = useState(6);
+    const [hyp, setHyp] = useState<Hypotheses>(FIN_DEFAULTS);
+    const finQ = useQuery<FinancialData>({ queryKey: ["fin", months], queryFn: () => apiFetch(`/api/analytics/enterprise/financial?months=${months}`) });
+
+    const d = finQ.data;
+    const N = d?.employeeCount ?? 0;
+    const t = d?.coverage ?? 0;
+    const factor = (hyp.p / 100) * hyp.C * (hyp.h / 100);   // exposition unitaire × facteur humain
+    const exposure = N * factor;                            // exposition annuelle estimée (avant sensibilisation)
+    const avoided = exposure * (hyp.r / 100) * t;           // perte potentielle évitée (estimation)
+    const expectedIncidents = N * (hyp.p / 100);            // incidents attendus / an (estimation)
+
+    const avoidedTrend = (d?.trend ?? []).map(pt => ({ label: pt.label, value: Math.round(N * factor * (hyp.r / 100) * pt.coverage) }));
+    const coverageTrend = (d?.trend ?? []).map(pt => ({ label: pt.label, value: Math.round(pt.coverage * 100) }));
+    const activityTrend = (d?.trend ?? []).map(pt => ({ label: pt.label, value: pt.completions }));
+    const avoidedMax = Math.max(100, ...avoidedTrend.map(x => x.value)) * 1.2;
+
+    function exportCsv() {
+        if (!d) return;
+        const L: string[] = [];
+        L.push("Rapport financier - estimation de pertes potentielles evitees");
+        L.push(`Genere le;${new Date().toLocaleString("fr-FR")}`);
+        L.push("AVERTISSEMENT;Estimation indicative basee sur des hypotheses - PAS une valeur mesuree ni garantie");
+        L.push("");
+        L.push("Hypotheses de calcul (modifiables par l'admin)");
+        L.push(`Proba incident par salarie et par an (p);${hyp.p};%`);
+        L.push(`Cout moyen d'un incident (C);${hyp.C};EUR`);
+        L.push(`Part des incidents liee au facteur humain (h);${hyp.h};%`);
+        L.push(`Reduction du risque via sensibilisation (r);${hyp.r};%`);
+        L.push("");
+        L.push("Donnees reelles du tenant");
+        L.push(`Salaries enregistres (N);${d.employeeCount}`);
+        L.push(`Participation;${d.participationRate};%`);
+        L.push(`CRI moyen;${d.avgCri}`);
+        L.push(`Couverture de formation (t);${Math.round(d.coverage * 100)};%`);
+        L.push("");
+        L.push(`Perte potentielle evitee (estimation) par an;${Math.round(avoided)};EUR`);
+        L.push(`Exposition annuelle estimee (avant sensibilisation);${Math.round(exposure)};EUR`);
+        L.push("");
+        L.push("Mois;Completions;Participation cumulee %;CRI;Couverture %;Perte evitee estimee EUR");
+        d.trend.forEach(pt => L.push(`${pt.label};${pt.completions};${pt.cumulativeParticipation};${pt.cri};${Math.round(pt.coverage * 100)};${Math.round(N * factor * (hyp.r / 100) * pt.coverage)}`));
+        const blob = new Blob(["﻿" + L.join("\r\n")], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `rapport-financier-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    if (finQ.isLoading) {
+        return <div style={{ display: "flex", flexDirection: "column", gap: 20 }}><SkelBlock h={150} /><SkelBlock h={260} /><SkelBlock h={220} /></div>;
+    }
+    if (!d || d.employeeCount === 0) {
+        return <Reveal><GlassCard><EmptyState label="Aucun salarié enregistré pour estimer un impact financier. Ajoutez des collaborateurs et lancez des formations pour alimenter le rapport." /></GlassCard></Reveal>;
+    }
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Période + export */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <span style={{ fontSize: 12, color: "var(--v-text-3)" }}>Période :</span>
+                    {[3, 6, 12].map(m => (
+                        <button key={m} onClick={() => setMonths(m)} style={{
+                            fontSize: 12, padding: "5px 12px", borderRadius: 8, cursor: "pointer",
+                            border: "1px solid " + (months === m ? "var(--v-accent)" : "var(--v-border)"),
+                            background: months === m ? "var(--v-accent-subtle)" : "transparent",
+                            color: months === m ? "var(--v-cyan)" : "var(--v-text-2)",
+                        }}>{m} mois</button>
+                    ))}
+                </div>
+                <button onClick={exportCsv} style={{
+                    display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "8px 16px", borderRadius: 10, cursor: "pointer",
+                    background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)", border: "none",
+                    boxShadow: "0 6px 16px color-mix(in srgb, var(--v-accent) 40%, transparent)",
+                }}><Download size={15} /> Exporter (CSV)</button>
+            </div>
+
+            {/* KPI phare + secondaires */}
+            <Reveal><MoneyHeadline avoided={avoided} coverage={t} /></Reveal>
+            <Reveal>
+                <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4" gap={0.06}>
+                    <StaggerItem><VisionKpiCard value={N} label="Salariés enregistrés" icon={Users2} hint="base du calcul (réel)" /></StaggerItem>
+                    <StaggerItem><VisionKpiCard value={Math.round(t * 100)} suffix="%" label="Couverture formation" icon={GraduationCap} hint="participation × CRI (réel)" /></StaggerItem>
+                    <StaggerItem><VisionKpiCard value={hyp.C} suffix=" €" label="Coût moyen / incident" icon={Euro} hint="hypothèse éditable" /></StaggerItem>
+                    <StaggerItem><VisionKpiCard value={Math.round(expectedIncidents * 10) / 10} label="Incidents attendus / an" icon={ShieldAlert} hint="estimation (N × p)" /></StaggerItem>
+                </Stagger>
+            </Reveal>
+
+            {/* Graphes animés */}
+            <Reveal>
+                <GlassCard>
+                    <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 2 }}>Évolution de la perte potentielle évitée <span style={{ fontSize: 12, fontWeight: 500, color: "var(--v-text-3)" }}>(estimation)</span></h2>
+                    <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 10 }}>Estimation mensuelle, croît avec la couverture réelle de formation · {months} mois</p>
+                    {avoidedTrend.length >= 2 ? <VisionAreaChart data={avoidedTrend} yKey="value" domainMax={avoidedMax} height={230} /> : <EmptyState label="Historique insuffisant pour tracer une courbe." />}
+                </GlassCard>
+            </Reveal>
+            <Reveal>
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <GlassCard>
+                        <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 2 }}>Couverture de formation réelle</h2>
+                        <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 10 }}>Participation cumulée × CRI moyen (vraie donnée)</p>
+                        {coverageTrend.length >= 2 ? <VisionAreaChart data={coverageTrend} yKey="value" domainMax={100} height={210} /> : <EmptyState label="Historique insuffisant." />}
+                    </GlassCard>
+                    <GlassCard>
+                        <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 2 }}>Activité de formation</h2>
+                        <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 10 }}>Complétions par mois (vraie donnée)</p>
+                        {activityTrend.some(x => x.value > 0) ? <VisionBarChart data={activityTrend} yKey="value" height={210} /> : <EmptyState label="Aucune complétion sur la période." />}
+                    </GlassCard>
+                </div>
+            </Reveal>
+
+            {/* Hypothèses éditables + méthodologie */}
+            <Reveal><HypothesesPanel hyp={hyp} setHyp={setHyp} /></Reveal>
+            <Reveal><MethodoNote /></Reveal>
+        </div>
+    );
+}
+
+function MoneyHeadline({ avoided, coverage }: { avoided: number; coverage: number }) {
+    const n = useAnimatedNumber(Math.round(avoided));
+    return (
+        <GlassCard style={{ borderColor: "color-mix(in srgb, var(--v-accent) 40%, var(--v-border))" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flexWrap: "wrap" }}>
+                <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", background: "var(--v-grad)", color: "var(--v-text)", boxShadow: "0 6px 16px color-mix(in srgb, var(--v-accent) 45%, transparent)", flexShrink: 0 }}><ShieldCheck size={22} /></span>
+                <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, color: "var(--v-text-2)", fontWeight: 500 }}>Perte potentielle évitée <b style={{ color: "var(--v-text)" }}>(estimation)</b> · sur 1 an</div>
+                    <div style={{ marginTop: 4, fontSize: 40, fontWeight: 800, color: "var(--v-text)", letterSpacing: "-0.03em", lineHeight: 1.05 }}>{eur.format(n)}</div>
+                    <div style={{ marginTop: 6, fontSize: 12, color: "var(--v-text-3)" }}>
+                        Estimation indicative, pondérée par votre couverture de formation réelle (<b style={{ color: "var(--v-text-2)" }}>{Math.round(coverage * 100)}%</b>). Ce n&apos;est pas une valeur mesurée ni garantie.
+                    </div>
+                </div>
+            </div>
+        </GlassCard>
+    );
+}
+
+function HypInput({ label, unit, value, min, max, onChange }: { label: string; unit: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
+    return (
+        <div>
+            <label style={{ display: "block", fontSize: 12, color: "var(--v-text-2)", fontWeight: 500, marginBottom: 6 }}>{label}</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 10, padding: "8px 12px" }}>
+                <input type="number" value={value} min={min} max={max}
+                    onChange={e => { const v = Number(e.target.value); onChange(Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : min); }}
+                    style={{ width: "100%", background: "transparent", border: "none", outline: "none", color: "var(--v-text)", fontSize: 15, fontWeight: 600 }} />
+                <span style={{ fontSize: 12, color: "var(--v-text-3)", flexShrink: 0 }}>{unit}</span>
+            </div>
+        </div>
+    );
+}
+
+function HypothesesPanel({ hyp, setHyp }: { hyp: Hypotheses; setHyp: (h: Hypotheses) => void }) {
+    return (
+        <GlassCard>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ display: "inline-flex", width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", background: "var(--v-accent-subtle)", color: "var(--v-cyan)" }}><Settings2 size={18} /></span>
+                    <div>
+                        <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--v-text)" }}>Hypothèses de calcul</h2>
+                        <p style={{ fontSize: 12, color: "var(--v-text-3)" }}>Ajustez ces valeurs à votre contexte — le rapport se recalcule en direct.</p>
+                    </div>
+                </div>
+                <button onClick={() => setHyp(FIN_DEFAULTS)} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 500, color: "var(--v-text-2)", background: "transparent", border: "1px solid var(--v-border)", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}>
+                    <RotateCcw size={14} /> Réinitialiser
+                </button>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" style={{ marginTop: 14 }}>
+                <HypInput label="Proba. incident / salarié / an (p)" unit="%" value={hyp.p} min={0} max={100} onChange={v => setHyp({ ...hyp, p: v })} />
+                <HypInput label="Coût moyen d'un incident (C)" unit="€" value={hyp.C} min={0} max={100000000} onChange={v => setHyp({ ...hyp, C: v })} />
+                <HypInput label="Part facteur humain (h)" unit="%" value={hyp.h} min={0} max={100} onChange={v => setHyp({ ...hyp, h: v })} />
+                <HypInput label="Réduction via sensibilisation (r)" unit="%" value={hyp.r} min={0} max={100} onChange={v => setHyp({ ...hyp, r: v })} />
+            </div>
+        </GlassCard>
+    );
+}
+
+function MethodoNote() {
+    return (
+        <GlassCard style={{ background: "color-mix(in srgb, var(--v-surface) 82%, transparent)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                <span style={{ display: "inline-flex", width: 30, height: 30, borderRadius: 9, alignItems: "center", justifyContent: "center", background: "var(--v-surface-2)", color: "var(--v-text-2)" }}><Info size={16} /></span>
+                <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--v-text)" }}>Méthodologie &amp; avertissement</h2>
+            </div>
+            <div style={{ fontSize: 13, color: "var(--v-text-2)", lineHeight: 1.6 }}>
+                <p style={{ marginBottom: 8 }}>
+                    Formule&nbsp;: <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, color: "var(--v-text)", background: "var(--v-surface-2)", padding: "2px 8px", borderRadius: 6, display: "inline-block" }}>Perte évitée (est.) = N × p × C × h × r × t</span>
+                </p>
+                <ul style={{ margin: "0 0 8px 0", paddingLeft: 18, listStyle: "disc" }}>
+                    <li><b style={{ color: "var(--v-text)" }}>N</b> = salariés enregistrés, <b style={{ color: "var(--v-text)" }}>t</b> = couverture réelle de formation (participation × CRI) — <b style={{ color: "var(--v-cyan)" }}>vraies données de votre organisation</b>.</li>
+                    <li><b style={{ color: "var(--v-text)" }}>p, C, h, r</b> = hypothèses que vous ajustez ci-dessus. Valeurs par défaut prudentes : p&nbsp;10&nbsp;%/an, C&nbsp;50&nbsp;000&nbsp;€, h&nbsp;68&nbsp;%, r&nbsp;25&nbsp;%.</li>
+                </ul>
+                <p style={{ marginBottom: 8, fontSize: 12, color: "var(--v-text-3)" }}>
+                    Repères publics indicatifs&nbsp;: Verizon <i>DBIR 2024</i> (~68&nbsp;% des compromissions impliquent le facteur humain) ; IBM <i>Cost of a Data Breach 2024</i> (4,88&nbsp;M$ en moyenne, tous segments — non transposable à une PME tel quel) ; ANSSI / Hiscox pour les ordres de grandeur PME. Ajustez à votre secteur.
+                </p>
+                <p style={{ fontSize: 12, color: "var(--warning)", fontWeight: 500 }}>
+                    ⚠ Il s&apos;agit d&apos;une <b>estimation indicative</b> destinée à objectiver un ordre de grandeur, <b>pas d&apos;une mesure comptable ni d&apos;une garantie</b> d&apos;économies réalisées.
+                </p>
+            </div>
+        </GlassCard>
     );
 }
 
