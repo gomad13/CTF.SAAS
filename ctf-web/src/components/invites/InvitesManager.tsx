@@ -1,12 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "react-qr-code";
 import {
     QrCode, Plus, Trash2, Copy, Check, Clock, Users, AlertCircle, X, Download, Building2, AppWindow, UserPlus,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { VisionInput, VisionSelect, VisionButton } from "@/components/vision/VisionForm";
 import { useInvites, useCreateInvite, useRevokeInvite } from "@/lib/hooks/useInvites";
 import type { InviteDto, CreatedInviteDto, InviteType } from "@/lib/types/invites";
 
@@ -17,25 +20,25 @@ const DURATIONS: { label: string; hours: number }[] = [
     { label: "30 jours", hours: 720 },
 ];
 
-// Métadonnées des 3 types de QR (libellés clairs pour l'admin).
-const TYPE_META: Record<InviteType, { short: string; label: string; help: string; cls: string }> = {
+// Métadonnées des 3 types de QR (libellés clairs + couleur token Vision, pas de vert cyber).
+const TYPE_META: Record<InviteType, { short: string; label: string; help: string; color: string }> = {
     app: {
         short: "Application",
         label: "Application — inscription générale",
         help: "Invite à créer un compte Sentys, SANS rattachement à une entreprise. Mène à la page d'inscription générale.",
-        cls: "bg-info/10 text-info",
+        color: "var(--v-cyan)",
     },
     enterprise_signup: {
         short: "Inscription",
         label: "Entreprise — inscription (nouveau compte)",
         help: "Une personne SANS compte s'inscrit avec l'entreprise pré-remplie et verrouillée, puis est rattachée automatiquement (rôle Membre).",
-        cls: "bg-success/10 text-success",
+        color: "var(--v-success)",
     },
     enterprise_join: {
         short: "Rejoindre",
         label: "Entreprise — rejoindre (compte existant)",
         help: "Une personne qui a DÉJÀ un compte scanne le QR et rejoint l'entreprise (rôle Membre). Ses autres sociétés sont conservées.",
-        cls: "bg-primary/10 text-primary",
+        color: "var(--v-accent)",
     },
 };
 
@@ -45,13 +48,16 @@ const TYPE_ICON: Record<InviteType, typeof Building2> = {
     enterprise_join: Building2,
 };
 
-type Status = { label: string; cls: string };
+function inviteStatus(i: InviteDto): { label: string; color: string } {
+    if (i.isRevoked) return { label: "Révoquée", color: "var(--v-danger)" };
+    if (i.isExpired) return { label: "Expirée", color: "var(--v-text-3)" };
+    if (i.usedCount >= i.maxUses) return { label: "Épuisée", color: "var(--warning)" };
+    return { label: "Active", color: "var(--v-success)" };
+}
 
-function inviteStatus(i: InviteDto): Status {
-    if (i.isRevoked) return { label: "Révoquée", cls: "bg-danger/10 text-danger" };
-    if (i.isExpired) return { label: "Expirée", cls: "bg-surface-2 text-fg-muted" };
-    if (i.usedCount >= i.maxUses) return { label: "Épuisée", cls: "bg-warning/10 text-warning" };
-    return { label: "Active", cls: "bg-success/10 text-success" };
+// Pastille de statut/type — fond teinté 15 % + texte à la couleur token.
+function pill(color: string): CSSProperties {
+    return { display: "inline-flex", alignItems: "center", borderRadius: 999, padding: "3px 10px", fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap", background: "color-mix(in srgb, " + color + " 15%, transparent)", color };
 }
 
 function fmt(iso: string): string {
@@ -60,12 +66,13 @@ function fmt(iso: string): string {
     });
 }
 
+const th: CSSProperties = { padding: "12px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--v-text-2)" };
+const td: CSSProperties = { padding: "14px 20px", fontSize: 13.5, color: "var(--v-text)", verticalAlign: "middle" };
+
 /**
- * Gestion des invitations QR en 3 types (voir QR_3_TYPES) :
- *  - Application (SuperAdmin) : inscription générale, sans entreprise.
- *  - Entreprise-Inscription (Type 2) et Entreprise-Rejoindre (Type 3) : scellées au tenant.
+ * Gestion des invitations QR en 3 types (voir QR_3_TYPES).
  * Génération + QR + téléchargement PNG + URL copiable + liste typée + révocation.
- * Réutilisé par les Paramètres entreprise (/admin/entreprise). Zéro duplication d'appels API.
+ * Réutilisé UNIQUEMENT par les Paramètres entreprise (/admin/entreprise). Thème Vision UI (tokens --v-*).
  */
 export default function InvitesManager() {
     const listQ = useInvites();
@@ -74,7 +81,6 @@ export default function InvitesManager() {
     const meQ = useQuery({ queryKey: ["me"], queryFn: () => apiFetch<{ role: string }>("/api/auth/me"), staleTime: 60_000 });
     const isSuperAdmin = meQ.data?.role === "SuperAdmin";
 
-    // Types générables selon le rôle : App réservé au SuperAdmin.
     const availableTypes: InviteType[] = isSuperAdmin
         ? ["app", "enterprise_signup", "enterprise_join"]
         : ["enterprise_signup", "enterprise_join"];
@@ -99,9 +105,7 @@ export default function InvitesManager() {
             await navigator.clipboard.writeText(url);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-        } catch {
-            /* clipboard indisponible — l'URL reste affichée et sélectionnable */
-        }
+        } catch { /* clipboard indisponible — l'URL reste affichée et sélectionnable */ }
     }
 
     // Sérialise le SVG du QR, le dessine sur un canvas HD et télécharge un PNG.
@@ -118,7 +122,7 @@ export default function InvitesManager() {
             canvas.height = size;
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
-            ctx.fillStyle = "#ffffff";
+            ctx.fillStyle = "#ffffff"; // fond blanc du PNG QR (hors UI — nécessaire au scan)
             ctx.fillRect(0, 0, size, size);
             ctx.drawImage(img, 0, 0, size, size);
             const a = document.createElement("a");
@@ -130,181 +134,159 @@ export default function InvitesManager() {
     }
 
     const isEnterprise = type !== "app";
+    const invites = listQ.data ?? [];
 
     return (
-        <div className="flex flex-col gap-6">
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {/* Générateur */}
-            <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-                <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-fg-body">
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <h3 style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--v-text-2)" }}>
                     <Plus size={14} /> Générer une invitation QR
-                </h2>
+                </h3>
 
                 {/* Sélecteur de type (cartes cliquables) */}
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {availableTypes.map(t => {
                         const meta = TYPE_META[t];
                         const Icon = TYPE_ICON[t];
                         const active = type === t;
                         return (
-                            <button
-                                key={t} type="button" onClick={() => setType(t)}
-                                className={`flex flex-col gap-1.5 rounded-lg border p-4 text-left transition-colors duration-200 ${active ? "border-primary bg-primary/10" : "border-border bg-surface hover:bg-surface-2"}`}
-                            >
-                                <span className="flex items-center gap-2 text-sm font-semibold text-fg-heading">
-                                    <Icon size={15} className={active ? "text-primary" : "text-fg-muted"} /> {meta.short}
+                            <button key={t} type="button" onClick={() => setType(t)} className="v-hover"
+                                style={{ display: "flex", flexDirection: "column", gap: 6, borderRadius: 12, padding: 14, textAlign: "left", cursor: "pointer",
+                                    border: "1px solid " + (active ? "var(--v-accent)" : "var(--v-border)"),
+                                    background: active ? "color-mix(in srgb, var(--v-accent) 12%, transparent)" : "var(--v-surface-2)" }}>
+                                <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 600, color: "var(--v-text)" }}>
+                                    <Icon size={15} style={{ color: active ? "var(--v-accent)" : "var(--v-text-2)" }} /> {meta.short}
                                 </span>
-                                <span className="text-xs leading-snug text-fg-muted">{meta.help}</span>
+                                <span style={{ fontSize: 12, lineHeight: 1.45, color: "var(--v-text-2)" }}>{meta.help}</span>
                             </button>
                         );
                     })}
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-end gap-4">
-                    <label className="flex flex-col gap-1 text-sm text-fg-body">
-                        <span className="flex items-center gap-1"><Clock size={13} /> Durée de validité</span>
-                        <select
-                            value={hours}
-                            onChange={e => setHours(Number(e.target.value))}
-                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading"
-                        >
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: 16 }}>
+                    <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12.5, fontWeight: 600, color: "var(--v-text)" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Clock size={13} /> Durée de validité</span>
+                        <VisionSelect value={hours} onChange={e => setHours(Number(e.target.value))} style={{ width: "auto" }}>
                             {DURATIONS.map(d => <option key={d.hours} value={d.hours}>{d.label}</option>)}
-                        </select>
+                        </VisionSelect>
                     </label>
-                    <label className="flex flex-col gap-1 text-sm text-fg-body">
-                        <span className="flex items-center gap-1"><Users size={13} /> Nombre max d’usages</span>
-                        <input
-                            type="number" min={1} max={1000} value={maxUses}
-                            onChange={e => setMaxUses(e.target.value)}
-                            className="w-[120px] rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading"
-                        />
+                    <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12.5, fontWeight: 600, color: "var(--v-text)" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Users size={13} /> Nombre max d&apos;usages</span>
+                        <VisionInput type="number" min={1} max={1000} value={maxUses} onChange={e => setMaxUses(e.target.value)} style={{ width: 120 }} />
                     </label>
-                    <button
-                        type="button"
-                        onClick={handleCreate}
-                        disabled={createM.isPending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50"
-                    >
+                    <VisionButton type="button" onClick={handleCreate} disabled={createM.isPending}>
                         <QrCode size={14} /> {createM.isPending ? "Génération…" : "Générer le QR"}
-                    </button>
+                    </VisionButton>
                 </div>
-                <p className="mt-2 text-xs text-fg-muted">{isEnterprise
+                <p style={{ fontSize: 12, color: "var(--v-text-2)", lineHeight: 1.5 }}>{isEnterprise
                     ? "Ce QR est scellé à votre société active : il ne fait rejoindre que celle-ci."
                     : "Ce QR mène à l'inscription générale Sentys, sans rattachement à une entreprise."}</p>
                 {createM.isError && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-danger">
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--v-danger)" }}>
                         <AlertCircle size={13} /> {createM.error.message}
                     </div>
                 )}
 
-                {created && (
-                    <div className="mt-6 grid grid-cols-1 gap-6 rounded-lg border border-border bg-surface-2 p-6 sm:grid-cols-[auto_1fr]">
-                        <div className="flex flex-col items-center gap-2">
-                            <div ref={qrRef} className="rounded-lg bg-surface p-3 shadow-sm">
-                                <QRCode value={created.joinUrl} size={160} />
+                <AnimatePresence>
+                    {created && (
+                        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}
+                            className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr]"
+                            style={{ borderRadius: 14, border: "1px solid var(--v-border)", background: "var(--v-surface-2)", padding: 20 }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                                <div ref={qrRef} style={{ borderRadius: 12, background: "#fff", padding: 12 }}>
+                                    <QRCode value={created.joinUrl} size={160} />
+                                </div>
+                                <VisionButton variant="ghost" type="button" onClick={downloadQrPng} style={{ padding: "6px 10px", fontSize: 12.5, color: "var(--v-accent)" }}>
+                                    <Download size={13} /> Télécharger le QR
+                                </VisionButton>
+                                <span style={{ fontSize: 12, color: "var(--v-text-2)" }}>{created.type === "app" ? "Scannez pour vous inscrire" : "Scannez pour rejoindre"}</span>
                             </div>
-                            <button
-                                type="button" onClick={downloadQrPng}
-                                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary transition-colors duration-200 hover:text-primary-hover"
-                            >
-                                <Download size={13} /> Télécharger le QR
-                            </button>
-                            <span className="text-xs text-fg-muted">{created.type === "app" ? "Scannez pour vous inscrire" : "Scannez pour rejoindre"}</span>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-start justify-between gap-2">
-                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${TYPE_META[created.type].cls}`}>
-                                    {TYPE_META[created.type].label}
-                                </span>
-                                <button type="button" onClick={() => setCreated(null)} title="Fermer"
-                                    className="text-fg-muted transition-colors duration-200 hover:text-fg-body">
-                                    <X size={16} />
-                                </button>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                                    <span style={pill(TYPE_META[created.type].color)}>{TYPE_META[created.type].label}</span>
+                                    <button type="button" onClick={() => setCreated(null)} title="Fermer"
+                                        style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--v-text-2)", display: "inline-flex" }}>
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <p style={{ fontSize: 12, color: "var(--v-text-2)", lineHeight: 1.5 }}>
+                                    Expire le {fmt(created.expiresAt)} · {created.maxUses} usage{created.maxUses > 1 ? "s" : ""} max.
+                                    Ce lien n&apos;est affiché qu&apos;une seule fois — copiez-le maintenant.
+                                </p>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <VisionInput readOnly value={created.joinUrl} onFocus={e => e.currentTarget.select()}
+                                        style={{ flex: 1, fontFamily: "ui-monospace, monospace", fontSize: 12 }} />
+                                    <VisionButton variant="secondary" type="button" onClick={() => copyUrl(created.joinUrl)} style={{ minWidth: 104 }}>
+                                        <AnimatePresence mode="wait" initial={false}>
+                                            {copied ? (
+                                                <motion.span key="ok" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }} transition={{ duration: 0.18 }} style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--v-success)" }}>
+                                                    <Check size={13} /> Copié !
+                                                </motion.span>
+                                            ) : (
+                                                <motion.span key="copy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                                    <Copy size={13} /> Copier
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
+                                    </VisionButton>
+                                </div>
                             </div>
-                            <p className="text-xs text-fg-muted">
-                                Expire le {fmt(created.expiresAt)} · {created.maxUses} usage{created.maxUses > 1 ? "s" : ""} max.
-                                Ce lien n’est affiché qu’une seule fois — copiez-le maintenant.
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    readOnly value={created.joinUrl}
-                                    onFocus={e => e.currentTarget.select()}
-                                    className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 font-mono text-xs text-fg-body"
-                                />
-                                <button
-                                    type="button" onClick={() => copyUrl(created.joinUrl)}
-                                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2"
-                                >
-                                    {copied ? <><Check size={13} className="text-success" /> Copié</> : <><Copy size={13} /> Copier</>}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </section>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
 
             {/* Liste */}
-            <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-                <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-table-head text-xs uppercase tracking-wider text-fg-body">
-                        <tr>
-                            <th className="px-6 py-3 text-left font-semibold">Type</th>
-                            <th className="px-6 py-3 text-left font-semibold">Statut</th>
-                            <th className="px-6 py-3 text-left font-semibold">Usages</th>
-                            <th className="px-6 py-3 text-left font-semibold">Expiration</th>
-                            <th className="px-6 py-3 text-left font-semibold">Créée le</th>
-                            <th className="px-6 py-3 text-right font-semibold">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                        {(listQ.data ?? []).map(i => {
-                            const st = inviteStatus(i);
-                            const tm = TYPE_META[i.type];
-                            const canRevoke = !i.isRevoked && !i.isExpired;
-                            return (
-                                <tr key={i.id} className="hover:bg-surface-2">
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${tm.cls}`}>
-                                            {tm.short}
-                                        </span>
-                                        {i.tenantName && <span className="ml-2 text-xs text-fg-muted">{i.tenantName}</span>}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${st.cls}`}>
-                                            {st.label}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-fg-body">{i.usedCount} / {i.maxUses}</td>
-                                    <td className="px-6 py-4 text-fg-body">{fmt(i.expiresAt)}</td>
-                                    <td className="px-6 py-4 text-fg-muted">{fmt(i.createdAt)}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            type="button"
-                                            disabled={!canRevoke || revokeM.isPending}
-                                            onClick={() => { if (confirm("Révoquer cette invitation ? Elle ne pourra plus être utilisée.")) revokeM.mutate(i.id); }}
-                                            className="inline-flex items-center gap-1.5 rounded-lg border border-danger/40 bg-surface px-3 py-1.5 text-xs font-medium text-danger transition-colors duration-200 hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-40"
-                                            title={canRevoke ? "Révoquer" : "Déjà inactive"}
-                                        >
-                                            <Trash2 size={13} /> Révoquer
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                        {listQ.isSuccess && (listQ.data ?? []).length === 0 && (
+            <div style={{ borderRadius: 16, border: "1px solid var(--v-border)", overflow: "hidden", background: "color-mix(in srgb, var(--v-surface) 82%, transparent)" }}>
+                <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <thead style={{ background: "var(--v-surface-2)" }}>
                             <tr>
-                                <td colSpan={6} className="px-6 py-12 text-center text-sm text-fg-muted">
-                                    Aucune invitation. Générez-en une ci-dessus.
-                                </td>
+                                <th style={th}>Type</th>
+                                <th style={th}>Statut</th>
+                                <th style={th}>Usages</th>
+                                <th style={th}>Expiration</th>
+                                <th style={th}>Créée le</th>
+                                <th style={{ ...th, textAlign: "right" }}>Actions</th>
                             </tr>
-                        )}
-                        {listQ.isLoading && (
-                            <tr><td colSpan={6} className="px-6 py-12 text-center text-sm text-fg-muted">Chargement…</td></tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {invites.map(i => {
+                                const st = inviteStatus(i);
+                                const tm = TYPE_META[i.type];
+                                const canRevoke = !i.isRevoked && !i.isExpired;
+                                return (
+                                    <tr key={i.id} className="v-row" style={{ borderTop: "1px solid var(--v-border)" }}>
+                                        <td style={td}>
+                                            <span style={pill(tm.color)}>{tm.short}</span>
+                                            {i.tenantName && <span style={{ marginLeft: 8, fontSize: 12, color: "var(--v-text-2)" }}>{i.tenantName}</span>}
+                                        </td>
+                                        <td style={td}><span style={pill(st.color)}>{st.label}</span></td>
+                                        <td style={td}>{i.usedCount} / {i.maxUses}</td>
+                                        <td style={td}>{fmt(i.expiresAt)}</td>
+                                        <td style={{ ...td, color: "var(--v-text-2)" }}>{fmt(i.createdAt)}</td>
+                                        <td style={{ ...td, textAlign: "right" }}>
+                                            <button type="button" disabled={!canRevoke || revokeM.isPending}
+                                                onClick={() => { if (confirm("Révoquer cette invitation ? Elle ne pourra plus être utilisée.")) revokeM.mutate(i.id); }}
+                                                title={canRevoke ? "Révoquer" : "Déjà inactive"}
+                                                style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8, padding: "6px 12px", fontSize: 12.5, fontWeight: 600, cursor: canRevoke ? "pointer" : "not-allowed", opacity: canRevoke ? 1 : 0.4, color: "var(--v-danger)", background: "color-mix(in srgb, var(--v-danger) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--v-danger) 40%, transparent)", transition: "background-color .15s ease" }}>
+                                                <Trash2 size={13} /> Révoquer
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {listQ.isSuccess && invites.length === 0 && (
+                                <tr><td colSpan={6} style={{ ...td, textAlign: "center", padding: "48px 20px", color: "var(--v-text-2)" }}>Aucune invitation. Générez-en une ci-dessus.</td></tr>
+                            )}
+                            {listQ.isLoading && (
+                                <tr><td colSpan={6} style={{ ...td, textAlign: "center", padding: "48px 20px", color: "var(--v-text-2)" }}>Chargement…</td></tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }

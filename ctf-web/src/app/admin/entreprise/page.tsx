@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Building2, Copy, Check, QrCode, KeyRound, ShieldCheck, Users, Save, ExternalLink, AlertCircle,
 } from "lucide-react";
 import InvitesManager from "@/components/invites/InvitesManager";
 import Reveal from "@/components/Reveal";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import { VisionSection, VisionField, VisionInput, VisionTextarea, VisionButton, VisionToggle } from "@/components/vision/VisionForm";
 import { useTenantSettings, useUpdateTenantSettings } from "@/lib/hooks/useTenantSettings";
 import type { TenantSettings } from "@/lib/types/tenantSettings";
 
@@ -14,10 +17,18 @@ export default function EntreprisePage() {
     const { data, isLoading, isError } = useTenantSettings();
 
     if (isLoading) {
-        return <div className="px-6 py-12 text-center text-sm text-fg-muted">Chargement…</div>;
+        return (
+            <div className="vision-dashboard" style={{ minHeight: "100%" }}>
+                <div style={{ padding: "48px 20px", textAlign: "center", fontSize: 14, color: "var(--v-text-2)" }}>Chargement…</div>
+            </div>
+        );
     }
     if (isError || !data) {
-        return <div className="px-6 py-12 text-center text-sm text-danger">Impossible de charger les paramètres.</div>;
+        return (
+            <div className="vision-dashboard" style={{ minHeight: "100%" }}>
+                <div style={{ padding: "48px 20px", textAlign: "center", fontSize: 14, color: "var(--v-danger)" }}>Impossible de charger les paramètres.</div>
+            </div>
+        );
     }
     return <EntrepriseForm initial={data} />;
 }
@@ -62,160 +73,153 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
     }
 
     return (
-        <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-            <div>
-                <h1 className="text-2xl font-bold text-fg-heading">Paramètres entreprise</h1>
-                <p className="mt-1 text-sm text-fg-muted">
-                    Configuration générale de votre organisation. Réservé aux administrateurs ; chaque admin
-                    ne gère que sa propre entreprise.
-                </p>
-            </div>
-
-            <Reveal>
-            {/* 1. INFOS ENTREPRISE */}
-            <Section icon={<Building2 size={15} />} title="Infos entreprise">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Nom de l'entreprise">
-                        <input value={name} onChange={e => setName(e.target.value)} className={inputCls} />
-                    </Field>
-                    <Field label="Secteur d'activité">
-                        <input value={sector} onChange={e => setSector(e.target.value)} placeholder="ex. Santé, Finance…" className={inputCls} />
-                    </Field>
-                </div>
-                <Field label="Description">
-                    <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
-                        placeholder="Quelques mots sur votre organisation (optionnel)" className={`${inputCls} resize-y`} />
-                </Field>
-                <Field label="Identifiant entreprise (TenantId)">
-                    <div className="flex items-center gap-2">
-                        <input readOnly value={initial.tenantId} onFocus={e => e.currentTarget.select()}
-                            className={`${inputCls} flex-1 font-mono text-xs`} />
-                        <button type="button" onClick={copyTenantId}
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-fg-body transition-colors duration-200 hover:bg-surface-2">
-                            {copied ? <><Check size={13} className="text-success" /> Copié</> : <><Copy size={13} /> Copier</>}
-                        </button>
+        <div className="vision-dashboard" style={{ minHeight: "100%" }}>
+            <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 20px 100px" }}>
+                <Reveal>
+                    <div style={{ marginBottom: 20 }}>
+                        <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--v-text)", letterSpacing: "-0.02em" }}>Paramètres entreprise</h1>
+                        <p style={{ marginTop: 6, fontSize: 13.5, color: "var(--v-text-2)", lineHeight: 1.55, maxWidth: 640 }}>
+                            Configuration générale de votre organisation. Réservé aux administrateurs ; chaque admin ne gère que sa propre entreprise.
+                        </p>
                     </div>
-                    <p className="mt-1 text-xs text-fg-muted">À partager pour rattacher manuellement un membre (alternative au QR code).</p>
-                </Field>
-            </Section>
+                </Reveal>
 
-            </Reveal>
+                <Stagger className="flex flex-col gap-5" gap={0.06}>
+                    {/* 1. INFOS ENTREPRISE */}
+                    <StaggerItem>
+                        <VisionSection icon={<Building2 size={17} />} title="Infos entreprise">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <VisionField label="Nom de l'entreprise">
+                                    <VisionInput value={name} onChange={e => setName(e.target.value)} />
+                                </VisionField>
+                                <VisionField label="Secteur d'activité">
+                                    <VisionInput value={sector} onChange={e => setSector(e.target.value)} placeholder="ex. Santé, Finance…" />
+                                </VisionField>
+                            </div>
+                            <VisionField label="Description">
+                                <VisionTextarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+                                    placeholder="Quelques mots sur votre organisation (optionnel)" />
+                            </VisionField>
+                            <VisionField label="Identifiant entreprise (TenantId)"
+                                hint="À partager pour rattacher manuellement un membre (alternative au QR code).">
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <VisionInput readOnly value={initial.tenantId} onFocus={e => e.currentTarget.select()}
+                                        style={{ flex: 1, fontFamily: "ui-monospace, monospace", fontSize: 12.5 }} />
+                                    <CopyButton copied={copied} onCopy={copyTenantId} />
+                                </div>
+                            </VisionField>
+                        </VisionSection>
+                    </StaggerItem>
 
-            <Reveal delay={0.05}>
-            {/* 2. INVITATIONS / QR — composant réutilisé */}
-            <Section icon={<QrCode size={15} />} title="Invitations par QR code"
-                desc="Générez un lien/QR sécurisé (durée + usages limités, révocable) pour faire rejoindre votre entreprise.">
-                <InvitesManager />
-            </Section>
+                    {/* 2. INVITATIONS / QR — composant réutilisé */}
+                    <StaggerItem>
+                        <VisionSection icon={<QrCode size={17} />} title="Invitations par QR code"
+                            desc="Générez un lien/QR sécurisé (durée + usages limités, révocable) pour faire rejoindre votre entreprise.">
+                            <InvitesManager />
+                        </VisionSection>
+                    </StaggerItem>
 
-            </Reveal>
+                    {/* 3. SSO */}
+                    <StaggerItem>
+                        <VisionSection icon={<KeyRound size={17} />} title="Connexions SSO"
+                            desc="Autorisez la connexion de vos membres via Google ou Microsoft.">
+                            <ToggleRow
+                                label="Connexion Google"
+                                desc={initial.googleSsoConfigured ? "Configuré sur le serveur." : "Non configuré côté serveur — sans effet tant que les clés ne sont pas posées."}
+                                configured={initial.googleSsoConfigured}
+                                on={googleSso} onChange={setGoogleSso}
+                            />
+                            <ToggleRow
+                                label="Connexion Microsoft"
+                                desc={initial.microsoftSsoConfigured ? "Configuré sur le serveur." : "Non configuré côté serveur — sans effet tant que les clés ne sont pas posées."}
+                                configured={initial.microsoftSsoConfigured}
+                                on={microsoftSso} onChange={setMicrosoftSso}
+                            />
+                        </VisionSection>
+                    </StaggerItem>
 
-            <Reveal delay={0.1}>
-            {/* 3. SSO */}
-            <Section icon={<KeyRound size={15} />} title="Connexions SSO"
-                desc="Autorisez la connexion de vos membres via Google ou Microsoft.">
-                <ToggleRow
-                    label="Connexion Google"
-                    desc={initial.googleSsoConfigured ? "Configuré sur le serveur." : "Non configuré côté serveur — sans effet tant que les clés ne sont pas posées."}
-                    configured={initial.googleSsoConfigured}
-                    on={googleSso} onChange={setGoogleSso}
-                />
-                <ToggleRow
-                    label="Connexion Microsoft"
-                    desc={initial.microsoftSsoConfigured ? "Configuré sur le serveur." : "Non configuré côté serveur — sans effet tant que les clés ne sont pas posées."}
-                    configured={initial.microsoftSsoConfigured}
-                    on={microsoftSso} onChange={setMicrosoftSso}
-                />
-            </Section>
+                    {/* 4. SÉCURITÉ */}
+                    <StaggerItem>
+                        <VisionSection icon={<ShieldCheck size={17} />} title="Sécurité">
+                            <p style={{ fontSize: 14, color: "var(--v-text)", lineHeight: 1.6 }}>
+                                La <strong>double authentification par email (2FA)</strong> est disponible et activable par chaque membre
+                                depuis ses paramètres personnels (Profil → Sécurité). Encouragez vos équipes à l&apos;activer.
+                            </p>
+                            <ul style={{ margin: 0, paddingLeft: 20, listStyle: "disc", display: "flex", flexDirection: "column", gap: 4, fontSize: 13.5, color: "var(--v-text-2)", lineHeight: 1.5 }}>
+                                <li>Mots de passe forts (8+ caractères, majuscule, chiffre, caractère spécial) — déjà imposé.</li>
+                                <li>2FA email recommandée pour les comptes admin.</li>
+                                <li>Révoquez les invitations QR inutilisées et limitez leur durée de validité.</li>
+                            </ul>
+                            <Link href="/dashboard/parametres" className="v-link"
+                                style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, fontWeight: 600, color: "var(--v-accent)", width: "fit-content" }}>
+                                Gérer ma propre 2FA <ExternalLink size={13} />
+                            </Link>
+                        </VisionSection>
+                    </StaggerItem>
 
-            </Reveal>
+                    {/* 5. ÉQUIPES */}
+                    <StaggerItem>
+                        <VisionSection icon={<Users size={17} />} title="Équipes"
+                            desc={`${initial.teamsCount} équipe${initial.teamsCount > 1 ? "s" : ""} dans votre entreprise.`}>
+                            {initial.teamsModeEnabled ? (
+                                <>
+                                    <ToggleRow
+                                        label="Équipes ouvertes par défaut"
+                                        desc="Les nouvelles équipes seront rejoignables librement par les membres (au lieu d'être sur invitation de l'admin)."
+                                        on={teamsOpen} onChange={setTeamsOpen}
+                                    />
+                                    <Link href="/admin/teams" className="v-link"
+                                        style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, fontWeight: 600, color: "var(--v-accent)", width: "fit-content" }}>
+                                        Gérer les équipes <ExternalLink size={13} />
+                                    </Link>
+                                </>
+                            ) : (
+                                <p style={{ fontSize: 13.5, color: "var(--v-text-2)", lineHeight: 1.55 }}>
+                                    Le mode Équipes est désactivé pour votre entreprise. Activez-le dans Administration → Paramètres (modes).
+                                </p>
+                            )}
+                        </VisionSection>
+                    </StaggerItem>
+                </Stagger>
 
-            <Reveal delay={0.15}>
-            {/* 4. SÉCURITÉ */}
-            <Section icon={<ShieldCheck size={15} />} title="Sécurité">
-                <p className="text-sm text-fg-body">
-                    La <strong>double authentification par email (2FA)</strong> est disponible et activable par
-                    chaque membre depuis ses paramètres personnels (Profil → Sécurité). Encouragez vos équipes
-                    à l’activer.
-                </p>
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
-                    <li>Mots de passe forts (8+ caractères, majuscule, chiffre, caractère spécial) — déjà imposé.</li>
-                    <li>2FA email recommandée pour les comptes admin.</li>
-                    <li>Révoquez les invitations QR inutilisées et limitez leur durée de validité.</li>
-                </ul>
-                <Link href="/dashboard/parametres"
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors duration-200 hover:text-primary-hover">
-                    Gérer ma propre 2FA <ExternalLink size={13} />
-                </Link>
-            </Section>
-
-            </Reveal>
-
-            <Reveal delay={0.2}>
-            {/* 5. ÉQUIPES */}
-            <Section icon={<Users size={15} />} title="Équipes"
-                desc={`${initial.teamsCount} équipe${initial.teamsCount > 1 ? "s" : ""} dans votre entreprise.`}>
-                {initial.teamsModeEnabled ? (
-                    <>
-                        <ToggleRow
-                            label="Équipes ouvertes par défaut"
-                            desc="Les nouvelles équipes seront rejoignables librement par les membres (au lieu d'être sur invitation de l'admin)."
-                            on={teamsOpen} onChange={setTeamsOpen}
-                        />
-                        <Link href="/admin/teams"
-                            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors duration-200 hover:text-primary-hover">
-                            Gérer les équipes <ExternalLink size={13} />
-                        </Link>
-                    </>
-                ) : (
-                    <p className="text-sm text-fg-muted">
-                        Le mode Équipes est désactivé pour votre entreprise. Activez-le dans Administration → Paramètres (modes).
-                    </p>
-                )}
-            </Section>
-
-            </Reveal>
-
-            {/* Barre d'enregistrement */}
-            <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-border bg-surface/90 p-3 shadow-sm backdrop-blur-md">
-                {toast && (
-                    <span className="flex items-center gap-1.5 text-sm text-fg-body">
-                        {update.isError ? <AlertCircle size={14} className="text-danger" /> : <Check size={14} className="text-success" />}
-                        {toast}
-                    </span>
-                )}
-                <button type="button" onClick={save} disabled={update.isPending || !name.trim()}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50">
-                    <Save size={14} /> {update.isPending ? "Enregistrement…" : "Enregistrer les modifications"}
-                </button>
+                {/* Barre d'enregistrement */}
+                <div style={{ position: "sticky", bottom: 16, marginTop: 20, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 12, borderRadius: 16, border: "1px solid var(--v-border)", background: "color-mix(in srgb, var(--v-surface) 88%, transparent)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", padding: 12, boxShadow: "0 8px 30px rgba(0,0,0,0.3)" }}>
+                    <AnimatePresence>
+                        {toast && (
+                            <motion.span initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+                                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5, color: update.isError ? "var(--v-danger)" : "var(--v-text)" }}>
+                                {update.isError ? <AlertCircle size={14} style={{ color: "var(--v-danger)" }} /> : <Check size={14} style={{ color: "var(--v-success)" }} />}
+                                {toast}
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
+                    <VisionButton type="button" onClick={save} disabled={update.isPending || !name.trim()}>
+                        <Save size={14} /> {update.isPending ? "Enregistrement…" : "Enregistrer les modifications"}
+                    </VisionButton>
+                </div>
             </div>
         </div>
     );
 }
 
-// ── UI helpers (charte admin claire) ───────────────────────────────────────────
-const inputCls = "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg-heading transition-colors duration-200 focus:border-primary focus:outline-none";
-
-function Section({ icon, title, desc, children }: {
-    icon: React.ReactNode; title: string; desc?: string; children: React.ReactNode;
-}) {
+// Bouton « Copier » avec feedback animé (check vert Vision, pas de vert cyber).
+function CopyButton({ copied, onCopy }: { copied: boolean; onCopy: () => void }) {
     return (
-        <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-fg-body">
-                {icon} {title}
-            </h2>
-            {desc && <p className="mt-1 text-sm text-fg-muted">{desc}</p>}
-            <div className="mt-4 flex flex-col gap-4">{children}</div>
-        </section>
-    );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-    return (
-        <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-fg-body">{label}</span>
-            {children}
-        </label>
+        <VisionButton variant="secondary" type="button" onClick={onCopy} style={{ flexShrink: 0, minWidth: 108 }}>
+            <AnimatePresence mode="wait" initial={false}>
+                {copied ? (
+                    <motion.span key="ok" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }} transition={{ duration: 0.18 }}
+                        style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--v-success)" }}>
+                        <Check size={14} /> Copié !
+                    </motion.span>
+                ) : (
+                    <motion.span key="copy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
+                        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <Copy size={14} /> Copier
+                    </motion.span>
+                )}
+            </AnimatePresence>
+        </VisionButton>
     );
 }
 
@@ -223,22 +227,19 @@ function ToggleRow({ label, desc, on, onChange, configured = true }: {
     label: string; desc?: string; on: boolean; onChange: (v: boolean) => void; configured?: boolean;
 }) {
     return (
-        <div className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-0 last:pb-0">
-            <div className="min-w-0">
-                <div className="flex items-center gap-2 text-sm font-medium text-fg-heading">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, borderBottom: "1px solid var(--v-border)", paddingBottom: 14 }} className="v-togglerow">
+            <div style={{ minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: "var(--v-text)" }}>
                     {label}
                     {!configured && (
-                        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fg-muted">
+                        <span style={{ borderRadius: 999, background: "var(--v-surface-2)", padding: "2px 8px", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--v-text-2)" }}>
                             non configuré
                         </span>
                     )}
                 </div>
-                {desc && <div className="mt-0.5 text-xs text-fg-muted">{desc}</div>}
+                {desc && <div style={{ marginTop: 3, fontSize: 12.5, color: "var(--v-text-2)", lineHeight: 1.5 }}>{desc}</div>}
             </div>
-            <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)}
-                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${on ? "bg-primary" : "bg-surface-2"}`}>
-                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface transition-all duration-200 ${on ? "left-[22px]" : "left-0.5"}`} />
-            </button>
+            <VisionToggle on={on} onChange={onChange} />
         </div>
     );
 }
