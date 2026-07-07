@@ -1,7 +1,7 @@
 "use client";
 
 // Analytics admin — 3 onglets Entreprise / Groupe / Individuel.
-// Cette passe : onglet ENTREPRISE uniquement (vraies données du tenant). Groupe/Individuel = placeholder.
+// Entreprise + Groupe implémentés (vraies données du tenant). Individuel = placeholder.
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +13,7 @@ import VisionAreaChart from "@/components/vision/VisionAreaChart";
 import VisionGauge from "@/components/vision/VisionGauge";
 import {
     AlertTriangle, Users2, UserCheck, UserX, CheckCircle2, Activity,
-    Download, BarChart3, Lock,
+    Download, BarChart3, Lock, ArrowLeft, ChevronRight,
 } from "lucide-react";
 
 type WeakTopic = { theme: string; avgScore: number; completionRate: number; mastery: number; completions: number };
@@ -21,6 +21,8 @@ type WeakTopics = { topics: WeakTopic[]; themesEvaluated: number };
 type RiskPoint = { label: string; value: number };
 type Risk = { globalScore: number | null; band: string; trend: RiskPoint[]; usersScored: number };
 type Engagement = { totalUsers: number; active7d: number; active30d: number; neverConnected: number; participationRate: number; totalCompletions: number; avgCompletionsPerActiveUser: number };
+type GroupRow = { teamId: string; team: string; memberCount: number; mastery: number; avgScore: number; completionRate: number; avgRisk: number | null; riskBand: string; participationRate: number };
+type Groups = { groups: GroupRow[] };
 
 function GlassCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
     return (
@@ -29,13 +31,13 @@ function GlassCard({ children, style }: { children: React.ReactNode; style?: Rea
         </div>
     );
 }
-
 function EmptyState({ label }: { label: string }) {
     return <div style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 13, color: "var(--v-text-3)", padding: 16 }}>{label}</div>;
 }
 function SkelBlock({ h }: { h: number }) {
     return <div style={{ height: h, borderRadius: 16, background: "var(--v-surface-2)", opacity: 0.6 }} />;
 }
+function masteryColor(m: number) { return m < 40 ? "var(--danger)" : m < 60 ? "var(--warning)" : "var(--v-accent)"; }
 
 export default function AnalyticsPage() {
     const [tab, setTab] = useState<"entreprise" | "groupe" | "individuel">("entreprise");
@@ -80,11 +82,12 @@ export default function AnalyticsPage() {
                     ))}
                 </div>
 
-                {tab === "entreprise" && <EntrepriseTab />}
-                {tab !== "entreprise" && (
+                {tab === "entreprise" && <AnalyticsDetail basePath="/api/analytics/enterprise" keyPrefix="ent" showExport />}
+                {tab === "groupe" && <GroupeTab />}
+                {tab === "individuel" && (
                     <GlassCard style={{ textAlign: "center", padding: 56 }}>
                         <Activity size={26} style={{ color: "var(--v-text-3)" }} />
-                        <h2 style={{ marginTop: 12, fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Vue {tab === "groupe" ? "Groupe" : "Individuelle"}</h2>
+                        <h2 style={{ marginTop: 12, fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Vue Individuelle</h2>
                         <p style={{ marginTop: 6, fontSize: 14, color: "var(--v-text-2)" }}>Bientôt disponible.</p>
                     </GlassCard>
                 )}
@@ -93,18 +96,76 @@ export default function AnalyticsPage() {
     );
 }
 
-function EntrepriseTab() {
+// ── Onglet GROUPE : classement des équipes + drill-down ───────────────────────
+function GroupeTab() {
+    const [selected, setSelected] = useState<GroupRow | null>(null);
+    const groupsQ = useQuery<Groups>({ queryKey: ["groups"], queryFn: () => apiFetch("/api/analytics/groups") });
+
+    if (selected) {
+        return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <button onClick={() => setSelected(null)} style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: "var(--v-text-2)", background: "transparent", border: "1px solid var(--v-border)", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}>
+                    <ArrowLeft size={15} /> Toutes les équipes
+                </button>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: "var(--v-text)" }}>{selected.team} <span style={{ fontSize: 13, fontWeight: 400, color: "var(--v-text-3)" }}>· {selected.memberCount} membre{selected.memberCount > 1 ? "s" : ""}</span></h2>
+                <AnalyticsDetail basePath={`/api/analytics/groups/${selected.teamId}`} keyPrefix={`grp-${selected.teamId}`} />
+            </div>
+        );
+    }
+
+    return (
+        <Reveal>
+            <GlassCard>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Classement des équipes</h2>
+                <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 16 }}>De la plus faible à la plus forte (maîtrise = score × complétion). Cliquez une équipe pour son détail.</p>
+                {groupsQ.isLoading ? <SkelBlock h={200} />
+                    : (groupsQ.data && groupsQ.data.groups.length > 0)
+                        ? <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                            {groupsQ.data.groups.map((g, i) => <GroupRowCard key={g.teamId} rank={i + 1} g={g} onClick={() => setSelected(g)} />)}
+                        </div>
+                        : <EmptyState label="Aucune équipe pour le moment. Créez des équipes et assignez-y des membres pour voir leurs analytics." />}
+            </GlassCard>
+        </Reveal>
+    );
+}
+
+function GroupRowCard({ rank, g, onClick }: { rank: number; g: GroupRow; onClick: () => void }) {
+    const color = masteryColor(g.mastery);
+    return (
+        <button onClick={onClick} className="v-hover" style={{ textAlign: "left", display: "flex", alignItems: "center", gap: 14, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 14, padding: "12px 16px", cursor: "pointer", width: "100%" }}>
+            <span style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, background: "color-mix(in srgb, " + color + " 16%, transparent)", color }}>{rank}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.team}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color, flexShrink: 0 }}>{g.mastery}<span style={{ fontSize: 11, color: "var(--v-text-3)" }}> /100</span></span>
+                </div>
+                <div style={{ height: 6, background: "var(--v-surface)", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ width: `${g.mastery}%`, height: "100%", background: color, borderRadius: 999 }} />
+                </div>
+                <div style={{ display: "flex", gap: 14, marginTop: 6, fontSize: 11, color: "var(--v-text-3)", flexWrap: "wrap" }}>
+                    <span>{g.memberCount} membre{g.memberCount > 1 ? "s" : ""}</span>
+                    <span>Participation&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{g.participationRate}%</b></span>
+                    <span>Risque&nbsp;: <b style={{ color: "var(--v-text-2)" }}>{g.avgRisk != null ? `${g.avgRisk} (${g.riskBand})` : "—"}</b></span>
+                </div>
+            </div>
+            <ChevronRight size={16} style={{ color: "var(--v-text-3)", flexShrink: 0 }} />
+        </button>
+    );
+}
+
+// ── Blocs analytics réutilisables (Entreprise OU équipe scopée) ───────────────
+function AnalyticsDetail({ basePath, keyPrefix, showExport = false }: { basePath: string; keyPrefix: string; showExport?: boolean }) {
     const [months, setMonths] = useState(6);
     const [exporting, setExporting] = useState(false);
 
-    const weakQ = useQuery<WeakTopics>({ queryKey: ["ent", "weak"], queryFn: () => apiFetch("/api/analytics/enterprise/weak-topics?top=5") });
-    const riskQ = useQuery<Risk>({ queryKey: ["ent", "risk", months], queryFn: () => apiFetch(`/api/analytics/enterprise/risk?months=${months}`) });
-    const engQ = useQuery<Engagement>({ queryKey: ["ent", "eng"], queryFn: () => apiFetch("/api/analytics/enterprise/engagement") });
+    const weakQ = useQuery<WeakTopics>({ queryKey: [keyPrefix, "weak"], queryFn: () => apiFetch(`${basePath}/weak-topics?top=5`) });
+    const riskQ = useQuery<Risk>({ queryKey: [keyPrefix, "risk", months], queryFn: () => apiFetch(`${basePath}/risk?months=${months}`) });
+    const engQ = useQuery<Engagement>({ queryKey: [keyPrefix, "eng"], queryFn: () => apiFetch(`${basePath}/engagement`) });
 
     async function handleExport() {
         setExporting(true);
         try {
-            const res = await fetch(`/api/analytics/enterprise/export?months=${months}`, { credentials: "include" });
+            const res = await fetch(`${basePath}/export?months=${months}`, { credentials: "include" });
             if (!res.ok) throw new Error("export");
             const blob = await res.blob();
             const url = URL.createObjectURL(blob);
@@ -119,7 +180,6 @@ function EntrepriseTab() {
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            {/* Barre période + export */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <span style={{ fontSize: 12, color: "var(--v-text-3)" }}>Période :</span>
@@ -132,14 +192,16 @@ function EntrepriseTab() {
                         }}>{m} mois</button>
                     ))}
                 </div>
-                <button onClick={handleExport} disabled={exporting} style={{
-                    display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600,
-                    padding: "8px 16px", borderRadius: 10, cursor: exporting ? "default" : "pointer",
-                    background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)",
-                    border: "none", boxShadow: "0 6px 16px color-mix(in srgb, var(--v-accent) 40%, transparent)", opacity: exporting ? 0.7 : 1,
-                }}>
-                    <Download size={15} /> {exporting ? "Export…" : "Exporter (CSV)"}
-                </button>
+                {showExport && (
+                    <button onClick={handleExport} disabled={exporting} style={{
+                        display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600,
+                        padding: "8px 16px", borderRadius: 10, cursor: exporting ? "default" : "pointer",
+                        background: "linear-gradient(135deg, var(--v-accent), var(--v-accent-2))", color: "var(--v-text)",
+                        border: "none", boxShadow: "0 6px 16px color-mix(in srgb, var(--v-accent) 40%, transparent)", opacity: exporting ? 0.7 : 1,
+                    }}>
+                        <Download size={15} /> {exporting ? "Export…" : "Exporter (CSV)"}
+                    </button>
+                )}
             </div>
 
             {/* BLOC PHARE — Points faibles à renforcer */}
@@ -151,7 +213,7 @@ function EntrepriseTab() {
                         </span>
                         <div>
                             <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--v-text)" }}>Points faibles à renforcer</h2>
-                            <p style={{ fontSize: 12, color: "var(--v-text-3)" }}>Thèmes où votre organisation est la plus faible (score × taux de complétion)</p>
+                            <p style={{ fontSize: 12, color: "var(--v-text-3)" }}>Thèmes les plus faibles (score × taux de complétion)</p>
                         </div>
                     </div>
                     {weakQ.isLoading ? <div style={{ marginTop: 16 }}><SkelBlock h={180} /></div>
@@ -163,19 +225,17 @@ function EntrepriseTab() {
                 </GlassCard>
             </Reveal>
 
-            {/* Risque cyber global + courbe */}
+            {/* Risque global + courbe */}
             <Reveal>
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                     <div className="lg:col-span-1">
                         <GlassCard>
-                            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 4 }}>Risque cyber global</h2>
+                            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 4 }}>Risque cyber</h2>
                             <p style={{ fontSize: 12, color: "var(--v-text-3)", marginBottom: 8 }}>{risk ? `${risk.usersScored} utilisateur${risk.usersScored > 1 ? "s" : ""} évalué${risk.usersScored > 1 ? "s" : ""}` : " "}</p>
                             {riskQ.isLoading ? <SkelBlock h={200} />
                                 : (risk && risk.globalScore != null)
-                                    ? <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-                                        <VisionGauge value={risk.globalScore} band={risk.band} />
-                                    </div>
-                                    : <EmptyState label="Aucun score de risque calculé pour le moment." />}
+                                    ? <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}><VisionGauge value={risk.globalScore} band={risk.band} /></div>
+                                    : <EmptyState label="Aucun score de risque calculé." />}
                         </GlassCard>
                     </div>
                     <div className="lg:col-span-2">
@@ -195,9 +255,7 @@ function EntrepriseTab() {
             <Reveal>
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--v-text)", marginBottom: 12 }}>Engagement</h2>
                 {engQ.isLoading ? (
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        {[0, 1, 2, 3].map(i => <SkelBlock key={i} h={112} />)}
-                    </div>
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[0, 1, 2, 3].map(i => <SkelBlock key={i} h={112} />)}</div>
                 ) : (
                     <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4" gap={0.06}>
                         <StaggerItem><VisionKpiCard value={eng?.active7d ?? 0} label="Actifs 7 jours" icon={UserCheck} hint={eng ? `sur ${eng.totalUsers}` : ""} /></StaggerItem>
@@ -212,7 +270,7 @@ function EntrepriseTab() {
 }
 
 function WeakRow({ rank, t }: { rank: number; t: WeakTopic }) {
-    const color = t.mastery < 40 ? "var(--danger)" : t.mastery < 60 ? "var(--warning)" : "var(--v-accent)";
+    const color = masteryColor(t.mastery);
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 14, background: "var(--v-surface-2)", border: "1px solid var(--v-border)", borderRadius: 14, padding: "12px 16px" }}>
             <span style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, background: "color-mix(in srgb, " + color + " 16%, transparent)", color }}>{rank}</span>

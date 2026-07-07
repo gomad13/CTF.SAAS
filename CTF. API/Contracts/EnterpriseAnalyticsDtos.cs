@@ -31,3 +31,18 @@ public record EnterpriseEngagementDto(
     int TotalCompletions,
     int AvgCompletionsPerActiveUser
 );
+
+// ── Onglet GROUPE (analytics par équipe) ──────────────────────────────────
+/// <summary>Une équipe et ses métriques agrégées (pour le classement des groupes).</summary>
+public record GroupRowDto(
+    string TeamId,
+    string Team,
+    int MemberCount,
+    int Mastery,            // maîtrise combinée équipe (bas = faible)
+    int AvgScore,
+    int CompletionRate,
+    int? AvgRisk,           // risque moyen des membres (null si aucun score)
+    string RiskBand,
+    int ParticipationRate
+);
+public record GroupsComparisonDto(List<GroupRowDto> Groups);
