@@ -213,6 +213,54 @@ public class AdminCatalogController : ControllerBase
         return Ok(items);
     }
 
+    // ── GET /api/admin/catalog/{pathId}/fiche — vitrine STATIQUE lecture seule ──
+    // Contenu réel du parcours pour la fiche immersive (modules, thèmes, exemple). Aucune réponse exposée.
+    [HttpGet("{pathId:guid}/fiche")]
+    public async Task<IActionResult> GetFiche(Guid pathId, CancellationToken ct)
+    {
+        if (CurrentTenantId() == Guid.Empty) return Unauthorized();
+
+        var path = await _db.Paths.AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == pathId && p.IsCatalog && p.Status != "archived", ct);
+        if (path is null) return NotFound();
+
+        var modules = await _db.Modules.AsNoTracking()
+            .Where(m => m.PathId == pathId).OrderBy(m => m.SortOrder)
+            .Select(m => new { m.Id, m.Title, m.SortOrder }).ToListAsync(ct);
+        var moduleIds = modules.Select(m => m.Id).ToList();
+
+        var challenges = await _db.Challenges.AsNoTracking()
+            .Where(c => moduleIds.Contains(c.ModuleId) && c.Status == "published")
+            .Select(c => new { c.ModuleId, c.Title, c.Instructions, c.InstructionTitle, c.InstructionBody, c.InstructionShortReminder, c.Category, c.SortOrder })
+            .ToListAsync(ct);
+
+        var moduleDtos = modules
+            .Select(m => new CatalogFicheModuleDto(m.Title, challenges.Count(c => c.ModuleId == m.Id)))
+            .ToList();
+
+        var themes = challenges
+            .Where(c => !string.IsNullOrWhiteSpace(c.Category))
+            .GroupBy(c => c.Category!.Trim().ToLowerInvariant())
+            .Select(g => g.First().Category!.Trim())
+            .Take(12).ToList();
+
+        var order = modules.ToDictionary(m => m.Id, m => m.SortOrder);
+        var example = challenges
+            .OrderBy(c => order.GetValueOrDefault(c.ModuleId, 0)).ThenBy(c => c.SortOrder)
+            .Select(c => new CatalogFicheExampleDto(
+                string.IsNullOrWhiteSpace(c.InstructionTitle) ? c.Title : c.InstructionTitle!,
+                Trunc(FirstNonEmpty(c.InstructionBody, c.InstructionShortReminder, c.Instructions), 320),
+                c.Category))
+            .FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.Body));
+
+        return Ok(new CatalogFicheDto(
+            path.Id, path.Title, path.Description, path.Level, path.Sector, path.EstimatedMinutes, path.Tags,
+            modules.Count, challenges.Count, moduleDtos, themes, example));
+    }
+
+    private static string FirstNonEmpty(params string?[] xs) => xs.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "";
+    private static string Trunc(string s, int n) => s.Length <= n ? s : s.Substring(0, n).TrimEnd() + "…";
+
     // ── Helper : propagation Assignments lors d'activation globale ───────────
     private async Task PropagateToAllUsersAsync(Guid tenantId, Guid pathId, Guid adminId, DateTime now, CancellationToken ct)
     {
@@ -257,3 +305,21 @@ public record AdminCatalogItemDto(
 );
 
 public record ActivatePathDto(string Mode); // "global" | "teams_only"
+
+// ── Fiche vitrine (lecture seule) : contenu réel du parcours, sans réponses ──
+public record CatalogFicheModuleDto(string Title, int ChallengeCount);
+public record CatalogFicheExampleDto(string Title, string Body, string? Category);
+public record CatalogFicheDto(
+    Guid Id,
+    string Title,
+    string? Description,
+    string? Level,
+    string? Sector,
+    int? EstimatedMinutes,
+    string? Tags,
+    int ModuleCount,
+    int ChallengeCount,
+    List<CatalogFicheModuleDto> Modules,
+    List<string> Themes,
+    CatalogFicheExampleDto? Example
+);

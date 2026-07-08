@@ -362,6 +362,9 @@ img,svg,video,canvas{max-width:100%;height:auto}
 .vision-dashboard .v-link:hover{color:color-mix(in srgb,var(--v-accent) 72%,var(--v-text))}
 .vision-dashboard .v-row{transition:background-color .15s ease}
 .vision-dashboard .v-row:hover{background:var(--v-surface-2)}
+/* Carte catalogue : hover scale léger + surface éclaircie + ombre. */
+.vision-dashboard .v-catcard{transition:transform .15s ease,background-color .15s ease,border-color .15s ease,box-shadow .15s ease}
+.vision-dashboard .v-catcard:hover{transform:scale(1.02);background:var(--v-surface-2);border-color:color-mix(in srgb,var(--v-accent) 45%,var(--v-border));box-shadow:0 12px 40px rgba(0,0,0,.35)}
 /* Boutons d'action de tableau (Voir/Éditer/Supprimer) — hover non adressable en inline. */
 .vision-dashboard .v-act{transition:background-color .15s ease,border-color .15s ease,color .15s ease}
 .vision-dashboard .v-act:hover{background:var(--v-surface-2);border-color:color-mix(in srgb,var(--v-accent) 55%,var(--v-border));color:var(--v-accent)}
