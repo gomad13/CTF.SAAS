@@ -52,3 +52,9 @@ export type Podium = {
     second: ScoreboardEntry | null;
     third: ScoreboardEntry | null;
 };
+
+// Classement nominatif complet — réservé admin (finalité rappelée dans `purpose`).
+export type AdminLeaderboard = {
+    purpose: string;
+    ranking: ScoreboardPage;
+};

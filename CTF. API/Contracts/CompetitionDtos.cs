@@ -75,3 +75,10 @@ public record ToggleCompetitionResponseDto(
     DateTime UpdatedAt,
     Guid UpdatedBy
 );
+
+// ── Classement nominatif COMPLET — RÉSERVÉ ADMIN (RGPD : non exposé aux membres) ──
+// Purpose = rappel de finalité/usage licite (suivi pédagogique), consigné et affiché.
+public record AdminLeaderboardDto(
+    string Purpose,
+    PagedResult<ScoreboardEntryDto> Ranking
+);

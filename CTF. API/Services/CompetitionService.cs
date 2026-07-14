@@ -117,6 +117,14 @@ public class CompetitionService : ICompetitionService
         return new PodiumDto(ranked.ElementAtOrDefault(0), ranked.ElementAtOrDefault(1), ranked.ElementAtOrDefault(2));
     }
 
+    // Top N individuel — PLAFONNÉ à 5 : garde-fou RGPD, on n'expose jamais nominativement au-delà du top 5.
+    public async Task<List<ScoreboardEntryDto>> GetTopIndividualsAsync(Guid tenantId, Guid currentUserId, int count, CancellationToken ct = default)
+    {
+        count = Math.Clamp(count, 1, 5);
+        var ranked = await GetRankedIndividualAsync(tenantId, currentUserId, ct);
+        return ranked.Take(count).ToList();
+    }
+
     // ── Classement par equipe (score equipe = somme des membres) ──────────────
     private async Task<List<TeamLeaderboardEntryDto>> GetRankedTeamsAsync(Guid tenantId, Guid currentUserId, CancellationToken ct)
     {

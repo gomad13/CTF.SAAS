@@ -31,11 +31,11 @@ public class CompetitionController : ControllerBase
         return Ok(new CompetitionStatusDto(isEnabled));
     }
 
+    // ── Classement individuel PUBLIC — TOP 5 nominatif uniquement (RGPD anti-stigmatisation) ──
+    // Aucun rang/score nominatif au-delà du top 5 n'est exposé aux membres. La liste complète
+    // est réservée à l'admin (api/admin/competition/leaderboard).
     [HttpGet("scoreboard")]
-    public async Task<ActionResult<PagedResult<ScoreboardEntryDto>>> GetScoreboard(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken ct = default)
+    public async Task<ActionResult<PagedResult<ScoreboardEntryDto>>> GetScoreboard(CancellationToken ct = default)
     {
         var tenantId = _tenant.TenantId ?? Guid.Empty;
         if (tenantId == Guid.Empty) return Unauthorized();
@@ -44,8 +44,21 @@ public class CompetitionController : ControllerBase
         if (!isEnabled) return StatusCode(403, new { error = "Competition mode is not enabled for this tenant." });
 
         var userId = User.GetUserId();
-        var result = await _service.GetScoreboardAsync(tenantId, userId, page, pageSize, ct);
-        return Ok(result);
+        var top = await _service.GetTopIndividualsAsync(tenantId, userId, 5, ct);
+        return Ok(new PagedResult<ScoreboardEntryDto>(top, 1, 5, top.Count));
+    }
+
+    [HttpGet("individual/top5")]
+    public async Task<ActionResult<List<ScoreboardEntryDto>>> GetTopIndividuals(CancellationToken ct)
+    {
+        var tenantId = _tenant.TenantId ?? Guid.Empty;
+        if (tenantId == Guid.Empty) return Unauthorized();
+
+        var isEnabled = await _service.GetStatusAsync(tenantId, ct);
+        if (!isEnabled) return StatusCode(403, new { error = "Competition mode is not enabled for this tenant." });
+
+        var userId = User.GetUserId();
+        return Ok(await _service.GetTopIndividualsAsync(tenantId, userId, 5, ct));
     }
 
     [HttpGet("podium")]
@@ -62,11 +75,10 @@ public class CompetitionController : ControllerBase
         return Ok(podium);
     }
 
-    // ── Classement individuel (alias explicite de /scoreboard) ───────────────
+    // ── Classement individuel PUBLIC (alias de /scoreboard) — top 5 uniquement (RGPD) ──
     [HttpGet("leaderboard/individual")]
-    public Task<ActionResult<PagedResult<ScoreboardEntryDto>>> GetIndividualLeaderboard(
-        [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken ct = default)
-        => GetScoreboard(page, pageSize, ct);
+    public Task<ActionResult<PagedResult<ScoreboardEntryDto>>> GetIndividualLeaderboard(CancellationToken ct = default)
+        => GetScoreboard(ct);
 
     // ── Classement par equipe (score = somme des membres) ────────────────────
     [HttpGet("leaderboard/teams")]
@@ -131,11 +143,34 @@ public class AdminCompetitionController : ControllerBase
 {
     private readonly ICompetitionService _service;
     private readonly TenantContext _tenant;
+    private readonly ILogger<AdminCompetitionController> _logger;
 
-    public AdminCompetitionController(ICompetitionService service, TenantContext tenant)
+    public AdminCompetitionController(ICompetitionService service, TenantContext tenant, ILogger<AdminCompetitionController> logger)
     {
         _service = service;
         _tenant = tenant;
+        _logger = logger;
+    }
+
+    // ── Classement nominatif COMPLET (tous les membres, positions 1..N) — RÉSERVÉ ADMIN ──
+    // Même garde-fou que la vue nominative des scénarios (AdminScenariosController). Non exposé aux membres.
+    [HttpGet("leaderboard")]
+    public async Task<ActionResult<AdminLeaderboardDto>> GetFullLeaderboard(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken ct = default)
+    {
+        var tenantId = _tenant.TenantId ?? Guid.Empty;
+        if (tenantId == Guid.Empty) return Unauthorized();
+
+        var adminId = User.GetUserId();
+        var ranking = await _service.GetScoreboardAsync(tenantId, adminId, page, pageSize, ct);
+
+        // Traçabilité RGPD : consigner l'accès à une donnée nominative sensible.
+        _logger.LogInformation("[COMPETITION] Classement nominatif complet consulté. Tenant={TenantId} Admin={AdminId} page={Page}",
+            tenantId, adminId, page);
+
+        return Ok(new AdminLeaderboardDto(
+            "Classement nominatif complet — réservé à l'administration (suivi pédagogique). Ces positions individuelles ne sont pas exposées aux membres.",
+            ranking));
     }
 
     [HttpPatch("toggle")]

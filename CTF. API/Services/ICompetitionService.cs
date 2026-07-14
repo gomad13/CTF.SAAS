@@ -15,6 +15,9 @@ public interface ICompetitionService
 
     Task<PodiumDto> GetPodiumAsync(Guid tenantId, Guid currentUserId, CancellationToken ct = default);
 
+    // Top N nominatif (public) — plafonné à 5 par le service (garde-fou RGPD anti-stigmatisation).
+    Task<List<ScoreboardEntryDto>> GetTopIndividualsAsync(Guid tenantId, Guid currentUserId, int count, CancellationToken ct = default);
+
     Task<List<TeamLeaderboardEntryDto>> GetTeamLeaderboardAsync(Guid tenantId, Guid currentUserId, CancellationToken ct = default);
 
     Task<TeamPodiumDto> GetTeamPodiumAsync(Guid tenantId, Guid currentUserId, CancellationToken ct = default);
