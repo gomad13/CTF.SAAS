@@ -15,6 +15,7 @@ import PasswordQuizChallenge from "@/components/challenges/PasswordQuizChallenge
 import FreeTextChallenge from "@/components/challenges/FreeTextChallenge";
 import FlashCardsChallenge from "@/components/challenges/FlashCardsChallenge";
 import EpreuveFlashCardsChallenge from "@/components/challenges/EpreuveFlashCardsChallenge";
+import MemoryChallenge from "@/components/challenges/MemoryChallenge";
 import ChallengeHeader from "@/components/challenges/ChallengeHeader";
 import ChallengeIntro from "@/components/challenges/ChallengeIntro";
 import ChallengeReminderBar from "@/components/challenges/ChallengeReminderBar";
@@ -395,9 +396,12 @@ function InteractiveMission({ challengeId, onComplete }: { challengeId: string; 
         return <FreeTextChallenge challengeId={data.id} content={data.content as Parameters<typeof FreeTextChallenge>[0]["content"]} onComplete={handleComplete} />;
 
     if (data.contentType === "flash_cards") {
-        // Sous-type "epreuve" (nouveau) = QCM évalué au style violet ; sinon match/flip existant.
-        if ((data.content as { subtype?: string })?.subtype === "epreuve")
+        const sub = (data.content as { subtype?: string })?.subtype;
+        // Sous-types (nouveaux) au style violet : "epreuve" = QCM évalué, "memory" = jeu d'association ; sinon match/flip existant.
+        if (sub === "epreuve")
             return <EpreuveFlashCardsChallenge challengeId={data.id} content={data.content as Parameters<typeof EpreuveFlashCardsChallenge>[0]["content"]} onComplete={handleComplete} />;
+        if (sub === "memory")
+            return <MemoryChallenge challengeId={data.id} onComplete={handleComplete} />;
         return <FlashCardsChallenge challengeId={data.id} content={data.content as Parameters<typeof FlashCardsChallenge>[0]["content"]} onComplete={handleComplete} />;
     }
 

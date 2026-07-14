@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowLeft, Clock, MousePointerClick, Trophy, RotateCcw } from "lucide-react";
+import { ArrowLeft, Clock, MousePointerClick, Trophy, RotateCcw, ArrowRight } from "lucide-react";
 import {
     buildShuffledDeck,
     MEMORY_PAIR_COUNT,
@@ -13,12 +13,19 @@ import { useSessionTimer } from "./useSessionTimer";
 import MemoryCard from "./MemoryCard";
 import MemoryVariantChoice from "./MemoryVariantChoice";
 
-type Props = { onExit: () => void };
+type Props = {
+    onExit: () => void;
+    /** Appelé une fois toutes les paires trouvées (scoring/complétion parcours). Optionnel (test isolé sans). */
+    onFinish?: () => void;
+    /** Libellé du bouton de sortie du récap. En parcours : « Continuer le parcours ». */
+    continueLabel?: string;
+};
 
 /** Mode Memory : UNE variante d'association par partie (terme↔déf OU risque↔parade), choisie sur un écran dédié.
- *  Flip 3D au clic, détection de paire (juste/faux), chrono, compteur de coups, récap. Isolé. */
-export default function MemoryMode({ onExit }: Props) {
+ *  Flip 3D au clic, détection de paire (juste/faux), chrono, compteur de coups, récap. */
+export default function MemoryMode({ onExit, onFinish, continueLabel }: Props) {
     const reduce = useReducedMotion();
+    const finishedRef = useRef(false);
     const [variant, setVariant] = useState<PairKind | null>(null);
     const [deck, setDeck] = useState<MemoryTile[]>([]);
     const [flipped, setFlipped] = useState<string[]>([]); // uids face visible (en évaluation)
@@ -30,6 +37,11 @@ export default function MemoryMode({ onExit }: Props) {
 
     const finished = deck.length > 0 && matched.length === MEMORY_PAIR_COUNT;
     const { label: timerLabel, reset: resetTimer } = useSessionTimer(deck.length > 0 && !finished);
+
+    // Remonte la fin de partie UNE fois (scoring/complétion parcours).
+    useEffect(() => {
+        if (finished && !finishedRef.current) { finishedRef.current = true; onFinish?.(); }
+    }, [finished, onFinish]);
 
     const clearPending = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -199,6 +211,14 @@ export default function MemoryMode({ onExit }: Props) {
                             <span className="text-xs text-[var(--text-3)]">Coups</span>
                         </div>
                     </div>
+                    {continueLabel && (
+                        <button
+                            onClick={onExit}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 font-semibold text-[var(--on-accent)] transition-colors duration-200 hover:bg-[var(--accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                        >
+                            {continueLabel} <ArrowRight className="h-4 w-4" />
+                        </button>
+                    )}
                     <div className="flex w-full gap-3">
                         <button
                             onClick={backToChoice}
@@ -208,7 +228,7 @@ export default function MemoryMode({ onExit }: Props) {
                         </button>
                         <button
                             onClick={() => start(variant)}
-                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-medium text-[var(--on-accent)] transition-colors duration-200 hover:bg-[var(--accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 font-medium text-[var(--text)] transition-colors duration-200 hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                         >
                             <RotateCcw className="h-4 w-4" /> Rejouer
                         </button>
