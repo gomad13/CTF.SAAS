@@ -4,19 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Zap, Crown, Lock } from "lucide-react";
+import { Trophy, Zap, Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useCompetitionStatus } from "@/hooks/useCompetitionStatus";
 import Reveal from "@/components/Reveal";
-import { Stagger, StaggerItem } from "@/components/Stagger";
 import CountUp from "@/components/CountUp";
 import VisionCard from "@/components/vision/VisionCard";
 import { renderTeamIcon } from "@/components/teams/teamIcons";
+import PodiumBoard, { type PodiumItem } from "@/components/competition/PodiumBoard";
 import type { ScoreboardEntry, TeamLeaderboardEntry, MyRank, AdminLeaderboard } from "@/components/competition/types";
-
-// Couleurs médailles or / argent / bronze — exception charte explicitement autorisée (cahier des charges).
-const MEDAL: Record<1 | 2 | 3, string> = { 1: "#F5C451", 2: "#C3CAD4", 3: "#CD7F44" };
-function medalColor(rank: number): string { return MEDAL[rank as 1 | 2 | 3] ?? "var(--v-text-2)"; }
 
 type Tab = "individual" | "teams" | "admin";
 
@@ -121,85 +117,42 @@ export default function CompetitionPage() {
     );
 }
 
-// ── Podium individuel TOP 5 (public) ─────────────────────────────────────────
+// ── Podium individuel TOP 5 (public) — utilise le podium partagé ─────────────
 function IndividualTop5({ loading, entries }: { loading: boolean; entries: ScoreboardEntry[] }) {
     if (loading) return <VisionCard><div className="grid grid-cols-3 gap-3">{[0, 1, 2].map(i => <SkelBlock key={i} h={150} />)}</div></VisionCard>;
     if (entries.length === 0) return <VisionCard><EmptyState label="Aucun score pour le moment. Complétez des challenges pour apparaître au classement." /></VisionCard>;
 
-    const [first, second, third, fourth, fifth] = entries;
-    // Ordre de podium : 2e à gauche, 1er au centre (surélevé), 3e à droite. Le 1er apparaît EN DERNIER (delay).
-    const spots = [{ e: second, place: 2, h: 128, delay: 0.15 }, { e: first, place: 1, h: 160, delay: 0.32 }, { e: third, place: 3, h: 108, delay: 0.05 }];
-
-    return (
-        <VisionCard>
-            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--v-text-2)", marginBottom: 6 }}>Podium — top 5</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, alignItems: "end", marginTop: 8 }}>
-                {spots.map(s => <PodiumSpot key={s.place} entry={s.e} place={s.place} height={s.h} delay={s.delay} />)}
-            </div>
-            {(fourth || fifth) && (
-                <Stagger className="flex flex-col gap-2" gap={0.08}>
-                    {[fourth, fifth].filter(Boolean).map(e => <StaggerItem key={e!.userId}><RankRow entry={e!} /></StaggerItem>)}
-                </Stagger>
-            )}
-        </VisionCard>
-    );
+    const items: PodiumItem[] = entries.map(e => ({
+        key: e.userId,
+        rank: e.rank,
+        name: e.displayName,
+        score: e.score,
+        subtitle: `${e.challengesCompleted} challenge${e.challengesCompleted > 1 ? "s" : ""}`,
+        isCurrent: e.isCurrentUser,
+        currentLabel: "vous",
+        avatarBg: "var(--v-grad)",
+        avatarContent: e.initials,
+    }));
+    return <PodiumBoard title="Podium — top 5" items={items} />;
 }
 
-function PodiumSpot({ entry, place, height, delay }: { entry?: ScoreboardEntry; place: number; height: number; delay: number }) {
-    const color = medalColor(place);
-    if (!entry) return <div style={{ opacity: 0.35, textAlign: "center", fontSize: 12, color: "var(--v-text-3)", paddingBottom: 12 }}>—</div>;
-    return (
-        <Reveal delay={delay}>
-            <div className="v-hover" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, borderRadius: 16, border: "1px solid " + (entry.isCurrentUser ? "var(--v-accent)" : "var(--v-border)"), background: "var(--v-surface-2)", padding: "14px 8px 0" }}>
-                <span style={{ position: "relative", display: "inline-flex", height: 52, width: 52, alignItems: "center", justifyContent: "center", borderRadius: "50%", background: "var(--v-grad)", color: "var(--v-text)", fontSize: 15, fontWeight: 800, boxShadow: `0 0 0 3px color-mix(in srgb, ${color} 55%, transparent)` }}>
-                    {entry.initials}
-                    {place === 1 && <Crown size={18} style={{ position: "absolute", top: -14, color }} />}
-                </span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--v-text)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{entry.displayName}</span>
-                <span style={{ fontSize: 15, fontWeight: 800, color }}><CountUp value={entry.score} /></span>
-                <span style={{ fontSize: 10, color: "var(--v-text-3)", marginBottom: 6 }}>{entry.challengesCompleted} challenge{entry.challengesCompleted > 1 ? "s" : ""}</span>
-                <div style={{ width: "100%", height, borderRadius: "10px 10px 0 0", background: `linear-gradient(180deg, color-mix(in srgb, ${color} 30%, var(--v-surface)), var(--v-surface))`, borderTop: `2px solid ${color}`, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 8, fontSize: 22, fontWeight: 800, color }}>{place}</div>
-            </div>
-        </Reveal>
-    );
-}
-
-function RankRow({ entry }: { entry: ScoreboardEntry }) {
-    return (
-        <div className="v-row" style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 12, border: "1px solid " + (entry.isCurrentUser ? "var(--v-accent)" : "var(--v-border)"), background: "var(--v-surface-2)", padding: "10px 14px" }}>
-            <span style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, background: "color-mix(in srgb, var(--v-accent) 16%, transparent)", color: "var(--v-accent)" }}>{entry.rank}</span>
-            <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: "50%", background: "var(--v-grad)", color: "var(--v-text)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{entry.initials}</span>
-            <span style={{ flex: 1, minWidth: 0, fontSize: 14, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{entry.displayName}</span>
-            <span style={{ flexShrink: 0, fontSize: 14, fontWeight: 700, color: "var(--v-accent)" }}><CountUp value={entry.score} /> pts</span>
-        </div>
-    );
-}
-
-// ── Classement par ÉQUIPE (collectif — complet autorisé) ─────────────────────
+// ── Podium par ÉQUIPE (collectif, complet) — MÊME podium partagé que l'individuel ─
 function TeamRanking({ loading, teams }: { loading: boolean; teams: TeamLeaderboardEntry[] }) {
     if (loading) return <VisionCard><SkelBlock h={200} /></VisionCard>;
     if (teams.length === 0) return <VisionCard><EmptyState label="Aucune équipe classée. Créez des équipes et assignez-y des membres." /></VisionCard>;
-    return (
-        <VisionCard>
-            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--v-text-2)", marginBottom: 12 }}>Classement des équipes</h2>
-            <Stagger className="flex flex-col gap-2" gap={0.05}>
-                {teams.map(t => (
-                    <StaggerItem key={t.teamId}>
-                        <div className="v-row" style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 12, border: "1px solid " + (t.isCurrentUserTeam ? "var(--v-accent)" : "var(--v-border)"), background: "var(--v-surface-2)", padding: "12px 14px" }}>
-                            <span style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, background: t.rank <= 3 ? "color-mix(in srgb, " + medalColor(t.rank) + " 20%, transparent)" : "var(--v-surface)", color: t.rank <= 3 ? medalColor(t.rank) : "var(--v-text-2)" }}>{t.rank}</span>
-                            <span aria-hidden style={{ flexShrink: 0, display: "flex", height: 32, width: 32, alignItems: "center", justifyContent: "center", borderRadius: 9, color: "var(--v-text)", background: t.color ?? "var(--v-accent)" }}>{renderTeamIcon(t.icon, 16)}</span>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--v-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}{t.isCurrentUserTeam && <span style={{ marginLeft: 8, fontSize: 11, color: "var(--v-accent)" }}>· mon équipe</span>}</div>
-                                <div style={{ fontSize: 11.5, color: "var(--v-text-3)" }}>{t.memberCount} membre{t.memberCount > 1 ? "s" : ""}</div>
-                            </div>
-                            <span style={{ flexShrink: 0, fontSize: 15, fontWeight: 800, color: "var(--v-accent)" }}><CountUp value={t.score} /> pts</span>
-                        </div>
-                    </StaggerItem>
-                ))}
-            </Stagger>
-            <p style={{ marginTop: 12, fontSize: 12, color: "var(--v-text-3)" }}>Score d&apos;équipe = somme des scores de ses membres.</p>
-        </VisionCard>
-    );
+
+    const items: PodiumItem[] = teams.map(t => ({
+        key: t.teamId,
+        rank: t.rank,
+        name: t.name,
+        score: t.score,
+        subtitle: `${t.memberCount} membre${t.memberCount > 1 ? "s" : ""}`,
+        isCurrent: t.isCurrentUserTeam,
+        currentLabel: "mon équipe",
+        avatarBg: t.color ?? "var(--v-accent)", // pastille couleur d'équipe (identité — conservée)
+        avatarContent: renderTeamIcon(t.icon, 18),
+    }));
+    return <PodiumBoard title="Podium des équipes" items={items} footer="Score d'équipe = somme des scores de ses membres." />;
 }
 
 // ── Classement complet nominatif — RÉSERVÉ ADMIN ─────────────────────────────
