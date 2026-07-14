@@ -17,7 +17,7 @@ export default function FlashcardsTestPage() {
     const backToMenu = () => setScreen("menu");
 
     return (
-        <main className="min-h-screen bg-[var(--bg)] px-4 py-10 text-[var(--text)] sm:px-6">
+        <main className="vision-dashboard min-h-screen px-4 py-10 sm:px-6" style={{ background: "var(--v-bg)", color: "var(--v-text)" }}>
             <div className="mx-auto w-full max-w-5xl">
                 {screen === "menu" && (
                     <FlashcardsMenu total={DEMO_FLASHCARDS.length} onPick={setScreen} />
