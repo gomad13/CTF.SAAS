@@ -139,7 +139,7 @@ BARÈME :
             if (!acquired)
             {
                 _logger.LogWarning("FreeText eval: Ollama saturé (concurrence max), fallback local");
-                return FallbackEvaluation(boundedAnswer);
+                return FallbackEvaluation(boundedAnswer, expectedElements);
             }
 
             // Timeout borné et annulable (lié au CancellationToken de la requête HTTP).
@@ -154,30 +154,30 @@ BARÈME :
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning("FreeText eval: Ollama HTTP {Code} -> fallback", (int)response.StatusCode);
-                return FallbackEvaluation(boundedAnswer);
+                return FallbackEvaluation(boundedAnswer, expectedElements);
             }
 
             var responseBody = await response.Content.ReadAsStringAsync(cts.Token);
             using var doc = JsonDocument.Parse(responseBody);
             var text = doc.RootElement.GetProperty("message").GetProperty("content").GetString() ?? "";
-            return ParseEvaluation(text, boundedAnswer);
+            return ParseEvaluation(text, boundedAnswer, expectedElements);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             // Requête annulée par le client : pas d'exception qui remonte, fallback propre.
             _logger.LogInformation("FreeText eval annulée par le client -> fallback");
-            return FallbackEvaluation(boundedAnswer);
+            return FallbackEvaluation(boundedAnswer, expectedElements);
         }
         catch (OperationCanceledException)
         {
             // Dépassement du timeout borné (Ollama lent) : l'exercice reste terminable.
             _logger.LogWarning("FreeText eval: timeout Ollama ({Sec}s) -> fallback local", TimeoutSec);
-            return FallbackEvaluation(boundedAnswer);
+            return FallbackEvaluation(boundedAnswer, expectedElements);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "FreeText evaluation error (Ollama indispo) -> fallback local");
-            return FallbackEvaluation(boundedAnswer);
+            return FallbackEvaluation(boundedAnswer, expectedElements);
         }
         finally
         {
@@ -185,27 +185,27 @@ BARÈME :
         }
     }
 
-    private EvaluationResult ParseEvaluation(string raw, string answerForFallback)
+    private EvaluationResult ParseEvaluation(string raw, string answerForFallback, string expectedElements)
     {
         try
         {
             var start = raw.IndexOf('{');
             var end = raw.LastIndexOf('}');
-            if (start < 0 || end < 0) return FallbackEvaluation(answerForFallback);
+            if (start < 0 || end < 0) return FallbackEvaluation(answerForFallback, expectedElements);
 
             var jsonStr = raw.Substring(start, end - start + 1);
             using var doc = JsonDocument.Parse(jsonStr);
             var root = doc.RootElement;
 
-            // Score tolérant : accepte entier OU nombre (85 comme 85.0) sans exception.
-            var score = 50;
-            if (root.TryGetProperty("score", out var s))
-            {
-                if (s.ValueKind == JsonValueKind.Number && s.TryGetDouble(out var sd))
-                    score = (int)Math.Round(sd);
-                else if (s.ValueKind == JsonValueKind.String && double.TryParse(s.GetString(), out var sp))
-                    score = (int)Math.Round(sp);
-            }
+            // Score tolérant : entier OU nombre (85 comme 85.0). (#5) Si le score est ABSENT ou invalide,
+            // on ne suppose PAS 50 : on retombe sur le fallback par couverture de mots-clés.
+            int score;
+            if (root.TryGetProperty("score", out var s) && s.ValueKind == JsonValueKind.Number && s.TryGetDouble(out var sd))
+                score = (int)Math.Round(sd);
+            else if (root.TryGetProperty("score", out var s2) && s2.ValueKind == JsonValueKind.String && double.TryParse(s2.GetString(), out var sp))
+                score = (int)Math.Round(sp);
+            else
+                return FallbackEvaluation(answerForFallback, expectedElements);
             var appreciation = root.TryGetProperty("appreciation", out var a) ? a.GetString() ?? "Moyen" : "Moyen";
             var resume = root.TryGetProperty("resume", out var r) ? r.GetString() ?? "" : "";
 
@@ -229,26 +229,57 @@ BARÈME :
         }
         catch
         {
-            return FallbackEvaluation(answerForFallback);
+            return FallbackEvaluation(answerForFallback, expectedElements);
         }
     }
 
     /// <summary>
     /// Évaluation locale (aucun appel réseau) quand Ollama est lent/indisponible/saturé.
-    /// Garantit que l'exercice reste terminable. Null-safe.
+    /// (#3) Scoring par COUVERTURE des éléments attendus — la longueur ne donne AUCUN point
+    /// (anti « remplissage »), elle sert seulement de garde (réponse trop courte = plafonnée).
+    /// Garantit que l'exercice reste terminable, sans surévaluer une réponse hors-sujet. Null-safe.
     /// </summary>
-    private EvaluationResult FallbackEvaluation(string? answer)
+    private EvaluationResult FallbackEvaluation(string? answer, string expectedElements)
     {
-        var text = answer ?? string.Empty;
-        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Count(w => w.Length > 3);
-        var score = words < 5 ? 20 : words < 15 ? 45 : words < 30 ? 65 : 75;
+        var text = (answer ?? string.Empty).ToLowerInvariant();
+        var stop = new HashSet<string> { "dans", "avec", "pour", "sans", "plus", "cette", "votre", "celui", "celle", "faire", "être", "avoir", "doit", "peut", "sont", "mais", "ceci", "cela", "donc", "alors", "aussi", "moins", "juste", "parce", "pendant", "après", "avant" };
+        var tokens = System.Text.RegularExpressions.Regex
+            .Split((expectedElements ?? string.Empty).ToLowerInvariant(), @"[^\p{L}0-9]+")
+            .Where(t => t.Length >= 5 && !stop.Contains(t))
+            .Distinct()
+            .ToList();
+        var words = (answer ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries).Count(w => w.Length > 3);
+
+        int score;
+        string resume;
+        var pointsForts = new List<string>();
+        var pointsManques = new List<string>();
+
+        if (tokens.Count == 0)
+        {
+            // Aucun référentiel exploitable : l'IA locale ne peut pas juger le fond → score conservateur
+            // (jamais passant sur la seule longueur).
+            score = 40;
+            resume = "Évaluation locale limitée : éléments attendus non exploitables (IA indisponible).";
+            pointsManques.Add("Correction détaillée indisponible — réessayez plus tard pour une évaluation par l'IA.");
+        }
+        else
+        {
+            var matched = tokens.Count(t => text.Contains(t));
+            var coverage = (double)matched / tokens.Count;
+            score = (int)Math.Round(Math.Clamp(coverage * 100.0, 0, 100));
+            if (words < 8) score = Math.Min(score, 40); // réponse trop courte : plafonnée
+            resume = $"Évaluation locale (IA indisponible) : {matched}/{tokens.Count} éléments attendus détectés.";
+            if (coverage >= 0.6) pointsForts.Add($"Bonne couverture des éléments attendus ({matched}/{tokens.Count}).");
+            if (coverage < 0.5) pointsManques.Add("Des éléments attendus semblent absents : approfondir la réponse.");
+        }
 
         return new EvaluationResult(
-            score,
-            score >= 70 ? "Bien" : "Moyen",
-            "Réponse reçue. L'IA locale est temporairement indisponible pour une évaluation détaillée.",
-            new List<string> { "Réponse fournie" },
-            new List<string> { "Évaluation détaillée indisponible — correction automatique locale appliquée" },
+            Math.Clamp(score, 0, 100),
+            score >= 70 ? "Bien" : score >= 40 ? "Moyen" : "Insuffisant",
+            resume,
+            pointsForts.Count > 0 ? pointsForts : new List<string> { "Réponse enregistrée." },
+            pointsManques,
             "Votre réponse a été enregistrée. Réessayez plus tard pour une correction personnalisée par l'IA.",
             false);
     }

@@ -352,11 +352,15 @@ public class ChallengeInteractiveController : ControllerBase
             var question          = root.TryGetProperty("question", out var q) ? q.GetString() ?? "" : "";
             var expectedElements  = root.TryGetProperty("expected_elements", out var e) ? e.GetString() ?? "" : "";
             systemPrompt =
-                "Tu évalues la réponse d'un apprenant à un scénario de cybersécurité. " +
+                "Tu évalues, en correcteur EXIGEANT, la réponse d'un apprenant à un scénario de cybersécurité. " +
                 "Question posée : " + question + "\n" +
                 "Éléments attendus dans une bonne réponse : " + expectedElements + "\n" +
+                "BARÈME STRICT : 90-100 = tous les éléments attendus identifiés et justes ; 70-89 = majorité couverte ; " +
+                "50-69 = partiel ; 0-49 = hors-sujet, vague, ou éléments clés absents. " +
+                "IMPORTANT : une réponse qui n'identifie PAS les éléments attendus, hors-sujet, ou du remplissage, " +
+                "doit être notée < 40 MÊME si elle est longue. La longueur seule ne vaut AUCUN point. " +
                 "Retourne un JSON strict : {\"score\":0-100, \"feedback\":\"...\", \"strengths\":[...], \"improvements\":[...]}. " +
-                "Le score reflète la couverture des éléments attendus (0=absent, 100=excellent).";
+                "Le score reflète la couverture réelle des éléments attendus (0=absent, 100=excellent).";
         }
 
         string? aiRaw = null;
@@ -381,18 +385,25 @@ public class ChallengeInteractiveController : ControllerBase
         List<string> strengths = new();
         List<string> improvements = new();
 
+        // Tente d'exploiter la sortie IA ; si JSON absent/malformé OU score manquant/non numérique,
+        // on retombe sur le fallback local (jamais de 502, jamais de défaut 0/50 arbitraire). (#5, #6)
+        JsonElement result = default;
+        var aiUsable = false;
         if (aiRaw is not null)
         {
-            // Parse AI response (format attendu : JSON strict)
             var jsonStart = aiRaw.IndexOf('{');
             var jsonEnd   = aiRaw.LastIndexOf('}');
-            if (jsonStart < 0 || jsonEnd < 0)
+            if (jsonStart >= 0 && jsonEnd > jsonStart)
             {
-                _logger.LogWarning("AI response is not valid JSON for challenge {Id}", challengeId);
-                return StatusCode(502, new { error = "Réponse IA invalide, réessayez." });
+                try { result = JsonSerializer.Deserialize<JsonElement>(aiRaw[jsonStart..(jsonEnd + 1)]); aiUsable = true; }
+                catch (JsonException) { aiUsable = false; }
             }
-            var result = JsonSerializer.Deserialize<JsonElement>(aiRaw[jsonStart..(jsonEnd + 1)]);
-            aiScore    = result.TryGetProperty("score", out var sc) ? (int)Math.Round(sc.GetDouble()) : 0;
+        }
+
+        if (aiUsable && result.TryGetProperty("score", out var sc)
+            && sc.ValueKind == JsonValueKind.Number && sc.TryGetDouble(out var scd))
+        {
+            aiScore    = (int)Math.Round(scd);
             feedback   = result.TryGetProperty("feedback", out var fb) ? fb.GetString() ?? "" : "";
             if (result.TryGetProperty("strengths", out var st) && st.ValueKind == JsonValueKind.Array)
                 strengths = st.EnumerateArray().Select(x => x.GetString() ?? "").Where(s => s.Length > 0).ToList();
@@ -401,9 +412,11 @@ public class ChallengeInteractiveController : ControllerBase
         }
         else
         {
-            // Fallback heuristique : scoring par couverture de mots-clés
-            var (score, fb, str, imp) = EvaluatePhishingAiLocally(root, req.UserAnalysis);
-            aiScore = score; feedback = fb; strengths = str; improvements = imp;
+            if (aiRaw is not null)
+                _logger.LogWarning("phishing_ai: sortie IA inexploitable (JSON/score) → fallback local. challenge={Id}", challengeId);
+            var (score, fb2, str, imp) = EvaluatePhishingAiLocally(root, req.UserAnalysis);
+            aiScore = score; feedback = fb2; strengths = str; improvements = imp;
+            aiRaw = null; // reporté comme mode "local"
         }
 
         aiScore       = Math.Clamp(aiScore, 0, 100);
@@ -451,30 +464,30 @@ public class ChallengeInteractiveController : ControllerBase
 
         if (tokens.Count == 0)
         {
-            // Pas de référentiel : score basé uniquement sur longueur
-            var lenScore = Math.Clamp((int)Math.Round(ua.Length * 100.0 / Math.Max(minChars * 2, 80)), 0, 100);
-            return (lenScore, "Évaluation automatique locale (IA non configurée).",
-                new List<string>(), new List<string>());
+            // Pas de référentiel « éléments attendus » : l'évaluation locale ne peut PAS juger le fond.
+            // On ne récompense JAMAIS la seule longueur → score conservateur plafonné (jamais passant).
+            return (40, "Évaluation automatique limitée : aucun « élément attendu » défini pour ce challenge.",
+                new List<string>(), new List<string> { "Définir des « éléments attendus » pour une évaluation fiable." });
         }
 
         var matched = tokens.Count(t => ua.Contains(t));
         var coverage = (double)matched / tokens.Count; // 0..1
 
-        // Bonus longueur : 0 si < 50% min, 1.0 si >= min
-        var lenRatio = Math.Clamp((double)ua.Length / Math.Max(minChars, 40), 0.0, 1.0);
-        var rawScore = coverage * 75.0 + lenRatio * 25.0;
-        var score    = (int)Math.Round(Math.Clamp(rawScore, 0, 100));
+        // Le score reflète la COUVERTURE réelle des éléments attendus. La longueur ne DONNE aucun point ;
+        // elle sert uniquement de garde : une réponse trop courte est plafonnée (anti « remplissage »).
+        var score = (int)Math.Round(Math.Clamp(coverage * 100.0, 0, 100));
+        var tooShort = ua.Length < Math.Max(minChars, 40);
+        if (tooShort) score = Math.Min(score, 40);
 
         var strengths = new List<string>();
         var improvements = new List<string>();
         if (coverage >= 0.6) strengths.Add($"Bonne couverture des éléments attendus ({matched}/{tokens.Count}).");
-        if (lenRatio >= 0.8) strengths.Add("Réponse suffisamment détaillée.");
-        if (coverage < 0.4) improvements.Add("Creuser davantage les indices techniques et la procédure d'escalade.");
-        if (lenRatio < 0.7) improvements.Add($"Développer la réponse (viser ~{minChars} caractères).");
+        if (coverage < 0.4) improvements.Add("Éléments clés attendus manquants : creuser les indices techniques et la procédure.");
+        if (tooShort) improvements.Add($"Réponse trop courte (viser ~{minChars} caractères).");
 
         var feedback = "Analyse évaluée en local (IA non configurée). " +
                        $"{matched}/{tokens.Count} éléments clés détectés. " +
-                       (score >= 70 ? "Bonne réponse." : score >= 40 ? "Correct, peut être approfondi." : "À étoffer.");
+                       (score >= 70 ? "Bonne réponse." : score >= 40 ? "Partiel, à approfondir." : "Éléments attendus non identifiés.");
 
         return (score, feedback, strengths, improvements);
     }
@@ -785,7 +798,12 @@ public class ChallengeInteractiveController : ControllerBase
 
             case JsonValueKind.Array:
                 var list = element.EnumerateArray().Select(e => StripSensitiveKeys(e)).ToList();
-                if (propName != null && ShuffleKeys.Contains(propName)) Shuffle(list);
+                // On ne mélange QUE les tableaux d'OBJETS (validation par `id` → scoring préservé).
+                // Un tableau de primitives (ex. flash_cards/epreuve : choices=strings identifiés par POSITION
+                // via correctIndex) ne doit JAMAIS être mélangé, sinon la bonne réponse est désynchronisée.
+                var firstEl = element.EnumerateArray().FirstOrDefault();
+                var isObjectArray = firstEl.ValueKind == JsonValueKind.Object;
+                if (propName != null && ShuffleKeys.Contains(propName) && isObjectArray) Shuffle(list);
                 return list;
 
             case JsonValueKind.String:  return element.GetString();
