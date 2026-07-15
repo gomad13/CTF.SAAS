@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
     "/landing",
     "/forgot-password",
     "/reset-password",
+    "/support", // formulaire de contact public (accessible sans auth)
     "/demo",
     "/cgu",
     "/privacy",
