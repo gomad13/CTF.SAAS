@@ -14,4 +14,7 @@ public interface IMailService
 
     /// <summary>M3 — Envoie un code de double authentification (6 chiffres) par email.</summary>
     Task SendTwoFactorCodeAsync(string toEmail, string code, CancellationToken ct = default);
+
+    /// <summary>Message du formulaire de support → adresse support configurée (reply-to = fromEmail). Contenu échappé/sanitisé.</summary>
+    Task SendSupportMessageAsync(string fromEmail, string subject, string message, CancellationToken ct = default);
 }

@@ -25,6 +25,7 @@ public class BrevoMailService : IMailService
     private readonly string _apiKey;
     private readonly string _senderEmail;
     private readonly string _senderName;
+    private readonly string _supportEmail;
 
     public BrevoMailService(HttpClient http, IConfiguration config, ILogger<BrevoMailService> logger, AppDbContext db)
     {
@@ -34,6 +35,7 @@ public class BrevoMailService : IMailService
         _apiKey = config["Mail:BrevoApiKey"] ?? "";
         _senderEmail = config["Mail:SenderEmail"] ?? "noreply@sentys.fr";
         _senderName = config["Mail:SenderName"] ?? "Sentys";
+        _supportEmail = config["Mail:SupportEmail"] ?? "support@sentys.fr";
     }
 
     public Task SendInvitationAsync(string toEmail, string firstName, string tempPassword, string organizationName, CancellationToken ct = default)
@@ -61,6 +63,38 @@ public class BrevoMailService : IMailService
         => SendAsync(toEmail, "two-factor-code",
             "Votre code de vérification Sentys",
             TwoFactorCodeTemplate(code), ct);
+
+    // Support : envoi vers l'adresse support configurée, reply-to = l'expéditeur du formulaire.
+    // Contenu ÉCHAPPÉ (anti-injection HTML) ; destinataire = support fixe (jamais l'entrée utilisateur → pas de relais ouvert).
+    public async Task SendSupportMessageAsync(string fromEmail, string subject, string message, CancellationToken ct = default)
+    {
+        var status = "sent";
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
+            req.Headers.TryAddWithoutValidation("api-key", _apiKey);
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var payload = new
+            {
+                sender = new { name = _senderName, email = _senderEmail },
+                to = new[] { new { email = _supportEmail } },
+                replyTo = new { email = fromEmail },
+                subject = "[Support Sentys] " + Trunc(subject, 150),
+                htmlContent = SupportTemplate(fromEmail, subject, message),
+            };
+            req.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            using var res = await _http.SendAsync(req, ct);
+            if (!res.IsSuccessStatusCode) status = $"failed:{(int)res.StatusCode}";
+        }
+        catch (Exception ex)
+        {
+            status = "failed:exception";
+            _logger.LogError(ex, "Brevo support send failed from={Email}", fromEmail);
+        }
+        await PersistLogAsync(_supportEmail, "support", "[Support] " + subject, status, ct);
+    }
 
     private async Task SendAsync(string toEmail, string type, string subject, string htmlBody, CancellationToken ct)
     {
@@ -127,8 +161,20 @@ public class BrevoMailService : IMailService
     private static string PasswordResetTemplate(string resetLink) =>
         Layout(
             "Vous avez demandé la réinitialisation de votre mot de passe.<br/><br/>" +
-            $@"<a href=""{resetLink}"" style=""display:inline-block;background:#3B82F6;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600"">Réinitialiser mon mot de passe</a>" +
-            "<br/><br/>Ce lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.");
+            $@"<a href=""{resetLink}"" style=""display:inline-block;background:#7551FF;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600"">Réinitialiser mon mot de passe</a>" +
+            "<br/><br/>Ce lien expire dans <strong>30 minutes</strong> et ne peut servir qu'une seule fois. " +
+            "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email — votre mot de passe reste inchangé.");
+
+    // Contenu échappé (anti-injection) ; le message utilisateur est traité comme du TEXTE, jamais du HTML.
+    private static string SupportTemplate(string fromEmail, string subject, string message) =>
+        Layout(
+            "Nouveau message reçu via le formulaire de support.<br/><br/>" +
+            $"<strong>De :</strong> {Esc(fromEmail)}<br/>" +
+            $"<strong>Sujet :</strong> {Esc(subject)}<br/><br/>" +
+            $@"<div style=""white-space:pre-wrap;background:#F1F5F9;padding:12px;border-radius:8px"">{Esc(message)}</div>");
+
+    private static string Esc(string s) => System.Net.WebUtility.HtmlEncode(s ?? "");
+    private static string Trunc(string s, int n) => string.IsNullOrEmpty(s) ? "" : (s.Length <= n ? s : s[..n]);
 
     private static string TwoFactorCodeTemplate(string code) =>
         Layout(

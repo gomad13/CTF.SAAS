@@ -7,28 +7,51 @@ import Reveal from "@/components/Reveal";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const cardStyle: React.CSSProperties = {
+    width: "100%",
+    maxWidth: 440,
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    padding: "clamp(28px, 6vw, 44px)",
+    position: "relative",
+    overflow: "hidden",
+};
+
+const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "var(--text-muted)",
+    marginBottom: 6,
+};
+
 export default function ForgotPasswordPage() {
-    const [email, setEmail]       = useState("");
-    const [loading, setLoading]   = useState(false);
-    const [sent, setSent]         = useState(false);
-    const [error, setError]       = useState<string | null>(null);
+    const [email, setEmail]     = useState("");
+    const [loading, setLoading] = useState(false);
+    const [sent, setSent]       = useState(false);
+    const [error, setError]     = useState<string | null>(null);
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
 
-        if (!email.trim()) { setError("L'email est requis."); return; }
-        if (!EMAIL_RE.test(email.trim())) { setError("Format d'email invalide."); return; }
+        const trimmed = email.trim().toLowerCase();
+        if (!trimmed) { setError("L'email est requis."); return; }
+        if (!EMAIL_RE.test(trimmed)) { setError("Format d'email invalide."); return; }
 
         setLoading(true);
         try {
             await apiFetch<void>("/api/auth/forgot-password", {
                 method: "POST",
-                body: JSON.stringify({ email: email.trim(), tenantId: null }),
+                body: JSON.stringify({ email: trimmed }),
             });
             setSent(true);
         } catch {
-            // On affiche le succès même en cas d'erreur réseau (éviter énumération)
+            // Succès affiché quoi qu'il arrive (anti-énumération de comptes).
             setSent(true);
         } finally {
             setLoading(false);
@@ -36,112 +59,100 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background-dark text-white">
-            {/* Back link */}
-            <div className="fixed left-4 top-4 z-50 sm:left-6 sm:top-6">
-                <Link
-                    href="/login"
-                    className="group inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-hover"
-                >
-                    <span className="text-neutral-300 transition-colors group-hover:text-accent">←</span>
-                    <span className="text-neutral-300">Retour à la connexion</span>
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}>
+            <div style={{ position: "fixed", left: 16, top: 16 }}>
+                <Link href="/login" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, textDecoration: "none", color: "var(--text-muted)" }}>
+                    <span aria-hidden>&#x2190;</span>
+                    <span>Retour à la connexion</span>
                 </Link>
             </div>
 
-            <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-16">
-                <Reveal>
-                <div className="w-full rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 shadow-sm">
+            <Reveal>
+            <div style={cardStyle}>
+                <div aria-hidden style={{ position: "absolute", top: 0, right: 0, width: 48, height: 48, background: "linear-gradient(225deg, var(--accent-border) 0%, transparent 60%)", clipPath: "polygon(100% 0, 0 0, 100% 100%)" }} />
 
-                    {/* Icon */}
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-2xl">
-                        🔑
-                    </div>
-
-                    <h1 className="text-2xl font-semibold">Mot de passe oublié</h1>
-                    <p className="mt-1 text-sm text-neutral-300">
-                        Saisissez votre email — si un compte existe, vous recevrez un lien de réinitialisation.
-                    </p>
-
-                    {sent ? (
-                        <SuccessBanner email={email} />
-                    ) : (
-                        <form className="mt-5 space-y-3" onSubmit={onSubmit} noValidate>
-                            <div>
-                                <label className="mb-1 block text-sm text-neutral-300">Email</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    placeholder="alice@entreprise.com"
-                                    autoComplete="email"
-                                    className="w-full min-h-[44px] rounded-xl border border-neutral-800 bg-neutral-950/40 px-3 py-2 text-sm text-white placeholder-black transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-                                />
-                            </div>
-
-                            {error && (
-                                <div className="rounded-xl border border-red-700/60 bg-red-950/30 px-3 py-2 text-sm text-red-300">
-                                    {error}
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="mt-1 min-h-[44px] w-full rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
-                            >
-                                {loading ? "Envoi en cours…" : "Envoyer le lien de réinitialisation"}
-                            </button>
-                        </form>
-                    )}
-
-                    {/* DEV notice — masqué en production (RGPD + crédibilité) */}
-                    {process.env.NODE_ENV !== "production" && <DevNotice />}
-
-                    <p className="mt-5 text-center text-sm text-neutral-300">
-                        Vous vous souvenez de votre mot de passe ?{" "}
-                        <Link href="/login" className="text-primary hover:underline">
-                            Se connecter
-                        </Link>
-                    </p>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent-subtle)", border: "1px solid var(--accent-border)", borderRadius: 20, padding: "4px 12px", fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: "0.12em", color: "var(--accent)" }}>
+                        <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--pr)", boxShadow: "0 0 6px var(--accent)" }} />
+                        R&Eacute;INITIALISATION
+                    </span>
                 </div>
-                </Reveal>
+
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", textAlign: "center", margin: "12px 0 0" }}>
+                    Mot de passe oubli&eacute;
+                </h1>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", margin: "8px 0 0", lineHeight: 1.5 }}>
+                    Saisissez votre email&nbsp;: si un compte existe, vous recevrez un lien de r&eacute;initialisation.
+                </p>
+
+                <div style={{ height: 1, background: "linear-gradient(90deg, transparent, var(--border), transparent)", margin: "20px 0" }} />
+
+                {sent ? (
+                    <SuccessBanner email={email.trim().toLowerCase()} />
+                ) : (
+                    <form onSubmit={onSubmit} noValidate>
+                        <div style={{ marginBottom: 16 }}>
+                            <label htmlFor="email" style={labelStyle}>EMAIL</label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                placeholder="alice@entreprise.com"
+                                autoComplete="email"
+                                required
+                                style={{ width: "100%", background: "var(--bg-input)", border: "1px solid var(--border)", borderRadius: 8, padding: "11px 14px", color: "var(--text-primary)", fontSize: 14, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s" }}
+                                onFocus={e => { e.currentTarget.style.borderColor = "var(--border-focus)"; e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-subtle)"; }}
+                                onBlur={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none"; }}
+                            />
+                        </div>
+
+                        {error && (
+                            <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 7, padding: "10px 14px", color: "var(--danger-t)", fontSize: 13, marginBottom: 16 }}>
+                                &#9888; {error}
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{ width: "100%", background: loading ? "var(--accent-subtle)" : "linear-gradient(135deg, var(--accent), var(--accent-hover))", color: "var(--on-accent)", fontWeight: 700, fontSize: 14, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", border: "none", borderRadius: 8, padding: "13px 0", minHeight: 44, cursor: loading ? "not-allowed" : "pointer", transition: "all 0.2s" }}
+                            onMouseOver={e => { if (!loading) { e.currentTarget.style.boxShadow = "0 0 20px var(--accent-subtle)"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
+                            onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
+                        >
+                            {loading ? "[ ENVOI... ]" : "Envoyer le lien"}
+                        </button>
+                    </form>
+                )}
+
+                <p style={{ textAlign: "center", marginTop: 24, fontSize: 13, color: "var(--text-muted)" }}>
+                    Vous vous souvenez de votre mot de passe&nbsp;?{" "}
+                    <Link href="/login" style={{ color: "var(--primary)", textDecoration: "none", fontWeight: 500 }}>
+                        Se connecter
+                    </Link>
+                </p>
             </div>
+            </Reveal>
         </div>
     );
 }
 
 function SuccessBanner({ email }: { email: string }) {
     return (
-        <div className="mt-5 rounded-xl border border-primary/40 bg-primary/10 px-4 py-4">
-            <div className="flex items-start gap-3">
-                <span className="mt-0.5 text-lg text-primary">✓</span>
+        <div style={{ background: "var(--accent-subtle)", border: "1px solid var(--accent-border)", borderRadius: 10, padding: "16px 18px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <span aria-hidden style={{ color: "var(--accent)", fontSize: 18, lineHeight: 1.2 }}>&#10003;</span>
                 <div>
-                    <div className="text-sm font-semibold text-primary">Email envoyé</div>
-                    <p className="mt-1 text-sm text-neutral-300">
-                        Si un compte est associé à <span className="font-medium text-white">{email}</span>,
-                        vous recevrez un lien de réinitialisation sous quelques minutes.
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)" }}>Email envoy&eacute;</div>
+                    <p style={{ marginTop: 6, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                        Si un compte est associ&eacute; &agrave;{" "}
+                        <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{email}</span>, vous recevrez un lien de r&eacute;initialisation d&apos;ici quelques minutes.
                     </p>
-                    <p className="mt-2 text-xs text-neutral-300">
-                        Vérifiez également vos spams. Le lien est valable 1 heure.
+                    <p style={{ marginTop: 8, fontSize: 12, color: "var(--text-muted)" }}>
+                        Pensez &agrave; v&eacute;rifier vos spams. Le lien est valable <strong>30&nbsp;minutes</strong>.
                     </p>
                 </div>
             </div>
-        </div>
-    );
-}
-
-function DevNotice() {
-    return (
-        <div className="mt-5 rounded-xl border border-dashed border-neutral-700 bg-neutral-950/30 px-3 py-3">
-            <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-neutral-300">DEV</span>
-                <span className="text-xs text-neutral-300">
-                    Le token de réinitialisation apparaît dans les logs du backend (console).
-                </span>
-            </div>
-            <p className="mt-1 text-xs text-neutral-300 font-mono">
-                [DEV] Lien de réinitialisation : /reset-password?token=…
-            </p>
         </div>
     );
 }

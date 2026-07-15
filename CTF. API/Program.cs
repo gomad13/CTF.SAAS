@@ -139,6 +139,22 @@ authBuilder.AddJwtBearer(options =>
                 if (ctx.Request.Cookies.TryGetValue("jwt", out var cookieToken))
                     ctx.Token = cookieToken;
                 return Task.CompletedTask;
+            },
+            // Révocation immédiate : le SecurityStamp du JWT doit correspondre à celui en base.
+            // Le faire tourner (reset/changement de mot de passe) invalide tous les JWT existants.
+            // (Comptes historiques : SecurityStamp null en base → aucune vérification tant que non défini.)
+            OnTokenValidated = async ctx =>
+            {
+                var uidClaim = ctx.Principal?.FindFirst("user_id")?.Value;
+                if (!Guid.TryParse(uidClaim, out var userId)) return;
+                var db = ctx.HttpContext.RequestServices.GetRequiredService<CTF.Api.Data.AppDbContext>();
+                var currentStamp = await db.Users.AsNoTracking()
+                    .Where(u => u.Id == userId).Select(u => u.SecurityStamp).FirstOrDefaultAsync();
+                if (currentStamp is not null &&
+                    ctx.Principal?.FindFirst("sstamp")?.Value != currentStamp)
+                {
+                    ctx.Fail("Session révoquée (mot de passe modifié).");
+                }
             }
         };
     });

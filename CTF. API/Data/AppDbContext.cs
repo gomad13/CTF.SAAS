@@ -44,6 +44,7 @@ public class AppDbContext : DbContext
     public DbSet<MailLog> MailLogs => Set<MailLog>();
     public DbSet<TenantInvite> TenantInvites => Set<TenantInvite>();
     public DbSet<TwoFactorCode> TwoFactorCodes => Set<TwoFactorCode>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<RiskScoreHistory> RiskScoreHistories => Set<RiskScoreHistory>();
     public DbSet<CoachingFeedback> CoachingFeedbacks => Set<CoachingFeedback>();
 
@@ -69,6 +70,14 @@ public class AppDbContext : DbContext
         {
             b.HasIndex(x => new { x.TenantId, x.Domain }).IsUnique();
             b.HasIndex(x => x.Domain).IsUnique();
+        });
+
+        // Reset mot de passe : lookup par hash de token (jamais le token en clair) + purge par user.
+        modelBuilder.Entity<PasswordResetToken>(b =>
+        {
+            b.HasIndex(x => x.TokenHash);
+            b.HasIndex(x => x.UserId);
+            b.Property(x => x.TokenHash).HasMaxLength(64);
         });
 
         // [MULTI-SOCIETES] Appartenance unique (UserId, TenantId) + lookup par user.

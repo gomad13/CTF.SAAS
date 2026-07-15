@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
@@ -9,19 +9,19 @@ import Reveal from "@/components/Reveal";
 
 // ── Password strength (shared logic) ─────────────────────────────────────────
 const PASSWORD_CRITERIA = [
-    { label: "8 caractères minimum",       test: (p: string) => p.length >= 8 },
-    { label: "Une majuscule (A-Z)",         test: (p: string) => /[A-Z]/.test(p) },
-    { label: "Une minuscule (a-z)",         test: (p: string) => /[a-z]/.test(p) },
-    { label: "Un chiffre (0-9)",            test: (p: string) => /[0-9]/.test(p) },
-    { label: "Un caractère spécial (!@#…)", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+    { label: "8 caractères minimum",        test: (p: string) => p.length >= 8 },
+    { label: "Une majuscule (A-Z)",          test: (p: string) => /[A-Z]/.test(p) },
+    { label: "Une minuscule (a-z)",          test: (p: string) => /[a-z]/.test(p) },
+    { label: "Un chiffre (0-9)",             test: (p: string) => /[0-9]/.test(p) },
+    { label: "Un caractère spécial (!@#…)",  test: (p: string) => /[^A-Za-z0-9]/.test(p) },
 ] as const;
 
 const STRENGTH_LEVELS = [
-    { min: 0, max: 0, label: "Très faible", color: "var(--danger)", pct: "0%"   },
+    { min: 0, max: 0, label: "Très faible", color: "var(--danger)",  pct: "0%"   },
     { min: 1, max: 2, label: "Faible",      color: "var(--warning)", pct: "40%"  },
     { min: 3, max: 3, label: "Moyen",       color: "var(--warning)", pct: "60%"  },
-    { min: 4, max: 4, label: "Fort",        color: "var(--pr)", pct: "80%"  },
-    { min: 5, max: 5, label: "Très fort",   color: "var(--pr)", pct: "100%" },
+    { min: 4, max: 4, label: "Fort",        color: "var(--pr)",      pct: "80%"  },
+    { min: 5, max: 5, label: "Très fort",   color: "var(--pr)",      pct: "100%" },
 ] as const;
 
 function passwordScore(p: string) {
@@ -31,7 +31,28 @@ function getLevel(score: number) {
     return STRENGTH_LEVELS.find(l => score >= l.min && score <= l.max) ?? STRENGTH_LEVELS[0];
 }
 
-// ── Wrapping with Suspense for useSearchParams ────────────────────────────────
+const cardStyle: React.CSSProperties = {
+    width: "100%",
+    maxWidth: 460,
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    padding: "clamp(28px, 6vw, 44px)",
+    position: "relative",
+    overflow: "hidden",
+};
+
+const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "var(--text-muted)",
+    marginBottom: 6,
+};
+
 export default function ResetPasswordPage() {
     return (
         <Suspense fallback={<LoadingShell />}>
@@ -40,11 +61,27 @@ export default function ResetPasswordPage() {
     );
 }
 
+function Shell({ children }: { children: React.ReactNode }) {
+    return (
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}>
+            <div style={{ position: "fixed", left: 16, top: 16 }}>
+                <Link href="/login" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, textDecoration: "none", color: "var(--text-muted)" }}>
+                    <span aria-hidden>&#x2190;</span>
+                    <span>Retour à la connexion</span>
+                </Link>
+            </div>
+            <Reveal>{children}</Reveal>
+        </div>
+    );
+}
+
 function LoadingShell() {
     return (
-        <div className="min-h-screen bg-background-dark text-white flex items-center justify-center">
-            <div className="h-8 w-48 animate-pulse rounded-lg bg-neutral-800" />
-        </div>
+        <Shell>
+            <div style={{ ...cardStyle, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
+                Vérification du lien…
+            </div>
+        </Shell>
     );
 }
 
@@ -54,15 +91,25 @@ function ResetPasswordForm() {
     const searchParams = useSearchParams();
     const token        = searchParams.get("token") ?? "";
 
-    const [password, setPassword]         = useState("");
-    const [confirm, setConfirm]           = useState("");
-    const [loading, setLoading]           = useState(false);
-    const [error, setError]               = useState<string | null>(null);
-    const [fieldError, setFieldError]     = useState<string | null>(null);
+    const [tokenValid, setTokenValid] = useState<boolean | null>(null); // null = en cours
+    const [password, setPassword]     = useState("");
+    const [confirm, setConfirm]       = useState("");
+    const [loading, setLoading]       = useState(false);
+    const [error, setError]           = useState<string | null>(null);
+    const [fieldError, setFieldError] = useState<string | null>(null);
 
-    if (!token) {
-        return <InvalidToken reason="Lien de réinitialisation manquant ou invalide." />;
-    }
+    // Validation du token au montage (n'expose rien d'autre que valid: true/false).
+    useEffect(() => {
+        if (!token) { setTokenValid(false); return; }
+        let cancelled = false;
+        apiFetch<{ valid: boolean }>(`/api/auth/reset-password/validate?token=${encodeURIComponent(token)}`)
+            .then(r => { if (!cancelled) setTokenValid(r.valid); })
+            .catch(() => { if (!cancelled) setTokenValid(false); });
+        return () => { cancelled = true; };
+    }, [token]);
+
+    if (tokenValid === null) return <LoadingShell />;
+    if (!tokenValid) return <InvalidToken reason="Ce lien de réinitialisation est invalide, expiré ou a déjà été utilisé." />;
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -85,7 +132,7 @@ function ResetPasswordForm() {
             router.push("/login?reset=1");
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "";
-            if (msg.includes("expiré") || msg.includes("invalide")) {
+            if (msg.includes("expiré") || msg.includes("invalide") || msg.includes("utilisé")) {
                 setError("Ce lien est invalide ou a expiré. Demandez un nouveau lien de réinitialisation.");
             } else {
                 setError("Une erreur est survenue. Réessayez ou demandez un nouveau lien.");
@@ -99,139 +146,112 @@ function ResetPasswordForm() {
     const level = getLevel(score);
 
     return (
-        <div className="min-h-screen bg-background-dark text-white">
-            {/* Back link */}
-            <div className="fixed left-4 top-4 z-50 sm:left-6 sm:top-6">
-                <Link
-                    href="/login"
-                    className="group inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-hover"
-                >
-                    <span className="text-neutral-300 transition-colors group-hover:text-accent">←</span>
-                    <span className="text-neutral-300">Retour à la connexion</span>
-                </Link>
-            </div>
+        <Shell>
+            <div style={cardStyle}>
+                <div aria-hidden style={{ position: "absolute", top: 0, right: 0, width: 48, height: 48, background: "linear-gradient(225deg, var(--accent-border) 0%, transparent 60%)", clipPath: "polygon(100% 0, 0 0, 100% 100%)" }} />
 
-            <div className="mx-auto flex min-h-screen max-w-lg items-center px-4 py-16">
-                <Reveal>
-                <div className="w-full rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 shadow-sm">
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent-subtle)", border: "1px solid var(--accent-border)", borderRadius: 20, padding: "4px 12px", fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: "0.12em", color: "var(--accent)" }}>
+                        <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--pr)", boxShadow: "0 0 6px var(--accent)" }} />
+                        NOUVEAU MOT DE PASSE
+                    </span>
+                </div>
 
-                    {/* Icon */}
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-2xl">
-                        🔒
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", textAlign: "center", margin: "12px 0 0" }}>
+                    Choisir un nouveau mot de passe
+                </h1>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", margin: "8px 0 0", lineHeight: 1.5 }}>
+                    Choisissez un mot de passe fort pour s&eacute;curiser votre compte.
+                </p>
+
+                <div style={{ height: 1, background: "linear-gradient(90deg, transparent, var(--border), transparent)", margin: "20px 0" }} />
+
+                {error && (
+                    <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "12px 14px", marginBottom: 16 }}>
+                        <p style={{ fontSize: 13, color: "var(--danger-t)", margin: 0 }}>{error}</p>
+                        <Link href="/forgot-password" style={{ display: "inline-block", marginTop: 8, fontSize: 13, color: "var(--primary)", textDecoration: "none" }}>
+                            Demander un nouveau lien &rarr;
+                        </Link>
+                    </div>
+                )}
+
+                <form onSubmit={onSubmit} noValidate>
+                    <div style={{ marginBottom: 16 }}>
+                        <label htmlFor="new-password" style={labelStyle}>NOUVEAU MOT DE PASSE</label>
+                        <PasswordInput
+                            id="new-password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            placeholder="8 caractères minimum"
+                            autoComplete="new-password"
+                        />
                     </div>
 
-                    <h1 className="text-2xl font-semibold">Nouveau mot de passe</h1>
-                    <p className="mt-1 text-sm text-neutral-300">
-                        Choisissez un mot de passe fort pour sécuriser votre compte.
-                    </p>
-
-                    {/* Token invalid error (non-recoverable) */}
-                    {error && (
-                        <div className="mt-4 rounded-xl border border-red-700/60 bg-red-950/30 px-4 py-3">
-                            <p className="text-sm text-red-300">{error}</p>
-                            <Link
-                                href="/forgot-password"
-                                className="mt-2 inline-block text-sm text-primary hover:underline"
-                            >
-                                Demander un nouveau lien →
-                            </Link>
+                    {password.length > 0 && (
+                        <div style={{ background: "var(--bg-input)", border: "1px solid var(--border)", borderRadius: 8, padding: 12, marginBottom: 16 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div style={{ height: 6, flex: 1, overflow: "hidden", borderRadius: 999, background: "var(--border)" }}>
+                                    <div style={{ height: "100%", borderRadius: 999, transition: "all 0.3s", width: level.pct, backgroundColor: level.color }} />
+                                </div>
+                                <span style={{ width: 68, textAlign: "right", fontSize: 12, fontWeight: 600, color: level.color }}>{level.label}</span>
+                            </div>
+                            <ul style={{ margin: "10px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
+                                {PASSWORD_CRITERIA.map(c => {
+                                    const ok = c.test(password);
+                                    return (
+                                        <li key={c.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-muted)" }}>
+                                            <span aria-hidden style={{ color: ok ? "var(--pr)" : "var(--danger)" }}>{ok ? "✓" : "✗"}</span>
+                                            <span>{c.label}</span>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
                         </div>
                     )}
 
-                    <form className="mt-5 space-y-4" onSubmit={onSubmit} noValidate>
-                        {/* New password */}
-                        <div>
-                            <label className="mb-1 block text-sm text-neutral-300">Nouveau mot de passe</label>
-                            <PasswordInput
-                                className="w-full rounded-xl border border-neutral-800 bg-neutral-950/40 py-2 pl-3 text-sm text-white placeholder-black transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                placeholder="8 caractères minimum"
-                                autoComplete="new-password"
-                            />
+                    <div style={{ marginBottom: 16 }}>
+                        <label htmlFor="confirm-password" style={labelStyle}>CONFIRMER LE MOT DE PASSE</label>
+                        <PasswordInput
+                            id="confirm-password"
+                            value={confirm}
+                            onChange={e => setConfirm(e.target.value)}
+                            placeholder="Répéter le mot de passe"
+                            autoComplete="new-password"
+                        />
+                    </div>
+
+                    {fieldError && (
+                        <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 7, padding: "10px 14px", color: "var(--danger-t)", fontSize: 13, marginBottom: 16 }}>
+                            &#9888; {fieldError}
                         </div>
+                    )}
 
-                        {/* Strength meter */}
-                        {password.length > 0 && (
-                            <div className="space-y-2 rounded-xl border border-neutral-800 bg-neutral-950/30 p-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-800">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-300"
-                                            style={{ width: level.pct, backgroundColor: level.color }}
-                                        />
-                                    </div>
-                                    <span className="w-16 text-right text-xs font-medium" style={{ color: level.color }}>
-                                        {level.label}
-                                    </span>
-                                </div>
-                                <ul className="space-y-1">
-                                    {PASSWORD_CRITERIA.map(c => {
-                                        const ok = c.test(password);
-                                        return (
-                                            <li key={c.label} className="flex items-center gap-2 text-xs">
-                                                <span style={{ color: ok ? "var(--pr)" : "var(--danger)" }}>
-                                                    {ok ? "✓" : "✗"}
-                                                </span>
-                                                <span className={ok ? "text-neutral-300" : "text-neutral-300"}>
-                                                    {c.label}
-                                                </span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                        )}
-
-                        {/* Confirm */}
-                        <div>
-                            <label className="mb-1 block text-sm text-neutral-300">Confirmer le mot de passe</label>
-                            <PasswordInput
-                                className="w-full rounded-xl border border-neutral-800 bg-neutral-950/40 py-2 pl-3 text-sm text-white placeholder-black transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-                                value={confirm}
-                                onChange={e => setConfirm(e.target.value)}
-                                placeholder="Répéter le mot de passe"
-                                autoComplete="new-password"
-                            />
-                        </div>
-
-                        {/* Field error */}
-                        {fieldError && (
-                            <div className="rounded-xl border border-red-700/60 bg-red-950/30 px-3 py-2 text-sm text-red-300">
-                                {fieldError}
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="mt-1 min-h-[44px] w-full rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
-                        >
-                            {loading ? "Réinitialisation en cours…" : "Réinitialiser mon mot de passe"}
-                        </button>
-                    </form>
-                </div>
-                </Reveal>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{ width: "100%", background: loading ? "var(--accent-subtle)" : "linear-gradient(135deg, var(--accent), var(--accent-hover))", color: "var(--on-accent)", fontWeight: 700, fontSize: 14, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", border: "none", borderRadius: 8, padding: "13px 0", minHeight: 44, cursor: loading ? "not-allowed" : "pointer", transition: "all 0.2s" }}
+                        onMouseOver={e => { if (!loading) { e.currentTarget.style.boxShadow = "0 0 20px var(--accent-subtle)"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
+                        onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
+                    >
+                        {loading ? "[ RÉINITIALISATION... ]" : "Réinitialiser mon mot de passe"}
+                    </button>
+                </form>
             </div>
-        </div>
+        </Shell>
     );
 }
 
 function InvalidToken({ reason }: { reason: string }) {
     return (
-        <div className="min-h-screen bg-background-dark text-white flex items-center justify-center px-4">
-            <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center">
-                <div className="mb-4 text-4xl">⚠️</div>
-                <h1 className="text-xl font-semibold">Lien invalide</h1>
-                <p className="mt-2 text-sm text-neutral-300">{reason}</p>
-                <Link
-                    href="/forgot-password"
-                    className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark transition-colors"
-                >
+        <Shell>
+            <div style={{ ...cardStyle, textAlign: "center" }}>
+                <div aria-hidden style={{ fontSize: 34, marginBottom: 12 }}>&#9888;&#65039;</div>
+                <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Lien invalide</h1>
+                <p style={{ marginTop: 10, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>{reason}</p>
+                <Link href="/forgot-password" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 44, marginTop: 18, padding: "0 22px", borderRadius: 8, background: "linear-gradient(135deg, var(--accent), var(--accent-hover))", color: "var(--on-accent)", fontSize: 14, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none" }}>
                     Demander un nouveau lien
                 </Link>
             </div>
-        </div>
+        </Shell>
     );
 }
-

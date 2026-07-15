@@ -39,6 +39,10 @@ public class LogOnlyMailService : IMailService
         => LogAsync(toEmail, "two-factor-code",
             $"Code de vérification 2FA : {code} (expire dans 10 minutes)", ct);
 
+    public Task SendSupportMessageAsync(string fromEmail, string subject, string message, CancellationToken ct = default)
+        => LogAsync("support", "support",
+            $"[Support] de {fromEmail} — sujet: {subject}", ct);
+
     private async Task LogAsync(string toEmail, string type, string body, CancellationToken ct)
     {
         _logger.LogInformation("[MAIL log-only] type={Type} to={Email} body={Body}", type, toEmail, body);

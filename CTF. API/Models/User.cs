@@ -54,4 +54,13 @@ public class User
     /// la session. Le login SSO délègue le MFA au provider.
     /// </summary>
     public bool TwoFactorEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Empreinte de sécurité de session. Incluse dans le JWT (claim `sstamp`) et re-vérifiée à chaque
+    /// requête. La faire tourner (reset/changement de mot de passe) invalide IMMÉDIATEMENT tous les JWT
+    /// existants de l'utilisateur (révocation de session multi-appareils). null = comptes historiques
+    /// (aucune vérification tant que non défini). Jamais exposé.
+    /// </summary>
+    [JsonIgnore]
+    public string? SecurityStamp { get; set; }
 }

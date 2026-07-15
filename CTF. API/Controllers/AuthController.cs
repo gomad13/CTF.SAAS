@@ -30,13 +30,8 @@ public class AuthController : ControllerBase
 
     private static readonly Guid DemoTenantId = Guid.Parse("00000000-0000-0000-0000-000000000000");
 
-    // cache key prefix for password-reset tokens
-    private const string ResetPrefix = "pwd_reset_";
-
     // M3 — cookie opaque (≠ cookie "jwt") portant l'état "en attente de code 2FA" au login.
     private const string TwoFactorCookie = "twofa_pending";
-
-    private record ResetTokenData(Guid UserId, Guid TenantId, DateTime ExpiresAt);
 
     public AuthController(IConfiguration config, IWebHostEnvironment env, IMemoryCache cache,
         IMailService mail, ILogger<AuthController> logger)
@@ -146,7 +141,7 @@ public class AuthController : ControllerBase
         // [MULTI-SOCIETES] Société active par défaut + rôle dans cette société.
         var (activeTenantId, effectiveRole) = await ResolveActiveAsync(db, user, isSuperAdmin, requestedTenantId: null);
 
-        SetAuthCookie(BuildJwt(activeTenantId, user.Id, effectiveRole));
+        SetAuthCookie(BuildJwt(activeTenantId, user.Id, effectiveRole, user.SecurityStamp));
         SetRoleCookie(effectiveRole);
 
         var ipAddr = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -270,6 +265,7 @@ public class AuthController : ControllerBase
             Role        = "user",
             IsActive    = true,
             CreatedAt   = DateTime.UtcNow,
+            SecurityStamp = Guid.NewGuid().ToString("N"),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password, workFactor: 12)
         };
 
@@ -325,74 +321,82 @@ public class AuthController : ControllerBase
             await db.SaveChangesAsync(ct);
         }
 
-        var tokenString = BuildJwt(tenantId, user.Id, user.Role);
+        var tokenString = BuildJwt(tenantId, user.Id, user.Role, user.SecurityStamp);
         SetAuthCookie(tokenString);
 
         return Ok(new { message = "Compte créé avec succès." });
     }
 
-    // ── Forgot password ─────────────────────────────────────────────────────
-    public record ForgotPasswordRequest(string Email, Guid? TenantId);
+    // ── Forgot password (SÉCURISÉ) ───────────────────────────────────────────
+    public record ForgotPasswordRequest(string Email);
 
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(
         [FromBody] ForgotPasswordRequest req,
         [FromServices] AppDbContext db)
     {
-        // Réponse identique quelle que soit l'issue (sécurité anti-énumération)
-        const string safeMsg = "Si cet email existe, un lien de réinitialisation a été envoyé.";
-
+        // Réponse + délai IDENTIQUES quelle que soit l'issue → aucune énumération de comptes.
+        const string safeMsg = "Si un compte existe pour cet email, un lien de réinitialisation a été envoyé.";
         var normalizedEmail = req.Email?.Trim().ToLowerInvariant();
-        if (string.IsNullOrEmpty(normalizedEmail))
-            return Ok(new { message = safeMsg });
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-        var tenantId = req.TenantId ?? DemoTenantId;
+        // Rate limiting par IP ET par email (3 / 15 min) — même réponse neutre si dépassé (pas de 429 révélateur).
+        var limited = IsResetRateLimited($"pwreset_ip_{ip}", 10)
+            || (!string.IsNullOrEmpty(normalizedEmail) && IsResetRateLimited($"pwreset_mail_{normalizedEmail}", 3));
 
-        var user = await db.Users
-            .Where(u => u.Email == normalizedEmail && u.TenantId == tenantId)
-            .FirstOrDefaultAsync();
-
-        if (user is not null)
+        if (!limited && !string.IsNullOrEmpty(normalizedEmail))
         {
-            var token     = Guid.NewGuid().ToString("N");   // 32 hex chars
-            var expiresAt = DateTime.UtcNow.AddHours(1);
-
-            _cache.Set(
-                ResetPrefix + token,
-                new ResetTokenData(user.Id, user.TenantId, expiresAt),
-                absoluteExpiration: new DateTimeOffset(expiresAt)
-            );
-
-            // [PENTEST] Ne JAMAIS logguer le token/lien en clair hors Development.
-            var resetLink = $"{Request.Scheme}://{Request.Host}/reset-password?token={token}";
-            if (_env.IsDevelopment())
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+            if (user is not null && user.IsActive && !string.IsNullOrEmpty(user.PasswordHash))
             {
-                Console.WriteLine($"[DEV] Lien de réinitialisation pour {normalizedEmail} : {resetLink}");
+                // Un seul token actif à la fois : invalider les précédents non utilisés.
+                var olds = await db.PasswordResetTokens.Where(t => t.UserId == user.Id && t.UsedAt == null).ToListAsync();
+                foreach (var o in olds) o.UsedAt = DateTime.UtcNow;
+
+                var rawToken = GenerateUrlSafeToken();                 // RandomNumberGenerator (CSPRNG)
+                db.PasswordResetTokens.Add(new PasswordResetToken
+                {
+                    Id        = Guid.NewGuid(),
+                    UserId    = user.Id,
+                    TenantId  = user.TenantId,
+                    TokenHash = Hash(rawToken),                        // SHA-256 — le token brut n'est JAMAIS en base
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(30),
+                    CreatedAt = DateTime.UtcNow,
+                    RequestIp = ip,
+                });
+                await db.SaveChangesAsync();
+
+                var baseUrl   = (_config["FrontendUrl"] ?? $"{Request.Scheme}://{Request.Host}").TrimEnd('/');
+                var resetLink = $"{baseUrl}/reset-password?token={rawToken}";
+                await _mail.SendPasswordResetAsync(user.Email, resetLink); // Brevo OU LogOnly ; jamais de token en log
             }
         }
 
+        await Task.Delay(250); // délai similaire (anti-timing)
         return Ok(new { message = safeMsg });
     }
 
-    // ── Reset password ──────────────────────────────────────────────────────
+    // ── Validation d'un token de reset (pour l'UI) — ne révèle rien d'autre ──
+    [HttpGet("reset-password/validate")]
+    public async Task<IActionResult> ValidateResetToken([FromQuery] string? token, [FromServices] AppDbContext db, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return Ok(new { valid = false });
+        var hash = Hash(token);
+        var ok = await db.PasswordResetTokens.AnyAsync(t => t.TokenHash == hash && t.UsedAt == null && t.ExpiresAt > DateTime.UtcNow, ct);
+        return Ok(new { valid = ok });
+    }
+
+    // ── Reset password (SÉCURISÉ) ────────────────────────────────────────────
     public record ResetPasswordRequest(string Token, string NewPassword);
 
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(
         [FromBody] ResetPasswordRequest req,
-        [FromServices] AppDbContext db)
+        [FromServices] AppDbContext db,
+        CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(req.Token))
-            return BadRequest(new { error = "Token manquant." });
-
-        if (!_cache.TryGetValue(ResetPrefix + req.Token, out ResetTokenData? data) || data is null)
-            return BadRequest(new { error = "Lien invalide ou expiré. Demandez un nouveau lien." });
-
-        if (data.ExpiresAt < DateTime.UtcNow)
-        {
-            _cache.Remove(ResetPrefix + req.Token);
-            return BadRequest(new { error = "Lien expiré. Demandez un nouveau lien." });
-        }
+            return BadRequest(new { error = "Lien invalide. Demandez un nouveau lien." });
 
         if (!IsPasswordStrong(req.NewPassword))
             return BadRequest(new
@@ -401,16 +405,41 @@ public class AuthController : ControllerBase
                         "une majuscule, une minuscule, un chiffre et un caractère spécial."
             });
 
-        var user = await db.Users.FindAsync(data.UserId);
+        // Lookup par HASH (le token brut n'est jamais stocké). Refus si absent/utilisé/expiré.
+        var hash = Hash(req.Token);
+        var prt = await db.PasswordResetTokens.FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
+        if (prt is null || prt.UsedAt != null || prt.ExpiresAt <= DateTime.UtcNow)
+            return BadRequest(new { error = "Lien invalide, expiré ou déjà utilisé. Demandez un nouveau lien." });
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == prt.UserId, ct);
         if (user is null)
-            return BadRequest(new { error = "Utilisateur introuvable." });
+            return BadRequest(new { error = "Lien invalide. Demandez un nouveau lien." });
 
+        // 1) Nouveau hash BCrypt (complexité déjà validée).
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword, workFactor: 12);
-        await db.SaveChangesAsync();
+        // 2) Rotation du SecurityStamp → invalide IMMÉDIATEMENT tous les JWT existants (multi-appareils).
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        user.UpdatedAt = DateTime.UtcNow;
 
-        _cache.Remove(ResetPrefix + req.Token);
+        // 3) Ce token = utilisé ; invalider TOUS les autres tokens de reset en cours du user.
+        prt.UsedAt = DateTime.UtcNow;
+        var otherTokens = await db.PasswordResetTokens
+            .Where(t => t.UserId == user.Id && t.UsedAt == null && t.Id != prt.Id).ToListAsync(ct);
+        foreach (var o in otherTokens) o.UsedAt = DateTime.UtcNow;
 
-        return Ok(new { message = "Mot de passe modifié avec succès." });
+        // 4) Révoquer TOUS les refresh tokens actifs → sessions non renouvelables.
+        var refreshTokens = await db.RefreshTokens
+            .Where(t => t.UserId == user.Id && !t.IsRevoked).ToListAsync(ct);
+        foreach (var r in refreshTokens)
+        {
+            r.IsRevoked = true;
+            r.RevokedAt = DateTime.UtcNow;
+            r.RevokedByIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        }
+
+        await db.SaveChangesAsync(ct);
+        _logger.LogInformation("[AUTH] Reset mot de passe effectué user={UserId} — sessions révoquées.", user.Id);
+        return Ok(new { message = "Mot de passe modifié. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe." });
     }
 
     // ── Me ──────────────────────────────────────────────────────────────────
@@ -511,7 +540,7 @@ public class AuthController : ControllerBase
         var (activeTenantId, effectiveRole) = await ResolveActiveAsync(db, user, isSuperAdmin, rt.ActiveTenantId);
 
         // Nouveaux tokens (rotation)
-        var newJwt = BuildJwt(activeTenantId, user.Id, effectiveRole);
+        var newJwt = BuildJwt(activeTenantId, user.Id, effectiveRole, user.SecurityStamp);
         SetAuthCookie(newJwt);
         SetRoleCookie(effectiveRole);
 
@@ -775,6 +804,28 @@ public class AuthController : ControllerBase
     private static string Hash(string value) =>
         Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 
+    // Token URL-safe (base64url, 256 bits) via CSPRNG — pas de +/=/ à encoder dans le lien.
+    private static string GenerateUrlSafeToken()
+    {
+        var bytes = new byte[32];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
+    }
+
+    // Rate limit simple par clé sur 15 min. true = bloqué. Par email = strict (3),
+    // par IP = plus large (10) pour ne pas bloquer un bureau entier derrière un même NAT.
+    private bool IsResetRateLimited(string key, int max)
+    {
+        var count = _cache.GetOrCreate(key, e =>
+        {
+            e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            return 0;
+        });
+        if (count >= max) return true;
+        _cache.Set(key, count + 1, TimeSpan.FromMinutes(15));
+        return false;
+    }
+
     private void SetTwoFactorPendingCookie(string token) =>
         Response.Cookies.Append(TwoFactorCookie, token, PendingCookieOptions());
 
@@ -905,7 +956,7 @@ public class AuthController : ControllerBase
 
         var (activeTenantId, effectiveRole) = await ResolveActiveAsync(db, user, isSuperAdmin, req.TenantId);
 
-        SetAuthCookie(BuildJwt(activeTenantId, user.Id, effectiveRole));
+        SetAuthCookie(BuildJwt(activeTenantId, user.Id, effectiveRole, user.SecurityStamp));
         SetRoleCookie(effectiveRole);
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var refresh = await IssueRefreshTokenAsync(db, user.Id, ip, activeTenantId);
@@ -920,7 +971,7 @@ public class AuthController : ControllerBase
         return Ok(new { success = true, tenantId = activeTenantId, role = effectiveRole, redirectTo });
     }
 
-    private string BuildJwt(Guid tenantId, Guid userId, string role)
+    private string BuildJwt(Guid tenantId, Guid userId, string role, string? securityStamp = null)
     {
         var section  = _config.GetSection("Jwt");
         var key      = Environment.GetEnvironmentVariable("JWT_KEY") ?? section["Key"]!;
@@ -935,6 +986,9 @@ public class AuthController : ControllerBase
             new("user_id",   userId.ToString()),
             new(ClaimTypes.Role, role)
         };
+        // Empreinte de session (révocation immédiate) — seulement si le compte en a une.
+        if (!string.IsNullOrEmpty(securityStamp))
+            claims.Add(new Claim("sstamp", securityStamp));
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var creds      = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
