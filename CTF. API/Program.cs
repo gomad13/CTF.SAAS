@@ -199,6 +199,8 @@ builder.Services.AddScoped<CTF.Api.Services.ProgressCalculationService>();
 builder.Services.AddScoped<CTF.Api.Services.ParcoursVisibilityService>();
 builder.Services.AddScoped<CTF.Api.Services.TenantResolutionService>();
 builder.Services.AddScoped<CTF.Api.Services.SsoFlowService>();
+// Vérification de domaine par DNS TXT (PASSE 1) — stateless (blacklist calculée une fois).
+builder.Services.AddSingleton<CTF.Api.Services.IDomainVerificationService, CTF.Api.Services.DomainVerificationService>();
 
 // ✅ Cyber Resilience Index (CRI)
 builder.Services.AddScoped<IRiskScoringService, RiskScoringService>();

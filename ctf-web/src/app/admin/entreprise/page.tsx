@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Building2, Copy, Check, QrCode, KeyRound, ShieldCheck, Users, Save, ExternalLink, AlertCircle,
+    Building2, Copy, Check, QrCode, KeyRound, ShieldCheck, Users, Save, ExternalLink, AlertCircle, Globe,
 } from "lucide-react";
 import InvitesManager from "@/components/invites/InvitesManager";
+import TenantDomainsSection from "@/components/domains/TenantDomainsSection";
 import Reveal from "@/components/Reveal";
 import { Stagger, StaggerItem } from "@/components/Stagger";
 import { VisionSection, VisionField, VisionInput, VisionTextarea, VisionButton, VisionToggle } from "@/components/vision/VisionForm";
@@ -138,7 +139,15 @@ function EntrepriseForm({ initial }: { initial: TenantSettings }) {
                         </VisionSection>
                     </StaggerItem>
 
-                    {/* 4. SÉCURITÉ */}
+                    {/* 4. DOMAINES DE L'ENTREPRISE */}
+                    <StaggerItem>
+                        <VisionSection icon={<Globe size={17} />} title="Domaines de l'entreprise"
+                            desc="Prouvez la possession de vos domaines email via un enregistrement DNS. Fondation du rattachement automatique et du SSO.">
+                            <TenantDomainsSection />
+                        </VisionSection>
+                    </StaggerItem>
+
+                    {/* 5. SÉCURITÉ */}
                     <StaggerItem>
                         <VisionSection icon={<ShieldCheck size={17} />} title="Sécurité">
                             <p style={{ fontSize: 14, color: "var(--v-text)", lineHeight: 1.6 }}>
