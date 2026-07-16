@@ -66,6 +66,14 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // F-04 — Au plus UN SuperAdmin actif à la fois. Index unique PARTIEL Postgres :
+        // toutes les lignes filtrées ont IsActive=true (même valeur) → l'unicité n'en autorise
+        // qu'une seule. Garantie au niveau DB, y compris contre une insertion SQL manuelle.
+        modelBuilder.Entity<SuperAdmin>()
+            .HasIndex(sa => sa.IsActive)
+            .IsUnique()
+            .HasFilter("\"IsActive\" = true");
+
         modelBuilder.Entity<TenantEmailDomain>(b =>
         {
             b.HasIndex(x => new { x.TenantId, x.Domain }).IsUnique();

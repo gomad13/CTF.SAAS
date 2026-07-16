@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -27,6 +28,7 @@ public class AuthController : ControllerBase
     private readonly IMemoryCache        _cache;
     private readonly IMailService        _mail;
     private readonly ILogger<AuthController> _logger;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     private static readonly Guid DemoTenantId = Guid.Parse("00000000-0000-0000-0000-000000000000");
 
@@ -34,13 +36,14 @@ public class AuthController : ControllerBase
     private const string TwoFactorCookie = "twofa_pending";
 
     public AuthController(IConfiguration config, IWebHostEnvironment env, IMemoryCache cache,
-        IMailService mail, ILogger<AuthController> logger)
+        IMailService mail, ILogger<AuthController> logger, IServiceScopeFactory scopeFactory)
     {
         _config = config;
         _env    = env;
         _cache  = cache;
         _mail   = mail;
         _logger = logger;
+        _scopeFactory = scopeFactory;
     }
 
     // ── Dev token (DEV only) ────────────────────────────────────────────────
@@ -335,7 +338,10 @@ public class AuthController : ControllerBase
         [FromBody] ForgotPasswordRequest req,
         [FromServices] AppDbContext db)
     {
-        // Réponse + délai IDENTIQUES quelle que soit l'issue → aucune énumération de comptes.
+        // Réponse + TEMPS DE RÉPONSE constants quelle que soit l'issue → aucune énumération de comptes
+        // (ni par message/HTTP, ni par timing). L'envoi mail est décalé en tâche de fond pour ne pas
+        // rendre la branche "compte existant" plus lente.
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         const string safeMsg = "Si un compte existe pour cet email, un lien de réinitialisation a été envoyé.";
         var normalizedEmail = req.Email?.Trim().ToLowerInvariant();
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -367,19 +373,48 @@ public class AuthController : ControllerBase
                 await db.SaveChangesAsync();
 
                 var baseUrl   = (_config["FrontendUrl"] ?? $"{Request.Scheme}://{Request.Host}").TrimEnd('/');
-                var resetLink = $"{baseUrl}/reset-password?token={rawToken}";
-                await _mail.SendPasswordResetAsync(user.Email, resetLink); // Brevo OU LogOnly ; jamais de token en log
+                // F-02 — token dans le FRAGMENT (#) : non transmis au serveur/proxy ni via l'en-tête Referer.
+                var resetLink = $"{baseUrl}/reset-password#token={rawToken}";
+                // Envoi en tâche de fond (scope dédié) : ne bloque pas la réponse → timing identique
+                // que le compte existe ou non. Brevo OU LogOnly ; jamais de token en log.
+                SendPasswordResetInBackground(user.Email, resetLink);
             }
         }
 
-        await Task.Delay(250); // délai similaire (anti-timing)
+        // Temps de réponse constant (anti-timing) : padding jusqu'à ~500 ms quelle que soit la branche.
+        var remainingMs = 500 - (int)sw.ElapsedMilliseconds;
+        if (remainingMs > 0) await Task.Delay(remainingMs);
         return Ok(new { message = safeMsg });
+    }
+
+    // Envoi du mail de reset hors du cycle requête (scope DI dédié) : découple le temps de réponse
+    // du coût réseau de l'envoi (anti-énumération temporelle). Échec silencieux loggué, non bloquant.
+    private void SendPasswordResetInBackground(string email, string resetLink)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var mail = scope.ServiceProvider.GetRequiredService<IMailService>();
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                await mail.SendPasswordResetAsync(email, resetLink, cts.Token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[AUTH] Envoi mail reset en tâche de fond échoué pour {Email}", email);
+            }
+        });
     }
 
     // ── Validation d'un token de reset (pour l'UI) — ne révèle rien d'autre ──
     [HttpGet("reset-password/validate")]
     public async Task<IActionResult> ValidateResetToken([FromQuery] string? token, [FromServices] AppDbContext db, CancellationToken ct)
     {
+        // Rate limiting par IP (défense en profondeur) — réponse NEUTRE si dépassé (pas de 429 révélateur).
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (IsResetRateLimited($"pwreset_validate_ip_{ip}", 60))
+            return Ok(new { valid = false });
         if (string.IsNullOrWhiteSpace(token)) return Ok(new { valid = false });
         var hash = Hash(token);
         var ok = await db.PasswordResetTokens.AnyAsync(t => t.TokenHash == hash && t.UsedAt == null && t.ExpiresAt > DateTime.UtcNow, ct);
@@ -395,6 +430,11 @@ public class AuthController : ControllerBase
         [FromServices] AppDbContext db,
         CancellationToken ct)
     {
+        // Rate limiting par IP sur la consommation du token (défense en profondeur anti-bruteforce).
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (IsResetRateLimited($"pwreset_consume_ip_{ip}", 20))
+            return StatusCode(429, new { error = "Trop de tentatives. Veuillez réessayer dans quelques minutes." });
+
         if (string.IsNullOrWhiteSpace(req.Token))
             return BadRequest(new { error = "Lien invalide. Demandez un nouveau lien." });
 
@@ -506,8 +546,26 @@ public class AuthController : ControllerBase
         if (!IsPasswordStrong(req.NewPassword))
             return BadRequest(new { error = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial." });
 
+        // 1) Nouveau hash BCrypt (complexité déjà validée).
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword, workFactor: 12);
-        await db.SaveChangesAsync();
+        // 2) Rotation du SecurityStamp → invalide IMMÉDIATEMENT tous les JWT existants (multi-appareils).
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        user.UpdatedAt = DateTime.UtcNow;
+
+        // 3) Révoquer tous les refresh tokens actifs et en émettre un neuf pour la session COURANTE :
+        //    l'utilisateur qui change son mot de passe reste connecté sur CET appareil, les autres tombent.
+        //    IssueRefreshTokenAsync révoque les anciens ET persiste (hash + SecurityStamp inclus).
+        var tenantId = User.GetTenantId();
+        var role     = User.FindFirst(ClaimTypes.Role)?.Value ?? "user";
+        var ip       = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var refresh  = await IssueRefreshTokenAsync(db, user.Id, ip, tenantId);
+
+        // 4) Ré-émettre les cookies de la session courante avec le nouveau SecurityStamp.
+        SetAuthCookie(BuildJwt(tenantId, user.Id, role, user.SecurityStamp));
+        SetRoleCookie(role);
+        SetRefreshCookie(refresh.Token);
+
+        _logger.LogInformation("[AUTH] Change password user={UserId} — autres sessions révoquées.", user.Id);
         return Ok(new { success = true });
     }
 
@@ -573,22 +631,22 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("jwt", new CookieOptions
         {
             HttpOnly = true,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Path     = "/",
         });
         Response.Cookies.Delete("refresh_token", new CookieOptions
         {
             HttpOnly = true,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Path     = "/",
         });
         Response.Cookies.Delete("user_role", new CookieOptions
         {
             HttpOnly = false,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Path     = "/",
         });
 
@@ -617,23 +675,23 @@ public class AuthController : ControllerBase
         var baseOpts = new CookieOptions
         {
             HttpOnly = true,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Path     = "/"
         };
         Response.Cookies.Delete("jwt", baseOpts);
         Response.Cookies.Delete("refresh_token", new CookieOptions
         {
             HttpOnly = true,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Path     = "/",
         });
         Response.Cookies.Delete("user_role", new CookieOptions
         {
             HttpOnly = false,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Path     = "/",
         });
 
@@ -832,8 +890,8 @@ public class AuthController : ControllerBase
     private CookieOptions PendingCookieOptions() => new()
     {
         HttpOnly = true,
-        Secure   = !_env.IsDevelopment(),
-        SameSite = SameSiteMode.Lax,
+        Secure   = CookieSecure(),
+        SameSite = CookieSameSite(),
         Expires  = DateTimeOffset.UtcNow.AddMinutes(10),
         Path     = "/",
     };
@@ -1004,14 +1062,23 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    // F-03 — SameSite/Secure pilotés par config selon la topologie de déploiement.
+    // Auth:CrossSiteCookies = false (défaut) → SameSite=Lax (front et API same-site, ex. app.x.fr / api.x.fr).
+    // Auth:CrossSiteCookies = true → SameSite=None + Secure obligatoire (front et API sur domaines distincts).
+    private SameSiteMode CookieSameSite() =>
+        _config.GetValue<bool>("Auth:CrossSiteCookies") ? SameSiteMode.None : SameSiteMode.Lax;
+
+    private bool CookieSecure() =>
+        _config.GetValue<bool>("Auth:CrossSiteCookies") || !_env.IsDevelopment();
+
     private void SetAuthCookie(string tokenString)
     {
         // JWT 15 min — refresh token prend le relais
         Response.Cookies.Append("jwt", tokenString, new CookieOptions
         {
             HttpOnly = true,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Expires  = DateTimeOffset.UtcNow.AddMinutes(15),
             Path     = "/"
         });
@@ -1023,8 +1090,8 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("user_role", role, new CookieOptions
         {
             HttpOnly = false,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Expires  = DateTimeOffset.UtcNow.AddDays(7),
             Path     = "/"
         });
@@ -1035,8 +1102,8 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("refresh_token", token, new CookieOptions
         {
             HttpOnly = true,
-            Secure   = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure   = CookieSecure(),
+            SameSite = CookieSameSite(),
             Expires  = DateTimeOffset.UtcNow.AddDays(7),
             Path     = "/"
         });

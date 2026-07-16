@@ -89,8 +89,8 @@ function LoadingShell() {
 function ResetPasswordForm() {
     const router       = useRouter();
     const searchParams = useSearchParams();
-    const token        = searchParams.get("token") ?? "";
 
+    const [token, setToken]           = useState<string | null>(null); // null = pas encore lu
     const [tokenValid, setTokenValid] = useState<boolean | null>(null); // null = en cours
     const [password, setPassword]     = useState("");
     const [confirm, setConfirm]       = useState("");
@@ -98,8 +98,19 @@ function ResetPasswordForm() {
     const [error, setError]           = useState<string | null>(null);
     const [fieldError, setFieldError] = useState<string | null>(null);
 
-    // Validation du token au montage (n'expose rien d'autre que valid: true/false).
+    // F-02 — le token est lu depuis le FRAGMENT d'URL (#token=…), qui n'est jamais envoyé au serveur,
+    // aux proxys ni via l'en-tête Referer. Fallback rétrocompatible sur l'ancien format query (?token=)
+    // pour les liens de reset déjà envoyés avant ce changement.
     useEffect(() => {
+        const rawHash  = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
+        const fromHash = new URLSearchParams(rawHash).get("token");
+        const fromQuery = searchParams.get("token");
+        setToken(fromHash ?? fromQuery ?? "");
+    }, [searchParams]);
+
+    // Validation du token une fois lu (n'expose rien d'autre que valid: true/false).
+    useEffect(() => {
+        if (token === null) return;             // fragment pas encore lu
         if (!token) { setTokenValid(false); return; }
         let cancelled = false;
         apiFetch<{ valid: boolean }>(`/api/auth/reset-password/validate?token=${encodeURIComponent(token)}`)
@@ -108,7 +119,7 @@ function ResetPasswordForm() {
         return () => { cancelled = true; };
     }, [token]);
 
-    if (tokenValid === null) return <LoadingShell />;
+    if (token === null || tokenValid === null) return <LoadingShell />;
     if (!tokenValid) return <InvalidToken reason="Ce lien de réinitialisation est invalide, expiré ou a déjà été utilisé." />;
 
     async function onSubmit(e: React.FormEvent) {
@@ -127,7 +138,7 @@ function ResetPasswordForm() {
         try {
             await apiFetch<void>("/api/auth/reset-password", {
                 method: "POST",
-                body: JSON.stringify({ token, newPassword: password }),
+                body: JSON.stringify({ token: token ?? "", newPassword: password }),
             });
             router.push("/login?reset=1");
         } catch (err: unknown) {

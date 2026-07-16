@@ -160,19 +160,23 @@ public class SsoFlowService
         await _db.SaveChangesAsync();
 
         var isDev = _env.IsDevelopment();
+        // F-03 — cohérent avec AuthController : SameSite/Secure selon la topologie (Auth:CrossSiteCookies).
+        var crossSite = _config.GetValue<bool>("Auth:CrossSiteCookies");
+        var sameSite  = crossSite ? SameSiteMode.None : SameSiteMode.Lax;
+        var secure    = crossSite || !isDev;
         httpContext.Response.Cookies.Append("jwt", jwt, new CookieOptions
         {
-            HttpOnly = true, Secure = !isDev, SameSite = SameSiteMode.Lax, Path = "/",
+            HttpOnly = true, Secure = secure, SameSite = sameSite, Path = "/",
             Expires = DateTimeOffset.UtcNow.AddMinutes(15),
         });
         httpContext.Response.Cookies.Append("refresh_token", refreshToken.Token, new CookieOptions
         {
-            HttpOnly = true, Secure = !isDev, SameSite = SameSiteMode.Lax, Path = "/",
+            HttpOnly = true, Secure = secure, SameSite = sameSite, Path = "/",
             Expires = DateTimeOffset.UtcNow.AddDays(7),
         });
         httpContext.Response.Cookies.Append("user_role", effectiveRole, new CookieOptions
         {
-            HttpOnly = false, Secure = !isDev, SameSite = SameSiteMode.Lax, Path = "/",
+            HttpOnly = false, Secure = secure, SameSite = sameSite, Path = "/",
             Expires = DateTimeOffset.UtcNow.AddDays(7),
         });
         httpContext.Response.Cookies.Delete("ext_auth");
@@ -182,7 +186,7 @@ public class SsoFlowService
         {
             httpContext.Response.Cookies.Append("sso_demo_fallback", "1", new CookieOptions
             {
-                HttpOnly = false, Secure = !isDev, SameSite = SameSiteMode.Lax, Path = "/",
+                HttpOnly = false, Secure = secure, SameSite = sameSite, Path = "/",
                 Expires = DateTimeOffset.UtcNow.AddDays(30),
             });
         }
